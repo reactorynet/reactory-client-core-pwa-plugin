@@ -1,19 +1,27 @@
 const ReactoryGetContentListQuery = `
-  query ReactoryGetContentList {
-    ReactoryGetContentList {
-      id
-      slug
-      title
-      format
-      locale
-      topics
-      published
-      version
-      template
-      engine
-      helpTopic
-      createdAt
-      updatedAt
+  query ReactoryGetContentList($search: Any, $paging: PagingRequest) {
+    ReactoryGetContentList(search: $search, paging: $paging) {
+      paging {
+        page
+        pageSize
+        total
+        hasNext
+      }
+      data {
+        id
+        slug
+        title
+        format
+        locale
+        topics
+        published
+        version
+        template
+        engine
+        helpTopic
+        createdAt
+        updatedAt
+      }
     }
   }
 `;
@@ -22,10 +30,17 @@ export default {
   query: {
     name: 'ReactoryGetContentList',
     text: ReactoryGetContentListQuery,
-    variables: {},
-    resultType: 'array',
+    variables: {
+      'query.search': 'search.searchString',
+      'query.status': 'search.status',
+      'query.format': 'search.format',
+      'query.page': 'paging.page',
+      'query.pageSize': 'paging.pageSize',
+    },
+    resultType: 'object',
     resultMap: {
-      '[].*': 'contentList',
+      'paging': 'paging',
+      'data': 'data',
     },
     edit: false,
     new: false,

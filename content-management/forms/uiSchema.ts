@@ -96,7 +96,17 @@ export const MaterialTableUIOptions: Reactory.Client.Components.IMaterialTableWi
   detailPanelPropsMap: {
     'props.rowData': 'content',
   },
-  variables: {},
+  variables: {
+    'query.search': 'search.searchString',
+    'query.status': 'search.status',
+    'query.format': 'search.format',
+    'query.page': 'paging.page',
+    'query.pageSize': 'paging.pageSize',
+  },
+  resultMap: {
+    'paging': 'paging',
+    'data': 'data',
+  },
 };
 
 export const uiSchema: Reactory.Schema.IFormUISchema = {

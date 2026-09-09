@@ -78,6 +78,16 @@ export const ContentManagementToolbar: React.FC<ContentManagementToolbarProps> =
     emitFilters(activeStatus, format);
   };
 
+  const handleResetFilters = useCallback(() => {
+    setActiveStatus('all');
+    setActiveFormat('all');
+    setSearch('');
+    onSearchChange?.('');
+    emitFilters('all', 'all');
+  }, [onSearchChange, emitFilters]);
+
+  const hasActiveFilters = activeStatus !== 'all' || activeFormat !== 'all' || Boolean(search);
+
   const handleAddClick = () => {
     if (onAddNew) {
       onAddNew();
@@ -241,6 +251,18 @@ export const ContentManagementToolbar: React.FC<ContentManagementToolbarProps> =
             variant={activeFormat === 'html' ? 'filled' : 'outlined'}
             onClick={() => handleFormatClick('html')}
           />
+          {hasActiveFilters && (
+            <Button
+              size="small"
+              color="inherit"
+              variant="text"
+              startIcon={<ClearIcon fontSize="small" />}
+              onClick={handleResetFilters}
+              sx={{ fontSize: '0.75rem', textTransform: 'none', ml: 1 }}
+            >
+              Reset all
+            </Button>
+          )}
         </Stack>
       </Stack>
     </Box>
