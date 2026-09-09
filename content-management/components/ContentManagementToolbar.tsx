@@ -23,7 +23,10 @@ import {
   ContentStatusFilter,
   ContentFormatFilter,
   ContentFilterEntry,
+  ContentFormat,
 } from '../types';
+import NewContentDialog from './NewContentDialog';
+import { ContentEditorDrawer } from './ContentEditorDrawer';
 
 export const ContentManagementToolbar: React.FC<ContentManagementToolbarProps> = ({
   reactory,
@@ -39,6 +42,9 @@ export const ContentManagementToolbar: React.FC<ContentManagementToolbarProps> =
   const [search, setSearch] = useState(filterState?.searchString || '');
   const [activeStatus, setActiveStatus] = useState<ContentStatusFilter>(filterState?.status || 'all');
   const [activeFormat, setActiveFormat] = useState<ContentFormatFilter>(filterState?.format || 'all');
+  const [newContentDialogOpen, setNewContentDialogOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [activeItemForEdit, setActiveItemForEdit] = useState<any>(null);
 
   const emitFilters = useCallback(
     (status: ContentStatusFilter, format: ContentFormatFilter) => {
@@ -91,10 +97,80 @@ export const ContentManagementToolbar: React.FC<ContentManagementToolbarProps> =
   const handleAddClick = () => {
     if (onAddNew) {
       onAddNew();
-    } else if (reactory?.emit) {
-      reactory.emit('core.ContentCreateRequested', {});
+    } else {
+      setNewContentDialogOpen(true);
     }
   };
+
+  const handleCreateNewSubmit = async (newContent: {
+    title: string;
+    slug: string;
+    description: string;
+    format: ContentFormat;
+    locale: string;
+    topics: string[];
+  }) => {
+    setNewContentDialogOpen(false);
+    try {
+      const createInput = {
+        title: newContent.title,
+        slug: newContent.slug,
+        description: newContent.description,
+        format: newContent.format,
+        locale: newContent.locale || 'en',
+        topics: newContent.topics || [],
+        content: '',
+        published: false,
+      };
+
+      const result: any = await reactory.graphqlMutation(
+        `mutation ReactoryCreateContent($createInput: CreateContentInput!) {
+          ReactoryCreateContent(createInput: $createInput) {
+            id
+            slug
+            title
+            description
+            content
+            format
+            locale
+            topics
+            published
+            version
+            template
+            engine
+            createdAt
+            updatedAt
+          }
+        }`,
+        { createInput }
+      );
+
+      const created = result?.data?.ReactoryCreateContent;
+      if (created) {
+        if (reactory?.emit) {
+          reactory.emit('core.ContentSavedEvent', created);
+          reactory.emit('core.ContentRefreshRequested', {});
+        }
+        onRefresh?.();
+        setActiveItemForEdit(created);
+        setEditorOpen(true);
+      }
+    } catch (err: any) {
+      reactory?.log?.('Error creating new content item', err, 'error');
+    }
+  };
+
+  useEffect(() => {
+    const handleEditRequested = (item: any) => {
+      setActiveItemForEdit(item);
+      setEditorOpen(true);
+    };
+
+    reactory?.on?.('core.ContentEditRequested', handleEditRequested);
+    return () => {
+      reactory?.removeListener?.('core.ContentEditRequested', handleEditRequested);
+    };
+  }, [reactory]);
 
   const handleRefreshClick = () => {
     if (onRefresh) {
@@ -265,6 +341,33 @@ export const ContentManagementToolbar: React.FC<ContentManagementToolbarProps> =
           )}
         </Stack>
       </Stack>
+
+      <NewContentDialog
+        open={newContentDialogOpen}
+        onClose={() => setNewContentDialogOpen(false)}
+        onSubmit={handleCreateNewSubmit}
+        reactory={reactory}
+      />
+
+      {editorOpen && activeItemForEdit && (
+        <ContentEditorDrawer
+          open={editorOpen}
+          onClose={() => {
+            setEditorOpen(false);
+            setActiveItemForEdit(null);
+            onRefresh?.();
+          }}
+          contentData={activeItemForEdit}
+          onSave={async (saved) => {
+            if (reactory?.emit) {
+              reactory.emit('core.ContentSavedEvent', saved);
+              reactory.emit('core.ContentRefreshRequested', {});
+            }
+            onRefresh?.();
+          }}
+          reactory={reactory}
+        />
+      )}
     </Box>
   );
 };

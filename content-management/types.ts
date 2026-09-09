@@ -99,7 +99,7 @@ export interface ContentEditorDrawerProps {
   onClose: () => void;
   contentData: CMSContentData | null;
   onSave?: (savedContent: CMSContentData) => void | Promise<void>;
-  reactory: Reactory.Client.ReactorySDK;
+  reactory?: Reactory.Client.ReactorySDK;
 }
 
 export interface NewContentDialogProps {
@@ -113,5 +113,5 @@ export interface NewContentDialogProps {
     locale: string;
     topics: string[];
   }) => void;
-  reactory: Reactory.Client.ReactorySDK;
+  reactory?: Reactory.Client.ReactorySDK;
 }
