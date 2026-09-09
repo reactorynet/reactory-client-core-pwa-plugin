@@ -54,7 +54,7 @@ export const ContentDetailPanel: React.FC<ContentDetailPanelProps> = ({
 
   const item: IContentItem = (record as unknown as IContentItem) || rawItem;
 
-  const { renderContent } = useContentRender(reactory);
+  const { renderContent } = useContentRender(reactory, { mountComponents: true });
 
   const handleCopySlug = useCallback(() => {
     if (item?.slug && navigator.clipboard) {
