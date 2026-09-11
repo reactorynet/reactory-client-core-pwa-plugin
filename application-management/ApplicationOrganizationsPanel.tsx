@@ -16,23 +16,21 @@ export interface ApplicationOrganizationsPanelProps {
 }
 
 export const ApplicationOrganizationsPanel: React.FC<ApplicationOrganizationsPanelProps> = ({
-  reactory: propReactory,
+  reactory,
   formData,
   applicationId,
   mode = 'view',
 }) => {
-  const hookReactory = useReactory();
-  const reactory = propReactory || hookReactory;
-
+  
   // If no application ID is available, show a message
-  if (!applicationId) {
+  if (!reactory) {
     return (
       <Box sx={{ p: 2 }}>
         <Card>
           <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <WarningIcon color="warning" />
             <Typography variant="body2" color="text.secondary">
-              No application ID provided. Please provide an applicationId to view organizations.
+              No Reactory instance available. Please provide a reactory prop to view organizations.
             </Typography>
           </CardContent>
         </Card>
