@@ -59,6 +59,7 @@ import {
   FormatPaint as FormatPaintIcon,
 } from '@mui/icons-material';
 import { useReactory } from '@reactory/client-core/api';
+import { omitDeep } from '@reactory/client-core/components/util';
 
 export interface ApplicationThemesPanelProps {
   reactory?: Reactory.Client.IReactoryApi;
@@ -529,28 +530,107 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
   // Open Edit Theme
   const handleOpenEdit = (theme: any) => {
     const cloned = JSON.parse(JSON.stringify(theme));
-    // Ensure modes structure exists
-    if (!cloned.modes || cloned.modes.length === 0) {
-      cloned.modes = [
-        {
-          id: 'dark',
-          mode: 'dark',
-          name: 'Dark Mode',
-          options: { palette: cloned.options?.palette || DEFAULT_DARK_PALETTE, components: cloned.options?.components || DEFAULT_COMPONENT_OVERRIDES },
+    const rootOptions = cloned.options || {};
+    const rootPalette = rootOptions.palette || {};
+    const mergedComponents = rootOptions.components 
+      || cloned.modes?.[0]?.options?.components 
+      || DEFAULT_COMPONENT_OVERRIDES;
+
+    const existingDarkMode = (cloned.modes || []).find((m: any) => m.mode === 'dark');
+    const existingLightMode = (cloned.modes || []).find((m: any) => m.mode === 'light');
+
+    const darkPalSrc = existingDarkMode?.options?.palette 
+      || (rootPalette.mode === 'dark' || !rootPalette.mode ? rootPalette : null)
+      || {};
+
+    const lightPalSrc = existingLightMode?.options?.palette 
+      || (rootPalette.mode === 'light' ? rootPalette : null)
+      || {};
+
+    const darkPalette = {
+      mode: 'dark',
+      ...darkPalSrc,
+      primary: {
+        ...DEFAULT_DARK_PALETTE.primary,
+        ...(darkPalSrc.primary || {}),
+      },
+      secondary: {
+        ...DEFAULT_DARK_PALETTE.secondary,
+        ...(darkPalSrc.secondary || {}),
+      },
+      background: {
+        ...DEFAULT_DARK_PALETTE.background,
+        ...(darkPalSrc.background || {}),
+      },
+      text: {
+        ...DEFAULT_DARK_PALETTE.text,
+        ...(darkPalSrc.text || {}),
+      },
+    };
+
+    const lightPalette = {
+      mode: 'light',
+      ...lightPalSrc,
+      primary: {
+        ...DEFAULT_LIGHT_PALETTE.primary,
+        ...(lightPalSrc.primary || {}),
+      },
+      secondary: {
+        ...DEFAULT_LIGHT_PALETTE.secondary,
+        ...(lightPalSrc.secondary || {}),
+      },
+      background: {
+        ...DEFAULT_LIGHT_PALETTE.background,
+        ...(lightPalSrc.background || {}),
+      },
+      text: {
+        ...DEFAULT_LIGHT_PALETTE.text,
+        ...(lightPalSrc.text || {}),
+      },
+    };
+
+    const modes = [
+      {
+        id: existingDarkMode?.id || 'dark',
+        mode: 'dark',
+        name: existingDarkMode?.name || 'Dark Mode',
+        description: existingDarkMode?.description || 'Default dark theme mode',
+        icon: existingDarkMode?.icon || 'night',
+        options: {
+          ...(existingDarkMode?.options || {}),
+          palette: darkPalette,
+          components: existingDarkMode?.options?.components || mergedComponents,
         },
-        {
-          id: 'light',
-          mode: 'light',
-          name: 'Light Mode',
-          options: { palette: DEFAULT_LIGHT_PALETTE, components: DEFAULT_COMPONENT_OVERRIDES },
+      },
+      {
+        id: existingLightMode?.id || 'light',
+        mode: 'light',
+        name: existingLightMode?.name || 'Light Mode',
+        description: existingLightMode?.description || 'Default light theme mode',
+        icon: existingLightMode?.icon || 'day',
+        options: {
+          ...(existingLightMode?.options || {}),
+          palette: lightPalette,
+          components: existingLightMode?.options?.components || mergedComponents,
         },
-      ];
-    }
+      },
+    ];
+
+    const currentMode = cloned.defaultThemeMode === 'light' ? 'light' : 'dark';
+    const activePalette = currentMode === 'dark' ? darkPalette : lightPalette;
+
+    cloned.options = {
+      ...rootOptions,
+      palette: activePalette,
+      components: mergedComponents,
+    };
+    cloned.modes = modes;
+
     setEditingTheme(cloned);
-    setRawJsonOptions(JSON.stringify(cloned.options || {}, null, 2));
+    setRawJsonOptions(JSON.stringify(cloned.options, null, 2));
     setJsonError(null);
     setEditorTab(0);
-    setActiveModeTab(cloned.defaultThemeMode === 'light' ? 'light' : 'dark');
+    setActiveModeTab(currentMode);
     setEditorOpen(true);
   };
 
@@ -586,7 +666,7 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
       return;
     }
 
-    const payload = {
+    const rawPayload = {
       ...editingTheme,
       options: finalOptions,
       modes: (editingTheme.modes || []).map((m: any) => ({
@@ -595,7 +675,10 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
         name: m.name || (m.mode === 'dark' ? 'Dark Mode' : 'Light Mode'),
         description: m.description || '',
         icon: m.icon || (m.mode === 'dark' ? 'night' : 'day'),
-        options: m.options || {},
+        options: {
+          ...(m.options || {}),
+          components: finalOptions.components || m.options?.components || DEFAULT_COMPONENT_OVERRIDES,
+        },
       })),
       assets: (editingTheme.assets || []).map((a: any) => ({
         id: a.id || a.name,
@@ -607,6 +690,8 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
         data: a.data || null,
       })),
     };
+
+    const payload = omitDeep(rawPayload);
 
     if (!applicationId || !reactory?.graphqlMutation) {
       // Local update
@@ -626,9 +711,38 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
 
     setLoading(true);
     try {
+      const sanitizedThemeInput = {
+        id: payload.id || undefined,
+        nameSpace: payload.nameSpace || 'reactory',
+        name: payload.name,
+        version: payload.version || '1.0.0',
+        type: payload.type || 'material',
+        defaultThemeMode: payload.defaultThemeMode || 'dark',
+        description: payload.description || '',
+        options: payload.options || {},
+        modes: (payload.modes || []).map((m: any) => ({
+          id: m.id || m.mode,
+          mode: m.mode,
+          name: m.name || (m.mode === 'dark' ? 'Dark Mode' : 'Light Mode'),
+          description: m.description || '',
+          icon: m.icon || (m.mode === 'dark' ? 'night' : 'day'),
+          options: m.options || {},
+        })),
+        assets: (payload.assets || []).map((a: any) => ({
+          id: a.id || a.name,
+          name: a.name || a.id,
+          assetType: a.assetType || 'image',
+          url: a.url || '',
+          loader: a.loader || null,
+          options: a.options || null,
+          data: a.data || null,
+        })),
+        content: payload.content || {},
+      };
+
       const result: any = await reactory.graphqlMutation(THEME_MUTATIONS.saveTheme, {
         clientId: applicationId,
-        theme: payload,
+        theme: sanitizedThemeInput,
       });
       const client = result?.data?.ReactoryClientSaveTheme;
       if (client) {
@@ -757,71 +871,70 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
   // Palette color updater helper
   const updatePaletteField = (modeKey: 'dark' | 'light', category: string, field: string, val: string) => {
     if (!editingTheme) return;
-    const modes = editingTheme.modes ? [...editingTheme.modes] : [];
-    let modeObj = modes.find((m: any) => m.mode === modeKey);
-    if (!modeObj) {
-      modeObj = {
-        id: modeKey,
-        mode: modeKey,
-        name: modeKey === 'dark' ? 'Dark Mode' : 'Light Mode',
-        options: { palette: modeKey === 'dark' ? { ...DEFAULT_DARK_PALETTE } : { ...DEFAULT_LIGHT_PALETTE } },
-      };
-      modes.push(modeObj);
-    }
+    const modes = (editingTheme.modes || []).map((m: any) => {
+      if (m.mode === modeKey) {
+        const curPal = m.options?.palette || (modeKey === 'dark' ? DEFAULT_DARK_PALETTE : DEFAULT_LIGHT_PALETTE);
+        const updatedCat = { ...(curPal[category] || {}), [field]: val };
+        return {
+          ...m,
+          options: {
+            ...(m.options || {}),
+            palette: { ...curPal, [category]: updatedCat },
+          },
+        };
+      }
+      return m;
+    });
 
-    const currentPalette = modeObj.options?.palette || (modeKey === 'dark' ? DEFAULT_DARK_PALETTE : DEFAULT_LIGHT_PALETTE);
-    const updatedPalette = {
-      ...currentPalette,
-      [category]: {
-        ...(currentPalette[category] || {}),
-        [field]: val,
-      },
-    };
-
-    modeObj.options = {
-      ...(modeObj.options || {}),
-      palette: updatedPalette,
+    const activeModeObj = modes.find((m: any) => m.mode === (editingTheme.defaultThemeMode || 'dark')) || modes[0];
+    const updatedOptions = {
+      ...(editingTheme.options || {}),
+      palette: activeModeObj?.options?.palette || editingTheme.options?.palette,
     };
 
     setEditingTheme({
       ...editingTheme,
       modes,
+      options: updatedOptions,
     });
+    setRawJsonOptions(JSON.stringify(updatedOptions, null, 2));
   };
 
   // Palette background / text updater helper
   const updateDirectPaletteField = (modeKey: 'dark' | 'light', category: 'background' | 'text', field: string, val: string) => {
     if (!editingTheme) return;
-    const modes = editingTheme.modes ? [...editingTheme.modes] : [];
-    let modeObj = modes.find((m: any) => m.mode === modeKey);
-    if (!modeObj) {
-      modeObj = {
-        id: modeKey,
-        mode: modeKey,
-        name: modeKey === 'dark' ? 'Dark Mode' : 'Light Mode',
-        options: { palette: modeKey === 'dark' ? { ...DEFAULT_DARK_PALETTE } : { ...DEFAULT_LIGHT_PALETTE } },
-      };
-      modes.push(modeObj);
-    }
+    const modes = (editingTheme.modes || []).map((m: any) => {
+      if (m.mode === modeKey) {
+        const curPal = m.options?.palette || (modeKey === 'dark' ? DEFAULT_DARK_PALETTE : DEFAULT_LIGHT_PALETTE);
+        return {
+          ...m,
+          options: {
+            ...(m.options || {}),
+            palette: {
+              ...curPal,
+              [category]: {
+                ...(curPal[category] || {}),
+                [field]: val,
+              },
+            },
+          },
+        };
+      }
+      return m;
+    });
 
-    const currentPalette = modeObj.options?.palette || (modeKey === 'dark' ? DEFAULT_DARK_PALETTE : DEFAULT_LIGHT_PALETTE);
-    const updatedPalette = {
-      ...currentPalette,
-      [category]: {
-        ...(currentPalette[category] || {}),
-        [field]: val,
-      },
-    };
-
-    modeObj.options = {
-      ...(modeObj.options || {}),
-      palette: updatedPalette,
+    const activeModeObj = modes.find((m: any) => m.mode === (editingTheme.defaultThemeMode || 'dark')) || modes[0];
+    const updatedOptions = {
+      ...(editingTheme.options || {}),
+      palette: activeModeObj?.options?.palette || editingTheme.options?.palette,
     };
 
     setEditingTheme({
       ...editingTheme,
       modes,
+      options: updatedOptions,
     });
+    setRawJsonOptions(JSON.stringify(updatedOptions, null, 2));
   };
 
   // Get active editing mode palette
@@ -1627,10 +1740,17 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
                               ...(comps.MuiButton || {}),
                               defaultProps: { ...(comps.MuiButton?.defaultProps || {}), variant: e.target.value },
                             };
+                            const updatedOptions = { ...(editingTheme.options || {}), components: comps };
+                            const updatedModes = (editingTheme.modes || []).map((m: any) => ({
+                              ...m,
+                              options: { ...(m.options || {}), components: comps },
+                            }));
                             setEditingTheme({
                               ...editingTheme,
-                              options: { ...(editingTheme.options || {}), components: comps },
+                              options: updatedOptions,
+                              modes: updatedModes,
                             });
+                            setRawJsonOptions(JSON.stringify(updatedOptions, null, 2));
                           }}
                         >
                           <MenuItem value="contained">Contained (Solid Fill)</MenuItem>
@@ -1649,10 +1769,17 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
                               ...(comps.MuiButton || {}),
                               defaultProps: { ...(comps.MuiButton?.defaultProps || {}), size: e.target.value },
                             };
+                            const updatedOptions = { ...(editingTheme.options || {}), components: comps };
+                            const updatedModes = (editingTheme.modes || []).map((m: any) => ({
+                              ...m,
+                              options: { ...(m.options || {}), components: comps },
+                            }));
                             setEditingTheme({
                               ...editingTheme,
-                              options: { ...(editingTheme.options || {}), components: comps },
+                              options: updatedOptions,
+                              modes: updatedModes,
                             });
+                            setRawJsonOptions(JSON.stringify(updatedOptions, null, 2));
                           }}
                         >
                           <MenuItem value="small">Small</MenuItem>
@@ -1683,10 +1810,21 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
                               ...(comps.MuiSelect || {}),
                               defaultProps: { ...(comps.MuiSelect?.defaultProps || {}), variant: e.target.value },
                             };
+                            comps.MuiFormControl = {
+                              ...(comps.MuiFormControl || {}),
+                              defaultProps: { ...(comps.MuiFormControl?.defaultProps || {}), variant: e.target.value },
+                            };
+                            const updatedOptions = { ...(editingTheme.options || {}), components: comps };
+                            const updatedModes = (editingTheme.modes || []).map((m: any) => ({
+                              ...m,
+                              options: { ...(m.options || {}), components: comps },
+                            }));
                             setEditingTheme({
                               ...editingTheme,
-                              options: { ...(editingTheme.options || {}), components: comps },
+                              options: updatedOptions,
+                              modes: updatedModes,
                             });
+                            setRawJsonOptions(JSON.stringify(updatedOptions, null, 2));
                           }}
                         >
                           <MenuItem value="outlined">Outlined</MenuItem>
