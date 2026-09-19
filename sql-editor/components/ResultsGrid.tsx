@@ -9,7 +9,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TablePagination,
   TableRow,
@@ -17,46 +16,12 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
 import { Search as SearchIcon, Download as DownloadIcon } from '@mui/icons-material';
+import ScrollArea from '../../data-grid/ScrollArea';
+import { toCsv, downloadCsv } from '../../data-grid/csv';
 import type { SqlColumn, SqlQueryResult, SqlQueryRow } from '../types';
 
-/**
- * Scroll region for the result table.
- *
- * A wide result set needs a horizontal scrollbar the user can actually find.
- * macOS overlay scrollbars are hidden until you scroll, which makes the table
- * look unscrollable; these rules give the track and thumb explicit, always
- * visible geometry in WebKit/Blink, plus `scrollbar-color`/`scrollbar-width`
- * for Firefox. The region is also focusable so the table can be panned with
- * the keyboard instead of a drag.
- */
-const ScrollArea = styled(TableContainer)(({ theme }) => ({
-  maxHeight: 460,
-  overflow: 'auto',
-  scrollbarWidth: 'thin',
-  scrollbarColor: `${theme.palette.text.disabled} ${theme.palette.action.hover}`,
-  '&::-webkit-scrollbar': {
-    width: 12,
-    height: 12,
-  },
-  '&::-webkit-scrollbar-track': {
-    backgroundColor: theme.palette.action.hover,
-    borderRadius: 6,
-  },
-  '&::-webkit-scrollbar-thumb': {
-    backgroundColor: theme.palette.text.disabled,
-    borderRadius: 6,
-    border: `3px solid ${theme.palette.background.paper}`,
-  },
-  '&::-webkit-scrollbar-thumb:hover': {
-    backgroundColor: theme.palette.text.secondary,
-  },
-  '&:focus-visible': {
-    outline: `2px solid ${theme.palette.primary.main}`,
-    outlineOffset: -2,
-  },
-}));
+export { toCsv, downloadCsv };
 
 /** Footer label, e.g. `1\u201310 of 32`. Exported so the arithmetic is unit-testable. */
 export const formatDisplayedRows = ({ from, to, count }: { from: number; to: number; count: number }): string =>
@@ -99,33 +64,6 @@ export const rowMatches = (row: SqlQueryRow, term: string): boolean => {
     if (value === null || value === undefined) return false;
     return String(value).toLowerCase().includes(term);
   });
-};
-
-const csvCell = (value: any): string => {
-  const text = value === null || value === undefined ? '' : String(value);
-  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-};
-
-/** CSV for the rows currently shown (the current page, after the client filter). */
-export const toCsv = (columns: SqlColumn[], rows: SqlQueryRow[]): string => {
-  const header = columns.map((column) => csvCell(column.title || column.field)).join(',');
-  const body = rows.map((row) => columns.map((column) => csvCell(row[column.field])).join(','));
-  return [header, ...body].join('\r\n');
-};
-
-export const downloadCsv = (filename: string, csv: string): void => {
-  if (typeof document === 'undefined' || typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') {
-    return;
-  }
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-  URL.revokeObjectURL(url);
 };
 
 export interface ResultsGridProps {
@@ -279,16 +217,16 @@ export const ResultsGrid: React.FC<ResultsGridProps> = ({
         ) : null}
 
         {result && visibleRows.length > 0 ? (
-          <ScrollArea
-            tabIndex={0}
-            role="region"
-            aria-label="Query results table"
-          >
+          <ScrollArea tabIndex={0} role="region" aria-label="Query results table">
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow>
                   {columns.map((column) => (
-                    <TableCell key={column.field} scope="col" sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>
+                    <TableCell
+                      key={column.field}
+                      scope="col"
+                      sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}
+                    >
                       {column.title || column.field}
                     </TableCell>
                   ))}
@@ -298,7 +236,10 @@ export const ResultsGrid: React.FC<ResultsGridProps> = ({
                 {visibleRows.map((row, rowIndex) => (
                   <TableRow key={rowIndex} hover>
                     {columns.map((column) => (
-                      <TableCell key={column.field} sx={{ fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                      <TableCell
+                        key={column.field}
+                        sx={{ fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                      >
                         {row[column.field] === null || row[column.field] === undefined
                           ? ''
                           : String(row[column.field])}
