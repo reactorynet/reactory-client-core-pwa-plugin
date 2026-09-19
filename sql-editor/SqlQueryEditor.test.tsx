@@ -87,6 +87,15 @@ describe('SqlQueryEditor', () => {
     expect(screen.getByText('Reactory Postgres')).toBeInTheDocument();
   });
 
+  it('gives each page section its own surface', async () => {
+    const reactory = makeReactory({ connectionList: [connections[0]] });
+    const { container } = render(<SqlQueryEditor reactory={reactory} />);
+    await screen.findByText('Run a query to see results.');
+
+    // Title, connection + actions, SQL editor, results.
+    expect(container.querySelectorAll('.MuiPaper-root').length).toBeGreaterThanOrEqual(4);
+  });
+
   it('disables Run with an accessible reason while the statement is blank (B2)', async () => {
     const reactory = makeReactory({ connectionList: [connections[0]] });
     render(<SqlQueryEditor reactory={reactory} />);

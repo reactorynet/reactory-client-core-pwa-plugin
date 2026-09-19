@@ -31,16 +31,35 @@ const editorTypography = (theme: any) => ({
   tabSize: 2,
 });
 
-const EditorRoot = styled(Box)(({ theme }) => ({
+/**
+ * The editor's surface.
+ *
+ * `plain` drops the border and background so the pane can sit inside a Paper
+ * without producing a box-in-a-box. The focus affordance is kept either way —
+ * it just moves to an outline so it is still visible on a parent surface.
+ */
+const EditorRoot = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'plain',
+})<{ plain?: boolean }>(({ theme, plain }) => ({
   position: 'relative',
-  border: `1px solid ${theme.palette.divider}`,
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: theme.palette.background.paper,
   overflow: 'hidden',
-  transition: theme.transitions.create('border-color'),
-  '&:focus-within': {
-    borderColor: theme.palette.primary.main,
-  },
+  borderRadius: theme.shape.borderRadius,
+  transition: theme.transitions.create(['border-color', 'outline-color']),
+  ...(plain === true
+    ? {
+        outline: '2px solid transparent',
+        outlineOffset: -2,
+        '&:focus-within': {
+          outlineColor: theme.palette.primary.main,
+        },
+      }
+    : {
+        border: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.palette.background.paper,
+        '&:focus-within': {
+          borderColor: theme.palette.primary.main,
+        },
+      }),
 }));
 
 /**
@@ -96,6 +115,11 @@ export interface SqlEditorPaneProps {
   disabled?: boolean;
   minRows?: number;
   label?: string;
+  /**
+   * `plain` renders the editor without its own border/background, for use
+   * inside a Paper. Defaults to `outlined` for standalone use.
+   */
+  variant?: 'outlined' | 'plain';
 }
 
 /**
@@ -119,6 +143,7 @@ export const SqlEditorPane: React.FC<SqlEditorPaneProps> = ({
   disabled = false,
   minRows = 10,
   label = 'SQL Command',
+  variant = 'outlined',
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLPreElement>(null);
@@ -187,7 +212,7 @@ export const SqlEditorPane: React.FC<SqlEditorPaneProps> = ({
         {label}
       </Typography>
 
-      <EditorRoot>
+      <EditorRoot plain={variant === 'plain'}>
         <EditorHighlight
           ref={highlightRef}
           aria-hidden="true"

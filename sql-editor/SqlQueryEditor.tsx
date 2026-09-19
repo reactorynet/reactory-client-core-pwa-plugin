@@ -6,6 +6,7 @@ import {
   CircularProgress,
   Container,
   LinearProgress,
+  Paper,
   Stack,
   Typography,
 } from '@mui/material';
@@ -119,68 +120,72 @@ export const SqlQueryEditor: React.FC<SqlQueryEditorProps> = ({ reactory: propRe
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
-      <Stack spacing={3}>
-        <Box>
+      <Stack spacing={2}>
+        {/* Each section is its own surface so the page reads as distinct blocks
+            rather than one flat column. */}
+        <Paper sx={{ p: 2 }}>
           <Typography variant="h5" component="h1">
             SQL Query Editor
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Execute read-only SQL against connected relational databases
           </Typography>
-        </Box>
+        </Paper>
 
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={2}
-          alignItems={{ xs: 'stretch', md: 'flex-start' }}
-        >
-          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-            <ConnectionSelect
-              connections={connections}
-              value={connectionId}
-              onChange={setConnectionId}
-              loading={connectionsLoading}
-              error={connectionsError}
-              disabled={running}
-            />
-          </Box>
-
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'flex-start',
-              pt: { xs: 0, md: 3 },
-            }}
+        <Paper sx={{ p: 2 }}>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            alignItems={{ xs: 'stretch', sm: 'flex-start' }}
           >
-            <Button
-              type="button"
-              variant="contained"
-              color="primary"
-              onClick={run}
-              disabled={!canRun || connectionsLoading}
-              title={runDisabledReason}
-              aria-label="Execute Query"
-              startIcon={
-                running ? <CircularProgress size={16} color="inherit" /> : <PlayArrowIcon />
-              }
-            >
-              Execute Query
-            </Button>
-          </Box>
-        </Stack>
+            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+              <ConnectionSelect
+                connections={connections}
+                value={connectionId}
+                onChange={setConnectionId}
+                loading={connectionsLoading}
+                error={connectionsError}
+                disabled={running}
+              />
+            </Box>
 
-        <SqlEditorPane
-          value={commandText}
-          onChange={setCommandText}
-          onRun={run}
-          dirty={isDirty}
-          disabled={running}
-        />
+            {/* Aligned to the top of the row, not padded down to meet the input:
+                an outlined InputLabel is absolutely positioned, so it occupies no
+                vertical space and the select already starts at the row's top edge.
+                Adding an offset here pushed the button below the select. */}
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', flexShrink: 0 }}>
+              <Button
+                type="button"
+                variant="contained"
+                color="primary"
+                onClick={run}
+                disabled={!canRun || connectionsLoading}
+                title={runDisabledReason}
+                aria-label="Execute Query"
+                startIcon={
+                  running ? <CircularProgress size={16} color="inherit" /> : <PlayArrowIcon />
+                }
+              >
+                Execute Query
+              </Button>
+            </Box>
+          </Stack>
+        </Paper>
 
-        {running ? <LinearProgress /> : null}
+        <Paper sx={{ p: 2 }}>
+          <SqlEditorPane
+            value={commandText}
+            onChange={setCommandText}
+            onRun={run}
+            dirty={isDirty}
+            disabled={running}
+            variant="plain"
+          />
+        </Paper>
 
         <Box aria-live="polite" aria-busy={running}>
+          {running ? <LinearProgress sx={{ mb: 2, borderRadius: 1 }} /> : null}
+
           {runState.status === 'error' ? (
             <Alert severity="error" sx={{ mb: 2 }}>
               {runState.message}

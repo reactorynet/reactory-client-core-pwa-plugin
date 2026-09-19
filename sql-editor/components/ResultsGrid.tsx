@@ -17,8 +17,46 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { Search as SearchIcon, Download as DownloadIcon } from '@mui/icons-material';
 import type { SqlColumn, SqlQueryResult, SqlQueryRow } from '../types';
+
+/**
+ * Scroll region for the result table.
+ *
+ * A wide result set needs a horizontal scrollbar the user can actually find.
+ * macOS overlay scrollbars are hidden until you scroll, which makes the table
+ * look unscrollable; these rules give the track and thumb explicit, always
+ * visible geometry in WebKit/Blink, plus `scrollbar-color`/`scrollbar-width`
+ * for Firefox. The region is also focusable so the table can be panned with
+ * the keyboard instead of a drag.
+ */
+const ScrollArea = styled(TableContainer)(({ theme }) => ({
+  maxHeight: 460,
+  overflow: 'auto',
+  scrollbarWidth: 'thin',
+  scrollbarColor: `${theme.palette.text.disabled} ${theme.palette.action.hover}`,
+  '&::-webkit-scrollbar': {
+    width: 12,
+    height: 12,
+  },
+  '&::-webkit-scrollbar-track': {
+    backgroundColor: theme.palette.action.hover,
+    borderRadius: 6,
+  },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: theme.palette.text.disabled,
+    borderRadius: 6,
+    border: `3px solid ${theme.palette.background.paper}`,
+  },
+  '&::-webkit-scrollbar-thumb:hover': {
+    backgroundColor: theme.palette.text.secondary,
+  },
+  '&:focus-visible': {
+    outline: `2px solid ${theme.palette.primary.main}`,
+    outlineOffset: -2,
+  },
+}));
 
 /** Footer label, e.g. `1\u201310 of 32`. Exported so the arithmetic is unit-testable. */
 export const formatDisplayedRows = ({ from, to, count }: { from: number; to: number; count: number }): string =>
@@ -146,7 +184,7 @@ export const ResultsGrid: React.FC<ResultsGridProps> = ({
   const showPager = total > pageSize;
 
   return (
-    <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
+    <Paper sx={{ overflow: 'hidden' }}>
       <Box
         sx={{
           display: 'flex',
@@ -182,7 +220,8 @@ export const ResultsGrid: React.FC<ResultsGridProps> = ({
             disabled={!result || pageRows.length === 0}
             inputProps={{ 'aria-label': 'Search the current page' }}
             helperText="Filters the current page"
-            FormHelperTextProps={{ sx: { mt: 0.25, mx: 0 } }}
+            sx={{ minWidth: 200 }}
+            FormHelperTextProps={{ sx: { mt: 0.25, mx: 0, whiteSpace: 'nowrap' } }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -240,7 +279,11 @@ export const ResultsGrid: React.FC<ResultsGridProps> = ({
         ) : null}
 
         {result && visibleRows.length > 0 ? (
-          <TableContainer sx={{ maxHeight: 460 }}>
+          <ScrollArea
+            tabIndex={0}
+            role="region"
+            aria-label="Query results table"
+          >
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow>
@@ -265,7 +308,7 @@ export const ResultsGrid: React.FC<ResultsGridProps> = ({
                 ))}
               </TableBody>
             </Table>
-          </TableContainer>
+          </ScrollArea>
         ) : null}
 
         {result && showPager ? (

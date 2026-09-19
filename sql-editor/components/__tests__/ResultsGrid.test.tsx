@@ -101,6 +101,15 @@ describe('ResultsGrid states', () => {
     expect(headers[0]).toHaveAttribute('scope', 'col');
     expect(headers[0]).toHaveTextContent('table_name');
   });
+
+  it('puts a wide table in a focusable, labelled scroll region', () => {
+    // A wide result set must be pannable without a mouse: the scroll container
+    // is keyboard-focusable and named, so it can be scrolled with arrow keys.
+    renderGrid({ result: makeResult() });
+
+    const region = screen.getByRole('region', { name: /query results table/i });
+    expect(region).toHaveAttribute('tabindex', '0');
+  });
 });
 
 describe('ResultsGrid helpers', () => {
