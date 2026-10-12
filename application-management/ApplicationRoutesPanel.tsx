@@ -27,6 +27,7 @@ import {
   CircularProgress,
   Tooltip,
   InputAdornment,
+  Autocomplete,
 } from '@mui/material';
 import {
   AltRoute as RouteIcon,
@@ -42,14 +43,24 @@ import {
 } from '@mui/icons-material';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { useReactory } from '@reactory/client-core/api';
-
-export interface ApplicationRoutesPanelProps {
+import { ReactoryForm } from '@reactory/client-core/components/reactory/ReactoryForm/ReactoryForm';
+import { TagsField } from '@reactory/client-core/components/shared/TagsField';
+import { resolvePropsSchema } from '@reactory/client-core/components/reactory/form-engine/utils/inputFormInference';
+import { JsonEditorWidget } from '@reactory/client-core/components/reactory/ux/mui/widgets/JsonEditorWidget';export interface ApplicationRoutesPanelProps {
   reactory?: Reactory.Client.IReactoryApi;
   formData?: any;
   onChange?: (formData: any) => void;
   applicationId?: string;
   mode?: 'view' | 'edit';
 }
+
+const ROUTE_SLOT_FIELDS = `
+  show
+  title
+  componentFqn
+  props
+  propsMap
+`;
 
 const ROUTE_FIELDS = `
   id
@@ -62,6 +73,8 @@ const ROUTE_FIELDS = `
   componentFqn
   redirect
   componentProps
+  header { ${ROUTE_SLOT_FIELDS} }
+  footer { ${ROUTE_SLOT_FIELDS} }
 `;
 
 const MUTATIONS = {
@@ -96,6 +109,28 @@ const getRouteId = (route: any): string => {
   return String(route.id || route._id || route.key || route.path || '');
 };
 
+/**
+ * Normalise a header/footer slot for persistence. Returns null when the slot
+ * carries no configuration, so an explicitly cleared slot is removed from the
+ * stored route (the server merge then drops it).
+ */
+export const normaliseSlot = (slot: any) => {
+  if (!slot || typeof slot !== 'object') return null;
+  const props = slot.props && typeof slot.props === 'object' ? slot.props : {};
+  const propsMap = slot.propsMap && typeof slot.propsMap === 'object' ? slot.propsMap : {};
+  const hasContent = Boolean(
+    slot.componentFqn || slot.show || slot.title || Object.keys(props).length || Object.keys(propsMap).length,
+  );
+  if (!hasContent) return null;
+  return {
+    show: Boolean(slot.show),
+    title: slot.title || null,
+    componentFqn: slot.componentFqn || null,
+    props,
+    propsMap,
+  };
+};
+
 const cleanRouteInput = (route: any) => ({
   key: route.key || route.path || '',
   path: route.path || '',
@@ -106,7 +141,103 @@ const cleanRouteInput = (route: any) => ({
   componentFqn: route.componentFqn || '',
   redirect: route.redirect || null,
   componentProps: route.componentProps || {},
+  header: normaliseSlot(route.header),
+  footer: normaliseSlot(route.footer),
 });
+
+interface RouteSlotEditorProps {
+  label: string;
+  slotKey: 'header' | 'footer';
+  slot: any;
+  onChange: (slotKey: 'header' | 'footer', patch: Record<string, any>) => void;
+  componentOptions: Array<{ fqn: string; title: string; componentType: string }>;
+}
+
+/**
+ * Edits a single route slot (`header` / `footer`): show, title, component FQN,
+ * `props` and `propsMap`. Mirrors `RouteSlotConfig` on the server, and uses
+ * the JsonEditorWidget for the two free-form JSON maps.
+ */
+const RouteSlotEditor: React.FC<RouteSlotEditorProps> = ({
+  label,
+  slotKey,
+  slot,
+  onChange,
+  componentOptions,
+}) => {
+  const value = slot && typeof slot === 'object' ? slot : {};
+  const set = (patch: Record<string, any>) => onChange(slotKey, patch);
+  const optionFqns = componentOptions.map((opt) => opt.fqn);
+
+  return (
+    <Box
+      sx={{
+        border: '1px solid',
+        borderColor: 'divider',
+        borderRadius: 1,
+        p: 1.5,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1.5,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+        <Typography variant="subtitle2">{label}</Typography>
+        <FormControlLabel
+          control={
+            <Switch
+              size="small"
+              checked={Boolean(value.show)}
+              onChange={(e) => set({ show: e.target.checked })}
+            />
+          }
+          label={<Typography variant="caption">Show</Typography>}
+        />
+      </Box>
+      <Typography variant="caption" color="text.secondary">
+        Optional component mounted above (header) or below (footer) the route body.
+      </Typography>
+      <TextField
+        label="Title"
+        size="small"
+        fullWidth
+        value={value.title || ''}
+        onChange={(e) => set({ title: e.target.value })}
+      />
+      <Autocomplete
+        freeSolo
+        size="small"
+        options={optionFqns}
+        value={value.componentFqn || ''}
+        onInputChange={(_event: any, nextInput: string, reason: string) => {
+          if (reason === 'reset') return;
+          set({ componentFqn: nextInput });
+        }}
+        onChange={(_event: any, nextValue: any) => {
+          const fqn = typeof nextValue === 'string' ? nextValue : (nextValue?.fqn || '');
+          set({ componentFqn: fqn });
+        }}
+        renderInput={(params: any) => (
+          <TextField {...params} label="Component FQN" helperText="Component to mount in this slot" />
+        )}
+      />
+      <JsonEditorWidget
+        id={`${slotKey}_props`}
+        schema={{ type: 'object', title: 'Props' }}
+        uiSchema={{ 'ui:options': { minRows: 4 } }}
+        value={value.props || {}}
+        onChange={(next) => set({ props: next || {} })}
+      />
+      <JsonEditorWidget
+        id={`${slotKey}_propsMap`}
+        schema={{ type: 'object', title: 'Props Map' }}
+        uiSchema={{ 'ui:options': { minRows: 3 } }}
+        value={value.propsMap || {}}
+        onChange={(next) => set({ propsMap: next || {} })}
+      />
+    </Box>
+  );
+};
 
 export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
   reactory: propReactory,
@@ -126,6 +257,20 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
+
+  // Component FQN selector input (mirrors selectedRoute.componentFqn while typing).
+  const [componentFqnInput, setComponentFqnInput] = useState('');
+
+  // Extended properties (componentProps) editor state.
+  const [propsSchema, setPropsSchema] = useState<any>(null);
+  const [propsSource, setPropsSource] = useState<'form' | 'inferred' | 'none'>('none');
+  const [propsMatchedId, setPropsMatchedId] = useState<string>('');
+  const [propsUiSchema, setPropsUiSchema] = useState<Record<string, any>>({});
+  const [propsWidgetMap, setPropsWidgetMap] = useState<any[]>([]);
+  const [propsLoading, setPropsLoading] = useState(false);
+  const [propsUseRawJson, setPropsUseRawJson] = useState(false);
+  const [propsRawJson, setPropsRawJson] = useState('{}');
+  const [propsError, setPropsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (formData?.routes) {
@@ -164,7 +309,16 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
       componentFqn: '',
       redirect: '',
       componentProps: {},
+      header: {},
+      footer: {},
     });
+    setComponentFqnInput('');
+    setPropsSchema(null);
+    setPropsSource('none');
+    setPropsMatchedId('');
+    setPropsUseRawJson(false);
+    setPropsRawJson('{}');
+    setPropsError(null);
     setIsEditing(false);
     setDialogOpen(true);
   };
@@ -175,7 +329,17 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
       ...route,
       id: routeIdentifier,
       roles: Array.isArray(route.roles) ? [...route.roles] : [],
+      componentProps: route.componentProps || {},
+      header: route.header || {},
+      footer: route.footer || {},
     });
+    setComponentFqnInput(route.componentFqn || '');
+    setPropsSchema(null);
+    setPropsSource('none');
+    setPropsMatchedId('');
+    setPropsUseRawJson(false);
+    setPropsRawJson(JSON.stringify(route.componentProps || {}, null, 2));
+    setPropsError(null);
     setIsEditing(true);
     setDialogOpen(true);
   };
@@ -327,6 +491,10 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
           public: !route.public,
           roles: route.roles || [],
           componentFqn: route.componentFqn,
+          redirect: route.redirect || null,
+          componentProps: route.componentProps || {},
+          header: route.header || null,
+          footer: route.footer || null,
         },
       });
       updateRoutesFromResult(result, 'ReactoryClientUpdateRoute');
@@ -350,8 +518,106 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
     setSelectedRoute(null);
   };
 
+  const handleSlotChange = (slotKey: 'header' | 'footer', patch: Record<string, any>) => {
+    setSelectedRoute((prev: any) => ({
+      ...prev,
+      [slotKey]: { ...((prev && prev[slotKey]) || {}), ...patch },
+    }));
+  };
+
   const handleFieldChange = (field: string, value: any) => {
     setSelectedRoute((prev: any) => ({ ...prev, [field]: value }));
+  };
+
+  /**
+   * Registered components/forms available to bind to a route, for the
+   * Component FQN selector.
+   */
+  const componentOptions = React.useMemo(() => {
+    const register = (reactory as any)?.componentRegister || {};
+    return Object.keys(register)
+      .map((fqn) => {
+        const entry = register[fqn] || {};
+        return {
+          fqn,
+          title: entry.title || entry.name || fqn,
+          componentType: entry.componentType || 'component',
+        };
+      })
+      .sort((a, b) => a.fqn.localeCompare(b.fqn));
+  }, [reactory]);
+
+  const componentOptionByFqn = React.useMemo(() => {
+    const map: Record<string, { title: string; componentType: string }> = {};
+    componentOptions.forEach((opt) => {
+      map[opt.fqn] = { title: opt.title, componentType: opt.componentType };
+    });
+    return map;
+  }, [componentOptions]);
+
+  /**
+   * Resolve the extended-properties (componentProps) schema whenever the dialog
+   * opens or the target component changes. With an FQN we use the component's
+   * input form; without one we infer the property shape from the props already
+   * on the route — the same fallback the workflow QuickLauncher uses.
+   */
+  useEffect(() => {
+    if (!dialogOpen || !selectedRoute) return undefined;
+    let cancelled = false;
+    setPropsLoading(true);
+    setPropsError(null);
+    resolvePropsSchema(reactory as any, selectedRoute.componentFqn, selectedRoute.componentProps)
+      .then((resolved) => {
+        if (cancelled) return;
+        setPropsSchema(resolved.schema);
+        setPropsSource(resolved.source);
+        setPropsMatchedId(resolved.matchedId || '');
+        setPropsUiSchema(resolved.uiSchema || {});
+        setPropsWidgetMap(Array.isArray(resolved.widgetMap) ? resolved.widgetMap : []);
+        const nextProps = resolved.initialData || {};
+        setSelectedRoute((prev: any) => (prev ? { ...prev, componentProps: nextProps } : prev));
+        setPropsRawJson(JSON.stringify(nextProps, null, 2));
+      })
+      .catch((err: any) => {
+        if (cancelled) return;
+        setPropsError(err?.message || 'Failed to resolve component properties');
+      })
+      .finally(() => {
+        if (!cancelled) setPropsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dialogOpen, selectedRoute?.componentFqn]);
+
+  const propsHasFields = Boolean(
+    propsSchema && propsSchema.properties && Object.keys(propsSchema.properties).length > 0,
+  );
+  const propsShowRaw = propsUseRawJson || !propsHasFields;
+
+  const propsFormDef = React.useMemo(() => {
+    if (!propsSchema) return null;
+    return {
+      id: 'reactory.RouteComponentProps@1.0.0',
+      name: 'RouteComponentProps',
+      nameSpace: 'reactory',
+      version: '1.0.0',
+      schema: propsSchema,
+      uiSchema: propsUiSchema,
+      widgetMap: propsWidgetMap.length > 0 ? propsWidgetMap : undefined,
+    } as any;
+  }, [propsSchema, propsUiSchema, propsWidgetMap]);
+
+  const handlePropsRawJsonChange = (text: string) => {
+    setPropsRawJson(text);
+    try {
+      const parsed = JSON.parse(text);
+      handleFieldChange('componentProps', parsed);
+      setPropsError(null);
+    } catch (err) {
+      setPropsError('Invalid JSON');
+    }
   };
 
   const filteredRoutes = routes.filter((r) => {
@@ -502,8 +768,12 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
                                     <Typography variant="caption" fontFamily="monospace">
                                       {route.componentFqn || '-'}
                                     </Typography>
-                                  </TableCell>
-                                  <TableCell>
+                                    {(route.header?.componentFqn || route.footer?.componentFqn) && (
+                                      <Typography variant="caption" color="text.secondary" display="block">
+                                        Slots: {[route.header?.componentFqn ? 'header' : null, route.footer?.componentFqn ? 'footer' : null].filter(Boolean).join(', ')}
+                                      </Typography>
+                                    )}
+                                  </TableCell>                                  <TableCell>
                                     {isAdmin ? (
                                       <Tooltip title="Click to toggle access">
                                         <Chip
@@ -608,12 +878,44 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
               fullWidth
               helperText="Human-readable title for page and breadcrumb navigation"
             />
-            <TextField
-              label="Component FQN"
+            <Autocomplete
+              freeSolo
+              options={componentOptions.map((opt) => opt.fqn)}
               value={selectedRoute?.componentFqn || ''}
-              onChange={(e) => handleFieldChange('componentFqn', e.target.value)}
-              fullWidth
-              helperText="Fully qualified React component name (e.g., core.UserProfile@1.0.0)"
+              inputValue={componentFqnInput}
+              onInputChange={(_event: any, nextInput: string, reason: string) => {
+                if (reason === 'reset') return;
+                setComponentFqnInput(nextInput);
+                handleFieldChange('componentFqn', nextInput);
+              }}
+              onChange={(_event: any, nextValue: any) => {
+                const fqn = typeof nextValue === 'string' ? nextValue : (nextValue?.fqn || '');
+                setComponentFqnInput(fqn);
+                handleFieldChange('componentFqn', fqn);
+              }}
+              renderOption={(optionProps: any, option: string) => {
+                const meta = componentOptionByFqn[option];
+                return (
+                  <Box component="li" {...optionProps} key={option}>
+                    <Box>
+                      <Typography variant="body2" fontFamily="monospace">{option}</Typography>
+                      {meta && (
+                        <Typography variant="caption" color="text.secondary">
+                          {meta.title} · {meta.componentType}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                );
+              }}
+              renderInput={(params: any) => (
+                <TextField
+                  {...params}
+                  label="Component FQN"
+                  fullWidth
+                  helperText="Fully qualified component or form to bind (e.g. core.UserProfile@1.0.0). Leave empty to infer properties."
+                />
+              )}
             />
             <TextField
               label="Redirect Path (Optional)"
@@ -622,21 +924,112 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
               fullWidth
               helperText="Optional redirect target URL path if route redirects elsewhere"
             />
-            <TextField
+            <TagsField
               label="Roles"
-              value={selectedRoute?.roles?.join(', ') || ''}
-              onChange={(e) =>
-                handleFieldChange(
-                  'roles',
-                  e.target.value
-                    .split(',')
-                    .map((r: string) => r.trim())
-                    .filter(Boolean)
-                )
-              }
-              fullWidth
-              helperText="Comma-separated list of roles allowed to access this route"
+              value={selectedRoute?.roles}
+              onChange={(next) => handleFieldChange('roles', next)}
+              placeholder="Add a role..."
+              helperText="Roles allowed to access this route (leave empty for all roles)"
             />
+            {/* Extended properties (componentProps) passed to the bound component */}
+            <Box
+              sx={{
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                p: 1.5,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                  <Typography variant="subtitle2">Extended Properties</Typography>
+                  {propsSource === 'form' && (
+                    <Chip
+                      size="small"
+                      color="success"
+                      variant="outlined"
+                      label={`From ${propsMatchedId || 'component'}`}
+                    />
+                  )}
+                  {propsSource === 'inferred' && (
+                    <Chip size="small" color="info" variant="outlined" label="Inferred schema" />
+                  )}
+                </Box>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      size="small"
+                      checked={propsUseRawJson}
+                      onChange={(e) => {
+                        setPropsUseRawJson(e.target.checked);
+                        if (!e.target.checked) {
+                          setPropsRawJson(JSON.stringify(selectedRoute?.componentProps || {}, null, 2));
+                        }
+                      }}
+                    />
+                  }
+                  label={<Typography variant="caption">Raw JSON</Typography>}
+                />
+              </Box>
+              <Typography variant="caption" color="text.secondary">
+                {selectedRoute?.componentFqn
+                  ? 'Props passed to the bound component. The shape is resolved from the component when an input form exists, otherwise inferred.'
+                  : 'No component FQN set — property shape is inferred from the values below (same as the workflow QuickLauncher).'}
+              </Typography>
+
+              {propsLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                  <CircularProgress size={20} />
+                </Box>
+              ) : propsShowRaw || !propsFormDef ? (
+                <TextField
+                  label="Component Props (JSON)"
+                  value={propsRawJson}
+                  onChange={(e) => handlePropsRawJsonChange(e.target.value)}
+                  fullWidth
+                  multiline
+                  minRows={4}
+                  error={Boolean(propsError)}
+                  helperText={propsError || 'JSON object of props passed to the component'}
+                  InputProps={{ sx: { fontFamily: 'monospace', fontSize: '0.85rem' } }}
+                />
+              ) : (
+                <Box sx={{ '& .MuiPaper-root': { bgcolor: 'transparent' } }}>
+                  <ReactoryForm
+                    key={`routeProps_${propsMatchedId || 'inferred'}`}
+                    formDef={propsFormDef}
+                    data={selectedRoute?.componentProps || {}}
+                    onChange={(val: any) => {
+                      const next = val?.formData || val || {};
+                      handleFieldChange('componentProps', next);
+                      setPropsRawJson(JSON.stringify(next, null, 2));
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+
+            <Typography variant="subtitle2" sx={{ mt: 1 }}>
+              Route Slots (Optional)
+            </Typography>
+            <RouteSlotEditor
+              label="Header Slot"
+              slotKey="header"
+              slot={selectedRoute?.header}
+              onChange={handleSlotChange}
+              componentOptions={componentOptions}
+            />
+            <RouteSlotEditor
+              label="Footer Slot"
+              slotKey="footer"
+              slot={selectedRoute?.footer}
+              onChange={handleSlotChange}
+              componentOptions={componentOptions}
+            />
+
             <Box sx={{ display: 'flex', gap: 3 }}>
               <FormControlLabel
                 control={

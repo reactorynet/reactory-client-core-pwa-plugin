@@ -37,6 +37,7 @@ import {
   ToggleOff as ToggleOffIcon,
 } from '@mui/icons-material';
 import { useReactory } from '@reactory/client-core/api';
+import { TagsField } from '@reactory/client-core/components/shared/TagsField';
 
 export interface FeatureFlag {
   feature: string;
@@ -65,6 +66,13 @@ export interface ApplicationFeatureFlagsPanelProps {
   formData?: {
     featureFlags?: FeatureFlag[];
     totalFeatureFlags?: number;
+  };
+  formContext?: {
+    props?: {
+      applicationId?: string;
+      mode?: string;
+      application?: { _id?: string; id?: string };
+    };
   };
   onChange?: (formData: any) => void;
   applicationId?: string;
@@ -120,6 +128,7 @@ const MUTATIONS = {
 export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanelProps> = ({
   reactory: propReactory,
   formData,
+  formContext,
   onChange,
   applicationId,
   mode = 'view',
@@ -145,22 +154,57 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
   const [selectedFlag, setSelectedFlag] = useState<FeatureFlag | null>(null);
   const [editIndex, setEditIndex] = useState<number>(-1);
   const [isEditing, setIsEditing] = useState(false);
+  const [featureInput, setFeatureInput] = useState('');
   const [catalogue, setCatalogue] = useState<CatalogueFlag[]>([]);
   const [catalogueLoading, setCatalogueLoading] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number>(-1);
 
   /**
-   * Update local state and propagate to parent form after a mutation result.
+   * Resolve the application id.
+   *
+   * On the v5 form engine the `ui:props-map` that wires
+   * `formContext.props.applicationId` → `applicationId` used to be ignored, so
+   * the prop arrived undefined and every mutation silently no-oped. The v5
+   * adapter now honours the map, but we also fall back to `formContext` here so
+   * the panel keeps working regardless of how it was mounted.
    */
-  const updateFlagsFromResult = (result: any, mutationKey: string) => {
-    const data = result?.data?.[mutationKey];
-    if (data?.featureFlags) {
-      setFlags(data.featureFlags);
-      if (typeof onChange === 'function') {
-        onChange({ ...formData, featureFlags: data.featureFlags, totalFeatureFlags: data.featureFlags.length });
-      }
+  const resolveApplicationId = (): string | undefined =>
+    applicationId
+    || formContext?.props?.applicationId
+    || formContext?.props?.application?.id
+    || formContext?.props?.application?._id;
+
+  const notify = (
+    message: string,
+    type: 'success' | 'error' | 'info' | 'warning' = 'success',
+  ) => {
+    if (reactory.createNotification) {
+      reactory.createNotification(message, {
+        type,
+        canDismiss: true,
+        timeout: type === 'error' ? 5000 : 3000,
+        showInAppNotification: true,
+      });
     }
+  };
+
+  /**
+   * Publish the flag list to local state and the parent form.
+   */
+  const publishFlags = (nextFlags: FeatureFlag[]) => {
+    setFlags(nextFlags);
+    if (typeof onChange === 'function') {
+      onChange({ ...(formData || {}), featureFlags: nextFlags, totalFeatureFlags: nextFlags.length });
+    }
+  };
+
+  /**
+   * Pull the updated featureFlags array out of a mutation result.
+   */
+  const extractFlags = (result: any, mutationKey: string): FeatureFlag[] | null => {
+    const data = result?.data?.[mutationKey];
+    return data?.featureFlags ? data.featureFlags : null;
   };
 
   /**
@@ -223,22 +267,36 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
 
   /**
    * Toggle enabled/disabled state inline for a specific flag.
+   *
+   * Applies the change optimistically so the switch moves immediately, then
+   * reverts if the mutation fails.
    */
   const handleToggleEnabled = async (index: number) => {
-    if (!applicationId) return;
+    const clientId = resolveApplicationId();
+    if (!clientId) {
+      notify('Unable to determine the application id.', 'error');
+      return;
+    }
     const flag = featureFlags[index];
     if (!flag) return;
+
+    const nextEnabled = !flag.enabled;
+    const previous = featureFlags;
+    publishFlags(featureFlags.map((f, i) => (i === index ? { ...f, enabled: nextEnabled } : f)));
     setSaving(true);
     try {
       const result = await reactory.graphqlMutation(MUTATIONS.updateFeatureFlag, {
-        clientId: applicationId,
+        clientId,
         feature: flag.feature,
-        featureFlag: cleanFlagInput({ ...flag, enabled: !flag.enabled }),
+        featureFlag: cleanFlagInput({ ...flag, enabled: nextEnabled }),
       });
-      updateFlagsFromResult(result, 'ReactoryClientUpdateFeatureFlag');
+      const serverFlags = extractFlags(result, 'ReactoryClientUpdateFeatureFlag');
+      if (serverFlags) publishFlags(serverFlags);
+      notify(nextEnabled ? 'Feature flag enabled' : 'Feature flag disabled');
     } catch (err) {
+      publishFlags(previous);
       if (reactory.log) reactory.log('Error toggling feature flag:', err, 'error');
-      if (reactory.createNotification) reactory.createNotification('Error toggling feature flag', { type: 'error' });
+      notify('Error toggling feature flag', 'error');
     } finally {
       setSaving(false);
     }
@@ -259,6 +317,7 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
       value: {},
       enabled: true,
     });
+    setFeatureInput('');
     setEditIndex(-1);
     setIsEditing(false);
     setDialogOpen(true);
@@ -269,6 +328,7 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
    */
   const handleEditFlag = (flag: FeatureFlag, index: number) => {
     setSelectedFlag({ ...flag });
+    setFeatureInput(flag.feature || '');
     setEditIndex(index);
     setIsEditing(true);
     setDialogOpen(true);
@@ -286,23 +346,26 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
    * Execute deletion after confirmation.
    */
   const confirmDeleteFlag = async () => {
-    if (deleteIndex >= 0 && applicationId) {
-      const flag = featureFlags[deleteIndex];
-      if (flag) {
-        setSaving(true);
-        try {
-          const result = await reactory.graphqlMutation(MUTATIONS.deleteFeatureFlag, {
-            clientId: applicationId,
-            feature: flag.feature,
-          });
-          updateFlagsFromResult(result, 'ReactoryClientDeleteFeatureFlag');
-        } catch (err) {
-          if (reactory.log) reactory.log('Error deleting feature flag:', err, 'error');
-          if (reactory.createNotification) reactory.createNotification('Error deleting feature flag', { type: 'error' });
-        } finally {
-          setSaving(false);
-        }
+    const clientId = resolveApplicationId();
+    const flag = deleteIndex >= 0 ? featureFlags[deleteIndex] : undefined;
+    if (flag && clientId) {
+      setSaving(true);
+      try {
+        const result = await reactory.graphqlMutation(MUTATIONS.deleteFeatureFlag, {
+          clientId,
+          feature: flag.feature,
+        });
+        const serverFlags = extractFlags(result, 'ReactoryClientDeleteFeatureFlag');
+        publishFlags(serverFlags || featureFlags.filter((_, i) => i !== deleteIndex));
+        notify('Feature flag removed');
+      } catch (err) {
+        if (reactory.log) reactory.log('Error deleting feature flag:', err, 'error');
+        notify('Error deleting feature flag', 'error');
+      } finally {
+        setSaving(false);
       }
+    } else if (flag && !clientId) {
+      notify('Unable to determine the application id.', 'error');
     }
     setDeleteConfirmOpen(false);
     setDeleteIndex(-1);
@@ -312,31 +375,43 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
    * Save (add or update) a feature flag value via individual mutation.
    */
   const handleSaveFlag = async () => {
-    if (!selectedFlag?.feature || !applicationId) return;
+    if (!selectedFlag?.feature) return;
+    const clientId = resolveApplicationId();
+    if (!clientId) {
+      notify('Unable to determine the application id.', 'error');
+      return;
+    }
     setSaving(true);
     try {
       const input = cleanFlagInput(selectedFlag);
       if (isEditing && editIndex >= 0) {
-        const originalFeature = featureFlags[editIndex]?.feature;
+        const originalFeature = featureFlags[editIndex]?.feature || selectedFlag.feature;
         const result = await reactory.graphqlMutation(MUTATIONS.updateFeatureFlag, {
-          clientId: applicationId,
+          clientId,
           feature: originalFeature,
           featureFlag: input,
         });
-        updateFlagsFromResult(result, 'ReactoryClientUpdateFeatureFlag');
+        const serverFlags = extractFlags(result, 'ReactoryClientUpdateFeatureFlag');
+        publishFlags(
+          serverFlags || featureFlags.map((f, i) => (i === editIndex ? { ...selectedFlag } : f)),
+        );
+        notify('Feature flag updated');
       } else {
         const result = await reactory.graphqlMutation(MUTATIONS.addFeatureFlag, {
-          clientId: applicationId,
+          clientId,
           featureFlag: input,
         });
-        updateFlagsFromResult(result, 'ReactoryClientAddFeatureFlag');
+        const serverFlags = extractFlags(result, 'ReactoryClientAddFeatureFlag');
+        publishFlags(serverFlags || [...featureFlags, { ...selectedFlag }]);
+        notify('Feature flag added');
       }
       setDialogOpen(false);
       setSelectedFlag(null);
       setEditIndex(-1);
     } catch (err) {
+      // Keep the dialog open so the user does not lose their edits.
       if (reactory.log) reactory.log('Error saving feature flag:', err, 'error');
-      if (reactory.createNotification) reactory.createNotification('Error saving feature flag', { type: 'error' });
+      notify('Error saving feature flag', 'error');
     } finally {
       setSaving(false);
     }
@@ -357,11 +432,12 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
    */
   const handleCatalogueSelect = (
     _event: any,
-    catalogueFlag: CatalogueFlag | null,
+    catalogueFlag: CatalogueFlag | string | null,
   ) => {
-    if (catalogueFlag) {
-      handleFieldChange('feature', flagFqn(catalogueFlag));
-    }
+    if (!catalogueFlag) return;
+    const fqn = typeof catalogueFlag === 'string' ? catalogueFlag : flagFqn(catalogueFlag);
+    setFeatureInput(fqn);
+    handleFieldChange('feature', fqn);
   };
 
   return (
@@ -419,6 +495,7 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
                           onClick={() => handleToggleEnabled(index)}
                           color={flag.enabled ? 'success' : 'default'}
                           disabled={saving}
+                          aria-label={flag.enabled ? 'Disable feature flag' : 'Enable feature flag'}
                         >
                           {flag.enabled ? (
                             <ToggleOnIcon />
@@ -604,9 +681,17 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
               <Autocomplete
                 options={availableCatalogueOptions}
                 loading={catalogueLoading}
-                getOptionLabel={(option: CatalogueFlag) =>
-                  `${option.title} (${flagFqn(option)})`
+                getOptionLabel={(option: CatalogueFlag | string) =>
+                  typeof option === 'string'
+                    ? option
+                    : `${option.title} (${flagFqn(option)})`
                 }
+                inputValue={featureInput}
+                onInputChange={(_event: any, nextInput: string, reason: string) => {
+                  if (reason === 'reset') return;
+                  setFeatureInput(nextInput);
+                  handleFieldChange('feature', nextInput);
+                }}
                 onChange={handleCatalogueSelect}
                 freeSolo
                 renderOption={(optionProps: any, option: CatalogueFlag) => (
@@ -628,10 +713,6 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
                   <TextField
                     {...params}
                     label="Feature Flag"
-                    value={selectedFlag?.feature || ''}
-                    onChange={(e: any) =>
-                      handleFieldChange('feature', e.target.value)
-                    }
                     fullWidth
                     helperText="Select from the catalogue or enter an FQN manually"
                   />
@@ -641,7 +722,7 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
             <FormControlLabel
               control={
                 <Switch
-                  checked={selectedFlag?.enabled !== false}
+                  checked={Boolean(selectedFlag?.enabled)}
                   onChange={(e: any) =>
                     handleFieldChange('enabled', e.target.checked)
                   }
@@ -680,50 +761,26 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
               fullWidth
               helperText="Apply to specific business unit only"
             />
-            <TextField
+            <TagsField
               label="Roles"
-              value={selectedFlag?.roles?.join(', ') || ''}
-              onChange={(e: any) =>
-                handleFieldChange(
-                  'roles',
-                  e.target.value
-                    .split(',')
-                    .map((r: string) => r.trim())
-                    .filter(Boolean),
-                )
-              }
-              fullWidth
-              helperText="Comma-separated list of roles that can access this feature"
+              value={selectedFlag?.roles}
+              onChange={(next) => handleFieldChange('roles', next)}
+              placeholder="Type a role and press Enter"
+              helperText="Roles that can access this feature (press Enter or comma to add)"
             />
-            <TextField
+            <TagsField
               label="Regions"
-              value={selectedFlag?.regions?.join(', ') || ''}
-              onChange={(e: any) =>
-                handleFieldChange(
-                  'regions',
-                  e.target.value
-                    .split(',')
-                    .map((r: string) => r.trim())
-                    .filter(Boolean),
-                )
-              }
-              fullWidth
-              helperText="Comma-separated list of 2-digit ISO country codes"
+              value={selectedFlag?.regions}
+              onChange={(next) => handleFieldChange('regions', next)}
+              placeholder="e.g. ZA, US"
+              helperText="2-digit ISO country codes (press Enter or comma to add)"
             />
-            <TextField
+            <TagsField
               label="Timezones"
-              value={selectedFlag?.timezones?.join(', ') || ''}
-              onChange={(e: any) =>
-                handleFieldChange(
-                  'timezones',
-                  e.target.value
-                    .split(',')
-                    .map((t: string) => t.trim())
-                    .filter(Boolean),
-                )
-              }
-              fullWidth
-              helperText="Comma-separated list of timezones"
+              value={selectedFlag?.timezones}
+              onChange={(next) => handleFieldChange('timezones', next)}
+              placeholder="e.g. Africa/Johannesburg"
+              helperText="Timezones (press Enter or comma to add)"
             />
           </Box>
         </DialogContent>
