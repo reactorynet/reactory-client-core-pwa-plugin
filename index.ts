@@ -6,6 +6,7 @@ import { components as graphqlEditorComponents } from './graphql-editor';
 
 export * from './content-management';
 export * from './application-management';
+export * from './theme-editor';
 export * from './sql-editor';
 export * from './graphql-editor';
 
