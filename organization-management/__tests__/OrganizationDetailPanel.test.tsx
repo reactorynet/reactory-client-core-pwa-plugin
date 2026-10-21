@@ -192,14 +192,26 @@ describe('OrganizationDetailPanel — tab registry', () => {
     render(<OrganizationDetailPanel reactory={reactory} id="org-1" />);
     await screen.findByRole('heading', { name: 'Acme Holdings' });
 
-    await userEvent.click(screen.getByRole('tab', { name: 'Branding' }));
+    await userEvent.click(screen.getByRole('tab', { name: 'Structure' }));
 
     expect(await screen.findByTestId('organization-tab-placeholder')).toHaveAttribute(
       'data-ticket',
-      'ORG-013',
+      'ORG-022',
     );
-    expect(screen.getByText('ORG-013 delivers this tab')).toBeInTheDocument();
+    expect(screen.getByText('ORG-022 delivers this tab')).toBeInTheDocument();
     expect(screen.queryByTestId('organization-overview-tab')).not.toBeInTheDocument();
+  });
+
+  it('renders the real branding tab from the registry', async () => {
+    const reactory = makeReactory({ organizations: [makeOrganization()] });
+
+    render(<OrganizationDetailPanel reactory={reactory} id="org-1" />);
+    await screen.findByRole('heading', { name: 'Acme Holdings' });
+
+    await userEvent.click(screen.getByRole('tab', { name: 'Branding' }));
+
+    expect(await screen.findByTestId('organization-branding-tab')).toBeInTheDocument();
+    expect(screen.queryByTestId('organization-tab-placeholder')).not.toBeInTheDocument();
   });
 
   it('does not ship the ORG-010 comingSoon banner', async () => {

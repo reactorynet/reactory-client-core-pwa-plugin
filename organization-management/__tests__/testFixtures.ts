@@ -1,4 +1,4 @@
-import type { Organization, OrganizationStatistics } from '../types';
+import type { Organization, OrganizationStatistics, OrganizationTheme } from '../types';
 
 /**
  * Test fixtures and a stubbed Reactory SDK for the organization management
@@ -73,6 +73,42 @@ export const manyOrganizations = (count: number): Organization[] =>
     });
   });
 
+/**
+ * A valid `ApplicationTheme` record, shaped like the ones the server returns
+ * for `Organization.themes` (see the shared theme editor's `IThemeRecord`).
+ */
+export const makeTheme = (overrides: Partial<OrganizationTheme> = {}): OrganizationTheme => ({
+  id: 'theme-1',
+  nameSpace: 'reactory',
+  name: 'Acme Theme',
+  version: '1.0.0',
+  type: 'material',
+  defaultThemeMode: 'dark',
+  description: 'Acme brand theme',
+  options: { palette: { mode: 'dark' } },
+  modes: [
+    {
+      id: 'dark',
+      mode: 'dark',
+      name: 'Dark Mode',
+      description: '',
+      icon: 'night',
+      options: { palette: { mode: 'dark' } },
+    },
+    {
+      id: 'light',
+      mode: 'light',
+      name: 'Light Mode',
+      description: '',
+      icon: 'day',
+      options: { palette: { mode: 'light' } },
+    },
+  ],
+  assets: [],
+  content: { appTitle: 'Acme' },
+  ...overrides,
+});
+
 export const statisticsFor = (
   overrides: Partial<OrganizationStatistics> = {},
 ): OrganizationStatistics => ({
@@ -91,6 +127,8 @@ export interface ReactoryStubOptions {
   mutationImpl?: (operation: string, variables: any, callIndex: number) => any;
   /** Resolve query promises manually (used to assert the loading state). */
   hangOrganizations?: boolean;
+  /** Published `styles.css` per theme name, for `OrganizationThemeCss`. */
+  themeCss?: Record<string, string>;
   i18n?: any;
   /**
    * Platform roles the caller holds (`loggedIn.roles`). Matched against what
@@ -171,6 +209,26 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
       });
     }
 
+    if (operation === 'OrganizationBranding') {
+      const found = state.find((entry) => entry.id === variables?.id) || null;
+      return Promise.resolve({
+        data: {
+          OrganizationBranding: found
+            ? { ...found, themes: Array.isArray(found.themes) ? [...found.themes] : [] }
+            : null,
+        },
+        errors: [],
+      });
+    }
+
+    if (operation === 'OrganizationThemeCss') {
+      const published = (options.themeCss || {})[variables?.themeName];
+      return Promise.resolve({
+        data: { OrganizationThemeCss: typeof published === 'string' ? published : '' },
+        errors: [],
+      });
+    }
+
     if (operation === 'OrganizationDemographicDefinitions') {
       // The query does not exist yet: this is the shape the schema returns.
       return Promise.resolve({
@@ -234,6 +292,87 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
       const updated = { ...state[index], status };
       state[index] = updated;
       return Promise.resolve({ data: { [operation]: updated }, errors: [] });
+    }
+
+    if (operation === 'OrganizationSaveTheme') {
+      const index = state.findIndex((entry) => entry.id === variables?.id);
+      if (index < 0) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Organization not found' }] });
+      }
+
+      const incoming = variables?.theme || {};
+      const themes = Array.isArray(state[index].themes) ? [...state[index].themes!] : [];
+      const existing = themes.findIndex((theme) => theme.name === incoming.name);
+      if (existing >= 0) themes[existing] = { ...themes[existing], ...incoming };
+      else themes.push({ ...incoming });
+
+      const updated = { ...state[index], themes };
+      state[index] = updated;
+      return Promise.resolve({ data: { OrganizationSaveTheme: updated }, errors: [] });
+    }
+
+    if (operation === 'OrganizationSetActiveTheme') {
+      const index = state.findIndex((entry) => entry.id === variables?.id);
+      if (index < 0) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Organization not found' }] });
+      }
+
+      const updated = {
+        ...state[index],
+        theme: variables?.themeName,
+        themeMode: variables?.mode || state[index].themeMode || 'dark',
+      };
+      state[index] = updated;
+      return Promise.resolve({ data: { OrganizationSetActiveTheme: updated }, errors: [] });
+    }
+
+    if (operation === 'OrganizationDeleteTheme') {
+      const index = state.findIndex((entry) => entry.id === variables?.id);
+      if (index < 0) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Organization not found' }] });
+      }
+
+      const current = state[index];
+      const themes = (Array.isArray(current.themes) ? current.themes : []).filter(
+        (theme) => theme.name !== variables?.themeName,
+      );
+
+      // Mirrors the server's deterministic fallback: the first remaining theme
+      // becomes active, or the pointer is cleared when none remain.
+      const theme =
+        current.theme === variables?.themeName
+          ? themes[0]?.name || null
+          : current.theme || null;
+
+      const updated = {
+        ...current,
+        themes,
+        theme,
+        themeMode: theme ? current.themeMode || 'dark' : null,
+      };
+      state[index] = updated;
+      return Promise.resolve({ data: { OrganizationDeleteTheme: updated }, errors: [] });
+    }
+
+    if (operation === 'OrganizationUploadImage') {
+      const index = state.findIndex((entry) => entry.id === variables?.id);
+      if (index < 0) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Organization not found' }] });
+      }
+
+      const imageType = variables?.imageType === 'avatar' ? 'avatar' : 'logo';
+      const alias = `uploaded-${imageType}`;
+      const updated = {
+        ...state[index],
+        [imageType]: alias,
+        [`${imageType}URL`]: `https://cdn.example/${alias}`,
+      };
+      state[index] = updated;
+      return Promise.resolve({ data: { OrganizationUploadImage: updated }, errors: [] });
+    }
+
+    if (operation === 'OrganizationPublishThemeCss') {
+      return Promise.resolve({ data: { OrganizationPublishThemeCss: true }, errors: [] });
     }
 
     return Promise.resolve({

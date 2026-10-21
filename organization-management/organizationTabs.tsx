@@ -9,6 +9,7 @@ import {
 } from '@mui/icons-material';
 
 import OrganizationOverviewTab from './OrganizationOverviewTab';
+import OrganizationBrandingTab from './OrganizationBrandingTab';
 import OrganizationTabPlaceholder from './components/OrganizationTabPlaceholder';
 import type { OrganizationMessageKey } from './i18n';
 import type { OrganizationTabDefinition, OrganizationTabProps } from './types';
@@ -41,11 +42,10 @@ const placeholderTab = (
 /**
  * The organization detail tab registry.
  *
- * **This is the extension point.** A later ticket (ORG-013 branding, ORG-022
- * structure, ORG-024 people, ORG-031 demographics, settings) adds its tab by
- * appending one entry here — `OrganizationDetailPanel` renders whatever this
- * array contains and never needs editing. Order in this array is the order of
- * the tab bar.
+ * **This is the extension point.** A later ticket (ORG-022 structure, ORG-024
+ * people, ORG-031 demographics, settings) adds its tab by appending one entry
+ * here — `OrganizationDetailPanel` renders whatever this array contains and
+ * never needs editing. Order in this array is the order of the tab bar.
  */
 export const ORGANIZATION_TABS: OrganizationTabDefinition[] = [
   {
@@ -58,10 +58,7 @@ export const ORGANIZATION_TABS: OrganizationTabDefinition[] = [
     id: 'branding',
     labelKey: 'reactory.organizations.detail.tab.branding',
     icon: <PaletteOutlinedIcon fontSize="small" />,
-    component: placeholderTab(
-      'ORG-013',
-      'reactory.organizations.detail.tab.branding.placeholder',
-    ),
+    component: OrganizationBrandingTab,
   },
   {
     id: 'structure',

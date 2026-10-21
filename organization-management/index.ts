@@ -5,6 +5,7 @@ import OrganizationCreatePage from './OrganizationCreatePage';
 import OrganizationCreateWizard from './OrganizationCreateWizard';
 import OrganizationDetailPanel from './OrganizationDetailPanel';
 import OrganizationOverviewTab from './OrganizationOverviewTab';
+import OrganizationBrandingTab from './OrganizationBrandingTab';
 import OrganizationToolbar from './OrganizationToolbar';
 import OrganizationStatusChip from './components/OrganizationStatusChip';
 import OrganizationTabPlaceholder from './components/OrganizationTabPlaceholder';
@@ -12,6 +13,7 @@ import { ORGANIZATION_TABS, OVERVIEW_TAB_ID } from './organizationTabs';
 import useOrganizationList from './hooks/useOrganizationList';
 import useOrganizationDetail from './hooks/useOrganizationDetail';
 import useOrganizationAdmin, { useDemographicDefinitions } from './hooks/useOrganizationAdmin';
+import useOrganizationBranding from './hooks/useOrganizationBranding';
 import { ORGANIZATION_MESSAGES, translate } from './i18n';
 
 export {
@@ -20,6 +22,7 @@ export {
   OrganizationCreateWizard,
   OrganizationDetailPanel,
   OrganizationOverviewTab,
+  OrganizationBrandingTab,
   OrganizationTabPlaceholder,
   OrganizationToolbar,
   OrganizationStatusChip,
@@ -28,6 +31,7 @@ export {
   useOrganizationList,
   useOrganizationDetail,
   useOrganizationAdmin,
+  useOrganizationBranding,
   useDemographicDefinitions,
   ORGANIZATION_MESSAGES,
   translate,
