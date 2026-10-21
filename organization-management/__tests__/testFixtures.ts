@@ -25,7 +25,11 @@ export const makeOrganization = (overrides: Partial<Organization> = {}): Organiz
   name: 'Acme Holdings',
   code: 'ACME',
   tradingName: 'Acme Trading (Pty) Ltd',
+  legalName: 'Acme Holdings (Pty) Ltd',
   description: 'A holding company.',
+  website: 'https://acme.example',
+  contactEmail: 'hello@acme.example',
+  contactPhone: '+27 11 555 0100',
   status: 'active',
   logo: null,
   logoURL: null,
@@ -35,6 +39,7 @@ export const makeOrganization = (overrides: Partial<Organization> = {}): Organiz
   themeMode: 'dark',
   public: false,
   businessUnits: [{ id: 'bu-1' }, { id: 'bu-2' }],
+  createdAt: '2026-01-05T09:00:00.000Z',
   updatedAt: '2026-08-14T10:00:00.000Z',
   ...overrides,
 });
@@ -243,6 +248,8 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
     state,
     createNotification: jest.fn(),
     navigation: jest.fn(),
+    /** Event bus surface used by the detail shell and the Overview tab. */
+    emit: jest.fn(),
     location: { pathname: '/' } as any,
     getUser: jest.fn(() => ({
       loggedIn: {

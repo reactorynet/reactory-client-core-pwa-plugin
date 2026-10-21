@@ -7,6 +7,7 @@
  * codegen step of its own — it is compiled in the pwa-client workspace.
  */
 
+import type { ComponentType, ReactElement } from 'react';
 import type { OrganizationMessageKey } from './i18n';
 
 /** Lifecycle states exposed by `Organization.status`. */
@@ -31,6 +32,9 @@ export interface Organization {
   tradingName?: string | null;
   legalName?: string | null;
   description?: string | null;
+  website?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
   status?: OrganizationStatus | string | null;
   logo?: string | null;
   logoURL?: string | null;
@@ -42,6 +46,65 @@ export interface Organization {
   businessUnits?: OrganizationBusinessUnitRef[] | null;
   createdAt?: string | number | Date | null;
   updatedAt?: string | number | Date | null;
+  /**
+   * Audit fields. Named here because the detail Overview tab renders them when
+   * a payload carries them; the current server type does not select them yet,
+   * so they stay optional and the tab omits the rows when they are absent.
+   */
+  createdBy?: string | null;
+  updatedBy?: string | null;
+}
+
+/**
+ * Translator bound to the Reactory API (see `makeTranslator`).
+ *
+ * Aliased here so the tab contract below can name it without importing the
+ * i18n module's implementation.
+ */
+export type OrganizationTranslator = (
+  key: OrganizationMessageKey,
+  values?: Record<string, string | number>,
+) => string;
+
+/** Notification severity accepted by the Reactory notification API. */
+export type OrganizationNotifyType = 'success' | 'error' | 'info' | 'warning';
+
+/**
+ * Props every organization detail tab receives from the shell.
+ *
+ * The shell renders exactly one tab at a time and passes everything a tab
+ * needs, which is what keeps the tab registry data-driven: a new ticket adds a
+ * `component` that implements this contract and appends one registry entry —
+ * no change to the shell's structure.
+ */
+export interface OrganizationTabProps {
+  reactory: any;
+  t: OrganizationTranslator;
+  organization: Organization;
+  statistics: OrganizationStatistics | null;
+  /** False for a viewer who may read but not write; tabs must hide write UI. */
+  canManage: boolean;
+  /** Reloads the organization and its counts after a write. */
+  refresh: () => Promise<void>;
+  /**
+   * Report whether the tab holds unsaved input. The shell uses it to guard tab
+   * switches and Back navigation; a tab must clear it after save or cancel.
+   */
+  onUnsavedChanges: (dirty: boolean) => void;
+  notify: (message: string, type?: OrganizationNotifyType) => void;
+}
+
+/**
+ * One entry in the detail tab bar.
+ *
+ * `icon` is an element rather than a component so a registry entry stays a
+ * plain data literal.
+ */
+export interface OrganizationTabDefinition {
+  id: string;
+  labelKey: OrganizationMessageKey;
+  icon: ReactElement;
+  component: ComponentType<OrganizationTabProps>;
 }
 
 /** `OrganizationStatistics(id)` — the per-organization dashboard counts. */
