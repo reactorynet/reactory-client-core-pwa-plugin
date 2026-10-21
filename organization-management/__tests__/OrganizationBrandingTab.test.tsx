@@ -177,8 +177,12 @@ describe('image validation (client-side, before any network call)', () => {
 
     const [call] = mutationCallsFor(reactory, 'OrganizationUploadImage');
     expect(call[0]).toContain('mutation OrganizationUploadImage');
-    expect(call[1]).toMatchObject({ id: 'org-1', imageType: 'logo', file });
-
+    // `toBe` rather than a deep match: jest's structural equality walks the
+    // jsdom File/Blob internals and never terminates, so the File is asserted
+    // by identity and the surrounding variables explicitly.
+    expect(call[1].id).toBe('org-1');
+    expect(call[1].imageType).toBe('logo');
+    expect(call[1].file).toBe(file);
     await waitFor(() =>
       expect(screen.getByTestId('organization-branding-logo-preview')).toHaveAttribute(
         'src',
@@ -212,7 +216,7 @@ describe('theme inheritance', () => {
   it('clears the theme pointer when inheriting the client theme', async () => {
     const { props, reactory } = setup();
 
-    fireEvent.click(screen.getByRole('switch', { name: 'Inherit client theme' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Inherit client theme' }));
 
     await waitFor(() =>
       expect(mutationCallsFor(reactory, 'updateOrganization')).toHaveLength(1),
@@ -235,7 +239,7 @@ describe('theme inheritance', () => {
   it('refuses to leave the client theme when the organization owns no themes', async () => {
     const { props, reactory } = setup({ themes: [], organization: { theme: null } });
 
-    fireEvent.click(screen.getByRole('switch', { name: 'Inherit client theme' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Inherit client theme' }));
 
     await waitFor(() => expect(props.notify).toHaveBeenCalled());
     expect(props.notify).toHaveBeenCalledWith(
@@ -390,7 +394,7 @@ describe('read-only rendering', () => {
     setup({ canManage: false });
 
     expect(screen.getByTestId('organization-branding-readonly')).toBeInTheDocument();
-    expect(screen.queryByRole('switch')).toBeNull();
+    expect(screen.queryByRole('checkbox')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Upload' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'New theme' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Save theme' })).toBeNull();
