@@ -4,8 +4,11 @@ import OrganizationListPanel from './OrganizationListPanel';
 import OrganizationCreatePage from './OrganizationCreatePage';
 import OrganizationCreateWizard from './OrganizationCreateWizard';
 import OrganizationDetailPanel from './OrganizationDetailPanel';
+import OrganizationOverviewTab from './OrganizationOverviewTab';
 import OrganizationToolbar from './OrganizationToolbar';
 import OrganizationStatusChip from './components/OrganizationStatusChip';
+import OrganizationTabPlaceholder from './components/OrganizationTabPlaceholder';
+import { ORGANIZATION_TABS, OVERVIEW_TAB_ID } from './organizationTabs';
 import useOrganizationList from './hooks/useOrganizationList';
 import useOrganizationDetail from './hooks/useOrganizationDetail';
 import useOrganizationAdmin, { useDemographicDefinitions } from './hooks/useOrganizationAdmin';
@@ -16,8 +19,12 @@ export {
   OrganizationCreatePage,
   OrganizationCreateWizard,
   OrganizationDetailPanel,
+  OrganizationOverviewTab,
+  OrganizationTabPlaceholder,
   OrganizationToolbar,
   OrganizationStatusChip,
+  ORGANIZATION_TABS,
+  OVERVIEW_TAB_ID,
   useOrganizationList,
   useOrganizationDetail,
   useOrganizationAdmin,
@@ -84,7 +91,7 @@ export const components: Reactory.Client.IReactoryComponentRegistryEntry<any>[] 
     version: '1.0.0',
     component: OrganizationDetailPanel,
     description:
-      'Organization detail shell with identity header and member, business-unit and team counts.',
+      'Organization detail shell with an identity header, key metrics and data-driven Overview, Branding, Structure, People, Demographics and Settings tabs.',
     roles: ['USER', 'ADMIN'],
     tags: ['organization', 'organizations', 'detail', 'admin'],
   },

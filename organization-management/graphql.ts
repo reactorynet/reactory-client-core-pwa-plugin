@@ -29,7 +29,16 @@ export const ORGANIZATION_LIST_FIELDS = `
   businessUnits { id }
 `;
 
-/** Identity fields read by the detail shell and returned by mutations. */
+/**
+ * Identity fields read by the detail shell and returned by mutations.
+ *
+ * `website`, `contactEmail` and `contactPhone` are editable on the Overview
+ * tab (ORG-011) and are part of `UpdateOrganizationInput`. `createdBy` and
+ * `updatedBy` are deliberately **not** selected: the server's `Organization`
+ * type does not expose them yet, and selecting an unknown field would fail the
+ * whole query. The Overview tab renders those rows only when a payload has
+ * them (`Organization` in `./types` keeps them optional).
+ */
 export const ORGANIZATION_DETAIL_FIELDS = `
   id
   name
@@ -37,6 +46,9 @@ export const ORGANIZATION_DETAIL_FIELDS = `
   tradingName
   legalName
   description
+  website
+  contactEmail
+  contactPhone
   status
   logo
   logoURL

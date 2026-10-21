@@ -152,9 +152,80 @@ export const ORGANIZATION_MESSAGES = {
   'reactory.organizations.detail.members': 'Members',
   'reactory.organizations.detail.businessUnits': 'Business units',
   'reactory.organizations.detail.teams': 'Teams',
-  'reactory.organizations.detail.comingSoon':
-    'Overview, branding, structure, people, demographics and settings tabs follow in ORG-011 onwards.',
   'reactory.organizations.detail.themeInherited': 'Inherits the client theme',
+  'reactory.organizations.detail.tabs': 'Organization sections',
+  'reactory.organizations.detail.tab.overview': 'Overview',
+  'reactory.organizations.detail.tab.branding': 'Branding',
+  'reactory.organizations.detail.tab.structure': 'Structure',
+  'reactory.organizations.detail.tab.people': 'People',
+  'reactory.organizations.detail.tab.demographics': 'Demographics',
+  'reactory.organizations.detail.tab.settings': 'Settings',
+  'reactory.organizations.detail.actions': 'Organization actions',
+  'reactory.organizations.detail.action.archive': 'Archive organization',
+  'reactory.organizations.detail.action.restore': 'Restore organization',
+  'reactory.organizations.detail.action.copyId': 'Copy organization id',
+  'reactory.organizations.detail.copyIdSuccess': 'Organization id copied',
+  'reactory.organizations.detail.copyIdUnavailable':
+    'Copying is not available in this browser. The id is shown in the address bar.',
+  'reactory.organizations.detail.readOnly':
+    'You have read-only access to this organization. Ask an organization administrator for edit rights.',
+  // Unsaved-changes guard: the shell intercepts tab switches and Back while a
+  // tab reports unsaved input, so a half-finished edit is never lost silently.
+  'reactory.organizations.detail.unsaved.title': 'Discard unsaved changes?',
+  'reactory.organizations.detail.unsaved.body':
+    'You have changes that have not been saved. Continuing now discards them.',
+  'reactory.organizations.detail.unsaved.keepEditing': 'Keep editing',
+  'reactory.organizations.detail.unsaved.discard': 'Discard changes',
+  // Shown for archive/restore, which reload the organization and only discard
+  // the edit if they succeed — the archive dialog can still be cancelled.
+  'reactory.organizations.detail.unsaved.reloadTitle': 'Unsaved changes will be lost',
+  'reactory.organizations.detail.unsaved.reloadBody':
+    'Archiving or restoring reloads this organization, which discards the changes you have not saved. Save them first if you want to keep them.',
+  'reactory.organizations.detail.unsaved.proceed': 'Continue',
+  // Placeholder tabs name the ticket that replaces them; a placeholder is not
+  // an error, so it renders as an informational panel.
+  'reactory.organizations.detail.placeholder.title': '{{ticket}} delivers this tab',
+  'reactory.organizations.detail.tab.branding.placeholder':
+    'Logo, avatar and theme inheritance with the shared theme editor arrive with ORG-013.',
+  'reactory.organizations.detail.tab.structure.placeholder':
+    'Business units and teams, with their hierarchy, arrive with ORG-022.',
+  'reactory.organizations.detail.tab.people.placeholder':
+    'Members, roles and invitations arrive with ORG-024.',
+  'reactory.organizations.detail.tab.demographics.placeholder':
+    'Demographic definitions, configuration and values arrive with ORG-031.',
+  'reactory.organizations.detail.tab.settings.placeholder':
+    'Public visibility, client allow-lists and organization settings arrive with the settings ticket.',
+
+  // ---- Detail: Overview tab ----
+  'reactory.organizations.overview.section.identity': 'Identity',
+  'reactory.organizations.overview.section.contact': 'Contact',
+  'reactory.organizations.overview.section.record': 'Record',
+  'reactory.organizations.overview.field.name': 'Name',
+  'reactory.organizations.overview.field.code': 'Code',
+  'reactory.organizations.overview.field.tradingName': 'Trading name',
+  'reactory.organizations.overview.field.legalName': 'Legal name',
+  'reactory.organizations.overview.field.description': 'Description',
+  'reactory.organizations.overview.field.website': 'Website',
+  'reactory.organizations.overview.field.contactEmail': 'Contact email',
+  'reactory.organizations.overview.field.contactPhone': 'Contact phone',
+  'reactory.organizations.overview.field.status': 'Status',
+  'reactory.organizations.overview.field.createdAt': 'Created',
+  'reactory.organizations.overview.field.updatedAt': 'Updated',
+  'reactory.organizations.overview.field.createdBy': 'Created by',
+  'reactory.organizations.overview.field.updatedBy': 'Updated by',
+  'reactory.organizations.overview.field.nameRequired': 'A name is required.',
+  'reactory.organizations.overview.field.nameTooLong':
+    'The name must be {{max}} characters or fewer.',
+  'reactory.organizations.overview.field.emailInvalid':
+    'Enter a valid email address, for example name@example.com.',
+  'reactory.organizations.overview.field.websiteInvalid':
+    'Enter a valid http:// or https:// URL.',
+  'reactory.organizations.overview.save': 'Save changes',
+  'reactory.organizations.overview.saving': 'Saving…',
+  'reactory.organizations.overview.cancel': 'Cancel',
+  'reactory.organizations.overview.saved': '{{name}} was updated.',
+  'reactory.organizations.overview.saveFailed': 'The organization could not be updated.',
+  'reactory.organizations.overview.fieldRejected': 'This value was rejected by the server.',
 } as const;
 
 export type OrganizationMessageKey = keyof typeof ORGANIZATION_MESSAGES;
