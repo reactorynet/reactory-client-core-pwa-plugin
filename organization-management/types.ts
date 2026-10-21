@@ -8,6 +8,7 @@
  */
 
 import type { ComponentType, ReactElement } from 'react';
+import type { IThemeRecord } from '../theme-editor';
 import type { OrganizationMessageKey } from './i18n';
 
 /** Lifecycle states exposed by `Organization.status`. */
@@ -18,6 +19,21 @@ export type OrganizationStatusFilter = OrganizationStatus | 'all';
 
 /** Branding decision recorded by step 2 of the create wizard. ORG-013 owns the editor. */
 export type OrganizationBrandingChoice = 'inherit' | 'blank';
+
+/** `ApplicationThemeModeType` — the modes the server accepts for a theme. */
+export type OrganizationThemeMode = 'light' | 'dark' | 'os';
+
+/**
+ * A theme owned by an organization.
+ *
+ * Aliased to the shared editor's `IThemeRecord` rather than re-declared: the
+ * server's `ApplicationTheme` is the same shape a client theme uses, and the
+ * branding tab hands these records straight to `ThemeEditor`.
+ */
+export type OrganizationTheme = IThemeRecord;
+
+/** The two image slots `OrganizationUploadImage` accepts. */
+export type OrganizationImageType = 'logo' | 'avatar';
 
 export interface OrganizationBusinessUnitRef {
   id?: string | null;
@@ -41,7 +57,9 @@ export interface Organization {
   avatar?: string | null;
   avatarURL?: string | null;
   theme?: string | null;
-  themeMode?: string | null;
+  themeMode?: OrganizationThemeMode | string | null;
+  /** Themes owned by this organization (`Organization.themes`). */
+  themes?: OrganizationTheme[] | null;
   public?: boolean | null;
   businessUnits?: OrganizationBusinessUnitRef[] | null;
   createdAt?: string | number | Date | null;

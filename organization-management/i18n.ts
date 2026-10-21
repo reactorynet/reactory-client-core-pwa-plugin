@@ -226,6 +226,97 @@ export const ORGANIZATION_MESSAGES = {
   'reactory.organizations.overview.saved': '{{name}} was updated.',
   'reactory.organizations.overview.saveFailed': 'The organization could not be updated.',
   'reactory.organizations.overview.fieldRejected': 'This value was rejected by the server.',
+
+  // ---- Detail: Branding tab (ORG-013) ----
+  'reactory.organizations.branding.images.title': 'Branding images',
+  'reactory.organizations.branding.images.hint':
+    'Images are stored with the organization and resolve again after a reload.',
+  'reactory.organizations.branding.logo.title': 'Logo',
+  'reactory.organizations.branding.logo.hint':
+    'PNG, JPEG, SVG or WebP, up to {{max}} MB. A 16:9 image works best.',
+  'reactory.organizations.branding.avatar.title': 'Avatar',
+  'reactory.organizations.branding.avatar.hint':
+    'PNG, JPEG, SVG or WebP, up to {{max}} MB. A square image works best.',
+  'reactory.organizations.branding.image.upload': 'Upload',
+  'reactory.organizations.branding.image.replace': 'Replace',
+  'reactory.organizations.branding.image.remove': 'Remove',
+  'reactory.organizations.branding.image.uploading': 'Uploading…',
+  'reactory.organizations.branding.image.empty': 'No image',
+  'reactory.organizations.branding.image.typeInvalid':
+    'Choose a PNG, JPEG, SVG or WebP image.',
+  'reactory.organizations.branding.image.tooLarge': 'The image must be {{max}} MB or smaller.',
+  'reactory.organizations.branding.image.uploaded': '{{type}} updated.',
+  'reactory.organizations.branding.image.removed': '{{type}} removed.',
+  'reactory.organizations.branding.image.uploadFailed': 'The image could not be uploaded.',
+  'reactory.organizations.branding.image.removeFailed': 'The image could not be removed.',
+  'reactory.organizations.branding.image.logoName': 'Logo',
+  'reactory.organizations.branding.image.avatarName': 'Avatar',
+
+  'reactory.organizations.branding.theme.section': 'Theme',
+  'reactory.organizations.branding.theme.inherit': 'Inherit client theme',
+  'reactory.organizations.branding.theme.inheritHint':
+    'The organization follows the logged-in client theme and does not carry its own.',
+  'reactory.organizations.branding.theme.own': 'Use an organization theme',
+  'reactory.organizations.branding.theme.ownHint':
+    'Everyone who opens this organization sees the selected organization theme.',
+  'reactory.organizations.branding.theme.effective': 'Effective theme',
+  'reactory.organizations.branding.theme.effectiveInherited': 'Client theme',
+  'reactory.organizations.branding.theme.effectiveOwn': '{{name}} ({{mode}})',
+  'reactory.organizations.branding.theme.requiresTheme':
+    'Create a theme for this organization before leaving the client theme.',
+  'reactory.organizations.branding.theme.mode': 'Theme mode',
+  'reactory.organizations.branding.theme.mode.light': 'Light',
+  'reactory.organizations.branding.theme.mode.dark': 'Dark',
+  'reactory.organizations.branding.theme.mode.os': 'System',
+
+  'reactory.organizations.branding.themes.title': 'Organization themes',
+  'reactory.organizations.branding.themes.empty': 'This organization has no themes yet.',
+  'reactory.organizations.branding.themes.count': '{{count}} configured',
+  'reactory.organizations.branding.themes.active': 'Active',
+  'reactory.organizations.branding.themes.create': 'New theme',
+  'reactory.organizations.branding.themes.activate': 'Activate {{name}}',
+  'reactory.organizations.branding.themes.edit': 'Edit {{name}}',
+  'reactory.organizations.branding.themes.duplicate': 'Duplicate {{name}}',
+  'reactory.organizations.branding.themes.delete': 'Delete {{name}}',
+  'reactory.organizations.branding.themes.css': 'Edit CSS for {{name}}',
+  'reactory.organizations.branding.themes.saved': 'Theme “{{name}}” saved.',
+  'reactory.organizations.branding.themes.activated': '{{name}} is now the active theme.',
+  'reactory.organizations.branding.themes.deleted': 'Theme “{{name}}” deleted.',
+  'reactory.organizations.branding.themes.inherited':
+    'This organization now inherits the client theme.',
+  'reactory.organizations.branding.themes.saveFailed': 'The theme could not be saved.',
+  'reactory.organizations.branding.themes.activateFailed':
+    'The active theme could not be changed.',
+  'reactory.organizations.branding.themes.deleteFailed': 'The theme could not be deleted.',
+  'reactory.organizations.branding.themes.inheritFailed':
+    'The theme inheritance could not be changed.',
+  'reactory.organizations.branding.themes.deleteTitle': 'Delete “{{name}}”?',
+  'reactory.organizations.branding.themes.deleteBody':
+    'The theme is removed from this organization. If it is the active theme, the next remaining theme becomes active, or the organization falls back to the client theme.',
+  'reactory.organizations.branding.themes.deleteConfirm': 'Delete theme',
+  'reactory.organizations.branding.themes.deleteCancel': 'Cancel',
+  'reactory.organizations.branding.themes.editorTitle': 'Theme: {{name}}',
+  'reactory.organizations.branding.themes.saveLabel': 'Save theme',
+
+  'reactory.organizations.branding.css.published': 'CSS for {{name}} published.',
+  'reactory.organizations.branding.css.publishFailed': 'The CSS could not be published.',
+  'reactory.organizations.branding.css.loadFailed': 'The current CSS could not be loaded.',
+  'reactory.organizations.branding.css.publishing': 'Publishing…',
+
+  // ---- Detail: Branding tab errors (hook keys) ----
+  'reactory.organizations.error.brandingLoadFailed':
+    'The branding details could not be loaded.',
+  'reactory.organizations.error.themeSaveFailed': 'The theme could not be saved.',
+  'reactory.organizations.error.themeActivateFailed':
+    'The active theme could not be changed.',
+  'reactory.organizations.error.themeDeleteFailed': 'The theme could not be deleted.',
+  'reactory.organizations.error.themeInheritFailed':
+    'The theme inheritance could not be changed.',
+  'reactory.organizations.error.themeCssLoadFailed': 'The theme CSS could not be loaded.',
+  'reactory.organizations.error.themeCssPublishFailed':
+    'The theme CSS could not be published.',
+  'reactory.organizations.error.imageUploadFailed': 'The image could not be uploaded.',
+  'reactory.organizations.error.imageRemoveFailed': 'The image could not be removed.',
 } as const;
 
 export type OrganizationMessageKey = keyof typeof ORGANIZATION_MESSAGES;
