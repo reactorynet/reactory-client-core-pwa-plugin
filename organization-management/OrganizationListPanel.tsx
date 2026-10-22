@@ -48,7 +48,13 @@ import type {
   OrganizationSortField,
   OrganizationStatusFilter,
 } from './types';
-import { formatUpdated, organizationStatus, resolveOrganizationPermissions } from './utils';
+import {
+  DEFAULT_ORGANIZATIONS_BASE_PATH,
+  formatUpdated,
+  organizationDetailPath,
+  organizationStatus,
+  resolveOrganizationPermissions,
+} from './utils';
 
 export interface OrganizationListPanelProps {
   reactory?: any;
@@ -56,7 +62,22 @@ export interface OrganizationListPanelProps {
   initialStatusFilter?: OrganizationStatusFilter;
   /** Called after a create, before the detail view is opened. */
   onOrganizationCreated?: (organization: Organization) => void;
-  /** Override the detail route. Defaults to `/organizations/:id`. */
+  /**
+   * Base path of the organization surface, i.e. where the detail view lives.
+   *
+   * A plain string precisely so a *route config* can supply it: `componentProps`
+   * is JSON, so the older `detailRoute` function cannot be configured by a host.
+   * Defaults to `/organizations`, the legacy surface; pass
+   * `'/organizations/manage'` when the UI is mounted under the manage prefix.
+   * A trailing slash is accepted and normalised away.
+   */
+  basePath?: string;
+  /**
+   * Override the detail route with a function.
+   *
+   * Takes precedence over `basePath`. This is a *function*, so it can only be
+   * supplied by a host that renders the panel in code, not from a route config.
+   */
   detailRoute?: (organization: Organization) => string;
 }
 
@@ -120,6 +141,7 @@ export const OrganizationListPanel: React.FC<OrganizationListPanelProps> = ({
   reactory: propReactory,
   initialStatusFilter = 'active',
   onOrganizationCreated,
+  basePath = DEFAULT_ORGANIZATIONS_BASE_PATH,
   detailRoute,
 }) => {
   const hookReactory = useReactory();
@@ -167,17 +189,24 @@ export const OrganizationListPanel: React.FC<OrganizationListPanelProps> = ({
     [reactory],
   );
 
+  /**
+   * Open the detail view for a row, or for an organization just created.
+   *
+   * The route is built from `basePath` — not a literal — so the whole surface can
+   * be mounted under `/organizations/manage` (ORG-016). `detailRoute` still wins
+   * when a host supplies the function.
+   */
   const openOrganization = useCallback(
     (organization: Organization) => {
       const path = detailRoute
         ? detailRoute(organization)
-        : `/organizations/${organization.id}`;
+        : organizationDetailPath(basePath, organization.id);
 
       if (reactory && typeof reactory.navigation === 'function') {
         reactory.navigation(path);
       }
     },
-    [reactory, detailRoute],
+    [reactory, basePath, detailRoute],
   );
 
   const handleCreated = useCallback(

@@ -7,13 +7,18 @@
  * behaviour, so they are exercised directly rather than only through a render.
  */
 import {
+  DEFAULT_ORGANIZATIONS_BASE_PATH,
   businessUnitCount,
   envelopeError,
   formatUpdated,
+  normalizeOrganizationPath,
   operationPayload,
+  organizationDetailPath,
   organizationIdFromPath,
   organizationStatus,
   resolveErrorMessage,
+  resolveOrganizationBasePath,
+  resolveOrganizationListRoute,
   resolveOrganizationPermissions,
   serverMessageOf,
 } from '../utils';
@@ -279,5 +284,53 @@ describe('resolveOrganizationPermissions', () => {
 
     const missing = resolveOrganizationPermissions(null);
     expect(missing.canManageOrganization('org-1')).toBe(true);
+  });
+});
+
+/**
+ * Route helpers (ORG-016).
+ *
+ * The surfaces build their navigation targets from a configurable base path;
+ * these pin the normalisation that keeps `'/organizations/manage'` and
+ * `'/organizations/manage/'` from producing a doubled slash, and that keeps the
+ * default identical to the pre-ORG-016 literal.
+ */
+describe('organization path helpers', () => {
+  it('defaults the base path to the legacy surface', () => {
+    expect(DEFAULT_ORGANIZATIONS_BASE_PATH).toBe('/organizations');
+    expect(resolveOrganizationBasePath(undefined)).toBe('/organizations');
+    expect(resolveOrganizationBasePath(null)).toBe('/organizations');
+    expect(resolveOrganizationBasePath('')).toBe('/organizations');
+    expect(resolveOrganizationBasePath('   ')).toBe('/organizations');
+  });
+
+  it('collapses duplicate and trailing slashes', () => {
+    expect(normalizeOrganizationPath('/organizations/manage/')).toBe('/organizations/manage');
+    expect(normalizeOrganizationPath('/organizations//manage//')).toBe('/organizations/manage');
+    expect(resolveOrganizationBasePath('/organizations/manage/')).toBe('/organizations/manage');
+    // A base path without a leading slash is still rooted.
+    expect(resolveOrganizationBasePath('organizations/manage')).toBe('/organizations/manage');
+  });
+
+  it('joins the base path and the id with exactly one slash', () => {
+    expect(organizationDetailPath(undefined, 'org-1')).toBe('/organizations/org-1');
+    expect(organizationDetailPath('/organizations/manage', 'org-1')).toBe(
+      '/organizations/manage/org-1',
+    );
+    expect(organizationDetailPath('/organizations/manage/', 'org-1')).toBe(
+      '/organizations/manage/org-1',
+    );
+    expect(organizationDetailPath('/organizations/manage', 'org-1')).not.toContain('//');
+  });
+
+  it('resolves a back target from listRoute, then the base path, then the default', () => {
+    expect(resolveOrganizationListRoute('/organizations/manage')).toBe('/organizations/manage');
+    expect(resolveOrganizationListRoute('/organizations/manage/')).toBe('/organizations/manage');
+    expect(resolveOrganizationListRoute(undefined, '/organizations/manage')).toBe(
+      '/organizations/manage',
+    );
+    expect(resolveOrganizationListRoute(undefined, undefined)).toBe('/organizations');
+    // The root itself survives normalisation rather than collapsing to ''.
+    expect(resolveOrganizationListRoute('/')).toBe('/');
   });
 });

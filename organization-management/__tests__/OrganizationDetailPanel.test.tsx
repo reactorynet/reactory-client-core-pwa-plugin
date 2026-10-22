@@ -614,3 +614,59 @@ describe('OrganizationDetailPanel — overflow menu actions', () => {
     expect(dirty.defaultPrevented).toBe(true);
   });
 });
+
+/**
+ * Back navigation (ORG-016).
+ *
+ * ORG-015 mounted the surface at `/organizations/manage/*`, but Back still
+ * navigated to the literal `/organizations`, dropping the user on the legacy
+ * panel. `listRoute` is the serialisable replacement for that literal; the
+ * default stays `/organizations` and `onBack` keeps precedence.
+ */
+describe('OrganizationDetailPanel — listRoute', () => {
+  const renderPanel = async (props: Record<string, any> = {}) => {
+    const reactory = makeReactory({ organizations: [makeOrganization()] });
+
+    render(<OrganizationDetailPanel reactory={reactory} id="org-1" {...props} />);
+
+    await screen.findByRole('heading', { name: 'Acme Holdings' });
+    return reactory;
+  };
+
+  it('navigates Back to the configured list route', async () => {
+    const reactory = await renderPanel({ listRoute: '/organizations/manage' });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Back to organizations' }));
+
+    expect(reactory.navigation).toHaveBeenCalledWith('/organizations/manage');
+  });
+
+  it('does not double the slash for a trailing-slash list route', async () => {
+    const reactory = await renderPanel({ listRoute: '/organizations/manage/' });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Back to organizations' }));
+
+    const path = reactory.navigation.mock.calls[0][0];
+    expect(path).toBe('/organizations/manage');
+    expect(path).not.toContain('//');
+  });
+
+  it('still defaults Back to `/organizations` with no list route', async () => {
+    const reactory = await renderPanel();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Back to organizations' }));
+
+    expect(reactory.navigation).toHaveBeenCalledWith('/organizations');
+  });
+
+  it('keeps onBack ahead of listRoute', async () => {
+    const onBack = jest.fn();
+    const reactory = await renderPanel({ listRoute: '/organizations/manage', onBack });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Back to organizations' }));
+
+    // The host owns the destination; the shell must not also navigate.
+    expect(onBack).toHaveBeenCalledTimes(1);
+    expect(reactory.navigation).not.toHaveBeenCalled();
+  });
+});

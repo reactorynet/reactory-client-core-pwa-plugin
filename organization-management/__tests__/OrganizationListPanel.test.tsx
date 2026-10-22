@@ -47,10 +47,13 @@ const settle = async () => {
  * in these tests; without an act-scoped flush their `setState` calls land after
  * `render()` returns and React logs an "update was not wrapped in act" warning.
  */
-const renderPanel = async (reactory: any) => {
+const renderPanel = async (
+  reactory: any,
+  props: Partial<React.ComponentProps<typeof OrganizationListPanel>> = {},
+) => {
   let view: ReturnType<typeof render> | undefined;
   await act(async () => {
-    view = render(<OrganizationListPanel reactory={reactory} />);
+    view = render(<OrganizationListPanel reactory={reactory} {...props} />);
     // Microtasks settle the list read; the macrotask lets the statistics effect
     // (scheduled after that commit) run and resolve its query in the same scope.
     for (let index = 0; index < 6; index += 1) await Promise.resolve();
@@ -630,6 +633,84 @@ describe('OrganizationListPanel', () => {
     expect(i18n.t).toHaveBeenCalledWith(
       'reactory.organizations.list.title',
       expect.objectContaining({ defaultValue: 'Organizations' }),
+    );
+  });
+});
+
+/**
+ * Route configuration (ORG-016).
+ *
+ * ORG-015 mounted this surface at `/organizations/manage/*`, but the panel built
+ * the detail link from a literal `/organizations/${id}` — so a row click landed
+ * on `/organizations/<id>`, which has no route, and the detail view never opened.
+ *
+ * `basePath` is the fix: a plain string, because a route config's
+ * `componentProps` is JSON and cannot carry the existing `detailRoute` function.
+ * Every default stays `/organizations`, so a host that passes nothing (and the
+ * legacy surface) behaves exactly as before.
+ */
+describe('OrganizationListPanel — basePath', () => {
+  it('opens a row at `/organizations/<id>` when no base path is configured', async () => {
+    const reactory = makeReactory({ organizations: activeOrganizations() });
+
+    await renderPanel(reactory);
+    await screen.findByText('Acme Holdings');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Open Acme Holdings' }));
+
+    // The backwards-compatible default: the legacy surface, exactly as before.
+    expect(reactory.navigation).toHaveBeenCalledWith('/organizations/org-1');
+  });
+
+  it('builds the row detail link from basePath', async () => {
+    const reactory = makeReactory({ organizations: activeOrganizations() });
+
+    await renderPanel(reactory, { basePath: '/organizations/manage' });
+    await screen.findByText('Acme Holdings');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Open Acme Holdings' }));
+
+    // The manage surface routes the detail view at `/organizations/manage/<id>`.
+    expect(reactory.navigation).toHaveBeenCalledWith('/organizations/manage/org-1');
+  });
+
+  it('does not double the slash when basePath ends with one', async () => {
+    const reactory = makeReactory({ organizations: activeOrganizations() });
+
+    await renderPanel(reactory, { basePath: '/organizations/manage/' });
+    await screen.findByText('Acme Holdings');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Open Acme Holdings' }));
+
+    const path = reactory.navigation.mock.calls[0][0];
+    expect(path).toBe('/organizations/manage/org-1');
+    expect(path).not.toContain('//');
+  });
+
+  it('keeps the detailRoute function ahead of basePath', async () => {
+    const reactory = makeReactory({ organizations: activeOrganizations() });
+    const detailRoute = jest.fn((organization: any) => `/orgs/${organization.id}`);
+
+    await renderPanel(reactory, { basePath: '/organizations/manage', detailRoute });
+    await screen.findByText('Acme Holdings');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Open Acme Holdings' }));
+
+    expect(detailRoute).toHaveBeenCalledTimes(1);
+    expect(reactory.navigation).toHaveBeenCalledWith('/orgs/org-1');
+  });
+
+  it('uses basePath for the detail view opened after a create', async () => {
+    const reactory = makeReactory({ organizations: activeOrganizations() });
+
+    await renderPanel(reactory, { basePath: '/organizations/manage' });
+    await screen.findByText('Acme Holdings');
+
+    await userEvent.click(screen.getByRole('button', { name: 'New organization' }));
+    await completeWizard('Gamma Logistics');
+
+    await waitFor(() =>
+      expect(reactory.navigation).toHaveBeenCalledWith('/organizations/manage/org-created-3'),
     );
   });
 });
