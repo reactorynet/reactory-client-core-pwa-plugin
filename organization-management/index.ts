@@ -7,6 +7,7 @@ import OrganizationDetailPanel from './OrganizationDetailPanel';
 import OrganizationOverviewTab from './OrganizationOverviewTab';
 import OrganizationBrandingTab from './OrganizationBrandingTab';
 import OrganizationDemographicsTab from './OrganizationDemographicsTab';
+import OrganizationPeopleTab from './OrganizationPeopleTab';
 import OrganizationStructureTab from './OrganizationStructureTab';
 import OrganizationToolbar from './OrganizationToolbar';
 import OrganizationStatusChip from './components/OrganizationStatusChip';
@@ -17,6 +18,7 @@ import useOrganizationDetail from './hooks/useOrganizationDetail';
 import useOrganizationAdmin, { useDemographicDefinitions } from './hooks/useOrganizationAdmin';
 import useOrganizationBranding from './hooks/useOrganizationBranding';
 import useOrganizationDemographics from './hooks/useOrganizationDemographics';
+import useOrganizationMembers from './hooks/useOrganizationMembers';
 import useOrganizationStructure from './hooks/useOrganizationStructure';
 import { ORGANIZATION_MESSAGES, translate } from './i18n';
 
@@ -28,6 +30,7 @@ export {
   OrganizationOverviewTab,
   OrganizationBrandingTab,
   OrganizationDemographicsTab,
+  OrganizationPeopleTab,
   OrganizationStructureTab,
   OrganizationTabPlaceholder,
   OrganizationToolbar,
@@ -39,6 +42,7 @@ export {
   useOrganizationAdmin,
   useOrganizationBranding,
   useOrganizationDemographics,
+  useOrganizationMembers,
   useOrganizationStructure,
   useDemographicDefinitions,
   ORGANIZATION_MESSAGES,

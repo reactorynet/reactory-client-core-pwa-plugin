@@ -624,6 +624,124 @@ export const ORGANIZATION_MESSAGES = {
     'The team could not be moved to that business unit.',
   'reactory.organizations.error.structureMemberFailed':
     'The membership could not be updated.',
+
+  // ---- People (ORG-024) ----
+  'reactory.organizations.people.title': 'People',
+  'reactory.organizations.people.hint':
+    'Everyone with a membership of this organization, with their roles, business unit and teams.',
+  'reactory.organizations.people.total': '{{count}} members',
+  'reactory.organizations.people.search': 'Search people',
+  'reactory.organizations.people.searchPlaceholder': 'Name or email',
+  'reactory.organizations.people.roleFilter': 'Role',
+  'reactory.organizations.people.roleAll': 'All roles',
+  'reactory.organizations.people.roleObservedHint':
+    'Roles are the roles held by the members on this page.',
+  'reactory.organizations.people.statusFilter': 'Status',
+  'reactory.organizations.people.status.active': 'Active',
+  'reactory.organizations.people.status.deactivated': 'Deactivated',
+  'reactory.organizations.people.status.invited': 'Invited',
+  'reactory.organizations.people.status.all': 'Active and deactivated',
+  'reactory.organizations.people.businessUnitFilter': 'Business unit',
+  'reactory.organizations.people.businessUnitAll': 'All business units',
+  'reactory.organizations.people.teamFilter': 'Team',
+  'reactory.organizations.people.teamAll': 'All teams',
+  'reactory.organizations.people.clearFilters': 'Clear filters',
+  'reactory.organizations.people.loading': 'Loading people…',
+  'reactory.organizations.people.empty': 'No people match this filter',
+  'reactory.organizations.people.emptyHint':
+    'Adjust the search or the filters to see more members.',
+  'reactory.organizations.people.emptyReadOnly': 'There are no members to show.',
+  'reactory.organizations.people.column.member': 'Member',
+  'reactory.organizations.people.column.email': 'Email',
+  'reactory.organizations.people.column.roles': 'Roles',
+  'reactory.organizations.people.column.businessUnit': 'Business unit',
+  'reactory.organizations.people.column.teams': 'Teams',
+  'reactory.organizations.people.column.status': 'Status',
+  'reactory.organizations.people.column.lastLogin': 'Last login',
+  'reactory.organizations.people.column.actions': 'Actions',
+  'reactory.organizations.people.never': 'Never',
+  'reactory.organizations.people.notSet': '—',
+  'reactory.organizations.people.unassigned': 'Unassigned',
+  'reactory.organizations.people.rolesNone': 'No roles',
+  'reactory.organizations.people.more': '+{{count}} more',
+  'reactory.organizations.people.teamsHint': '{{count}} teams: {{names}}',
+  'reactory.organizations.people.invited': 'Invited',
+  'reactory.organizations.people.rowsPerPage': 'Rows per page',
+  'reactory.organizations.people.displayedRows': '{{from}}–{{to}} of {{count}}',
+  'reactory.organizations.people.nameUnknown': 'Unnamed member',
+  'reactory.organizations.people.action.roles': 'Edit roles for {{name}}',
+  'reactory.organizations.people.action.assign':
+    'Assign {{name}} to a business unit or team',
+  'reactory.organizations.people.action.deactivate': 'Deactivate {{name}}',
+  'reactory.organizations.people.action.remove': 'Remove {{name}}',
+  'reactory.organizations.people.roles.title': 'Roles for {{name}}',
+  'reactory.organizations.people.roles.body':
+    'Comma separated. Saving replaces the roles this membership currently holds.',
+  'reactory.organizations.people.roles.field': 'Roles',
+  'reactory.organizations.people.roles.placeholder': 'ORGANIZATION_ADMIN, USER',
+  'reactory.organizations.people.save': 'Save',
+  'reactory.organizations.people.saving': 'Saving…',
+  'reactory.organizations.people.cancel': 'Cancel',
+  'reactory.organizations.people.close': 'Close',
+  'reactory.organizations.people.assign.title': 'Assign {{name}}',
+  'reactory.organizations.people.assign.body':
+    'The business unit and teams are stored on the business unit and team records, so this changes those memberships rather than the person record.',
+  'reactory.organizations.people.assign.businessUnit': 'Business unit',
+  'reactory.organizations.people.assign.teams': 'Teams',
+  'reactory.organizations.people.assign.teamsHint':
+    'Only teams of the selected business unit are listed. Choose no business unit to see all teams.',
+  'reactory.organizations.people.assign.teamsEmpty':
+    'There are no teams to assign in this organization yet.',
+  'reactory.organizations.people.assign.invitedHint':
+    'A pending invitation cannot hold a business unit or team until the invitation is accepted.',
+  'reactory.organizations.people.deactivate.title': 'Deactivate {{name}}?',
+  'reactory.organizations.people.deactivate.body':
+    'The membership is kept, so the person can be re-activated later, but organization access stops immediately.',
+  'reactory.organizations.people.deactivate.confirm': 'Deactivate',
+  'reactory.organizations.people.remove.title': 'Remove {{name}}?',
+  'reactory.organizations.people.remove.body':
+    'The membership is deleted and cannot be undone. Business unit and team participation is unchanged by this action.',
+  'reactory.organizations.people.remove.confirm': 'Remove',
+  'reactory.organizations.people.invite.open': 'Invite people',
+  'reactory.organizations.people.invite.title': 'Invite people',
+  'reactory.organizations.people.invite.body':
+    'One email address per line. Every address is invited on its own, so one failure does not affect the others.',
+  'reactory.organizations.people.invite.emails': 'Email addresses',
+  'reactory.organizations.people.invite.emailsPlaceholder':
+    'ada@example.com\ngrace@example.com',
+  'reactory.organizations.people.invite.emailsRequired':
+    'Enter at least one email address.',
+  'reactory.organizations.people.invite.roles': 'Roles (optional)',
+  'reactory.organizations.people.invite.businessUnit': 'Business unit (optional)',
+  'reactory.organizations.people.invite.submit': 'Send invitations',
+  'reactory.organizations.people.invite.sending': 'Sending…',
+  'reactory.organizations.people.invite.results': 'Invitation results',
+  'reactory.organizations.people.invite.result.invited':
+    'Invited — pending first sign-in',
+  'reactory.organizations.people.invite.result.alreadyMember': 'Already a member',
+  'reactory.organizations.people.invite.result.invalidEmail': 'Not a valid email address',
+  'reactory.organizations.people.invite.result.error': 'Could not be invited',
+  'reactory.organizations.people.invite.summaryAll': '{{invited}} invitation(s) sent.',
+  'reactory.organizations.people.invite.summaryPartial':
+    '{{invited}} invitation(s) sent, {{failed}} not invited.',
+  'reactory.organizations.people.notify.rolesSaved': 'Roles for {{name}} saved.',
+  'reactory.organizations.people.notify.deactivated': '{{name}} deactivated.',
+  'reactory.organizations.people.notify.removed':
+    '{{name}} removed from the organization.',
+  'reactory.organizations.people.notify.invited': '{{name}} invited.',
+  'reactory.organizations.people.notify.bulkInvited': '{{count}} invitation(s) sent.',
+  'reactory.organizations.people.notify.bulkPartial':
+    '{{invited}} invited, {{failed}} not invited.',
+  'reactory.organizations.people.notify.assigned': '{{name}} reassigned.',
+  'reactory.organizations.error.membersLoadFailed':
+    'The organization members could not be loaded.',
+  'reactory.organizations.error.memberSaveFailed': 'The member could not be updated.',
+  'reactory.organizations.error.memberInviteFailed':
+    'The invitation could not be sent.',
+  'reactory.organizations.error.memberInviteInvalidEmail':
+    'That is not a valid email address.',
+  'reactory.organizations.error.memberAssignFailed':
+    'The business unit or team assignment could not be changed.',
 } as const;
 
 export type OrganizationMessageKey = keyof typeof ORGANIZATION_MESSAGES;

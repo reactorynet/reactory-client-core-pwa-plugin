@@ -214,13 +214,15 @@ describe('OrganizationDetailPanel — tab registry', () => {
     render(<OrganizationDetailPanel reactory={reactory} id="org-1" />);
     await screen.findByRole('heading', { name: 'Acme Holdings' });
 
-    await userEvent.click(screen.getByRole('tab', { name: 'People' }));
+    // Settings is the last tab a later ticket still owns; People shipped with
+    // ORG-024.
+    await userEvent.click(screen.getByRole('tab', { name: 'Settings' }));
 
     expect(await screen.findByTestId('organization-tab-placeholder')).toHaveAttribute(
       'data-ticket',
-      'ORG-024',
+      'ORG-011+',
     );
-    expect(screen.getByText('ORG-024 delivers this tab')).toBeInTheDocument();
+    expect(screen.getByText('ORG-011+ delivers this tab')).toBeInTheDocument();
     expect(screen.queryByTestId('organization-overview-tab')).not.toBeInTheDocument();
   });
 
@@ -233,6 +235,19 @@ describe('OrganizationDetailPanel — tab registry', () => {
     await userEvent.click(screen.getByRole('tab', { name: 'Structure' }));
 
     expect(await screen.findByTestId('organization-structure-tab')).toBeInTheDocument();
+  });
+
+  it('renders the real people tab from the registry', async () => {
+    const reactory = makeReactory({ organizations: [makeOrganization()] });
+
+    render(<OrganizationDetailPanel reactory={reactory} id="org-1" />);
+    await screen.findByRole('heading', { name: 'Acme Holdings' });
+
+    await userEvent.click(screen.getByRole('tab', { name: 'People' }));
+
+    // ORG-024 replaced the placeholder with the member table.
+    expect(await screen.findByTestId('organization-people')).toBeInTheDocument();
+    expect(screen.queryByTestId('organization-tab-placeholder')).not.toBeInTheDocument();
   });
 
   it('renders the real branding tab from the registry', async () => {
@@ -390,12 +405,12 @@ describe('OrganizationDetailPanel — unsaved-changes guard', () => {
   it('switches tabs once the user agrees to discard', async () => {
     await renderWithEdit();
 
-    await userEvent.click(screen.getByRole('tab', { name: 'People' }));
+    await userEvent.click(screen.getByRole('tab', { name: 'Settings' }));
     expect(await screen.findByText('Discard unsaved changes?')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Discard changes' }));
 
-    expect(await screen.findByText('ORG-024 delivers this tab')).toBeInTheDocument();
+    expect(await screen.findByText('ORG-011+ delivers this tab')).toBeInTheDocument();
   });
 
   it('asks before Back discards unsaved input', async () => {
@@ -474,7 +489,7 @@ describe('OrganizationDetailPanel — unsaved-changes guard', () => {
     await waitForPanelToSettle();
 
     // Nothing was archived and nothing was reloaded: the edit is still there.
-    await userEvent.click(await screen.findByRole('tab', { name: 'People' }));
+    await userEvent.click(await screen.findByRole('tab', { name: 'Settings' }));
     expect(await screen.findByText('Discard unsaved changes?')).toBeInTheDocument();
 
     // The guard fired for a form that still holds the edit, so keeping editing
@@ -520,9 +535,9 @@ describe('OrganizationDetailPanel — unsaved-changes guard', () => {
     // the tab either. Unmounting the tab is what clears it.
     await renderWithEdit();
 
-    await userEvent.click(screen.getByRole('tab', { name: 'People' }));
+    await userEvent.click(screen.getByRole('tab', { name: 'Settings' }));
     await userEvent.click(screen.getByRole('button', { name: 'Discard changes' }));
-    expect(await screen.findByText('ORG-024 delivers this tab')).toBeInTheDocument();
+    expect(await screen.findByText('ORG-011+ delivers this tab')).toBeInTheDocument();
     await waitForPanelToSettle();
 
     await userEvent.click(await screen.findByRole('tab', { name: 'Structure' }));

@@ -17,6 +17,7 @@ import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import OrganizationPeopleTab from '../OrganizationPeopleTab';
 import OrganizationStructureTab from '../OrganizationStructureTab';
 import useOrganizationStructure from '../hooks/useOrganizationStructure';
 import { ORGANIZATION_TABS } from '../organizationTabs';
@@ -593,10 +594,13 @@ describe('registry wiring', () => {
     const structure = ORGANIZATION_TABS.find((tab) => tab.id === 'structure');
     const people = ORGANIZATION_TABS.find((tab) => tab.id === 'people');
     const demographics = ORGANIZATION_TABS.find((tab) => tab.id === 'demographics');
+    const settings = ORGANIZATION_TABS.find((tab) => tab.id === 'settings');
 
     expect(structure?.component).toBe(OrganizationStructureTab);
-    // The entries this ticket must leave alone.
-    expect(`${people?.component.displayName || ''}`).toContain('ORG-024');
+    // The entries this ticket must leave alone. People has shipped since
+    // (ORG-024), so Settings is the remaining placeholder.
+    expect(people?.component).toBe(OrganizationPeopleTab);
+    expect(`${settings?.component.displayName || ''}`).toContain('ORG-011+');
     expect(demographics?.component).not.toBe(OrganizationStructureTab);
   });
 });

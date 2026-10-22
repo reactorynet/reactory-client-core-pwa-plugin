@@ -12,6 +12,7 @@ import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 
 import OrganizationDemographicsTab from '../OrganizationDemographicsTab';
+import OrganizationPeopleTab from '../OrganizationPeopleTab';
 import { ORGANIZATION_TABS } from '../organizationTabs';
 import { makeTranslator } from '../i18n';
 import type { OrganizationTabProps } from '../types';
@@ -80,12 +81,14 @@ describe('registry wiring', () => {
     const demographics = ORGANIZATION_TABS.find((tab) => tab.id === 'demographics');
     const structure = ORGANIZATION_TABS.find((tab) => tab.id === 'structure');
     const people = ORGANIZATION_TABS.find((tab) => tab.id === 'people');
+    const settings = ORGANIZATION_TABS.find((tab) => tab.id === 'settings');
 
     expect(demographics?.component).toBe(OrganizationDemographicsTab);
-    // ORG-022 has replaced the structure placeholder; the people placeholder
-    // this ticket must leave alone is still in place.
+    // ORG-022 and ORG-024 have replaced their placeholders; the settings
+    // placeholder this ticket must leave alone is still in place.
     expect(`${structure?.component.displayName || ''}`).toBe('OrganizationStructureTab');
-    expect(`${people?.component.displayName || ''}`).toContain('ORG-024');
+    expect(people?.component).toBe(OrganizationPeopleTab);
+    expect(`${settings?.component.displayName || ''}`).toContain('ORG-011+');
   });
 });
 

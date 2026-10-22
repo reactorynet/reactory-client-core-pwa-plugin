@@ -2,6 +2,7 @@ import type { DemographicDefinition } from '../../demographic-form';
 import type {
   Organization,
   OrganizationBusinessUnit,
+  OrganizationMember,
   OrganizationStatistics,
   OrganizationTeam,
   OrganizationTheme,
@@ -193,6 +194,125 @@ export const structureFixtures = () => ({
 });
 
 /**
+ * A member row as `OrganizationMembers` returns it (ORG-024).
+ *
+ * Defaults to an active organization administrator in `bu-1` who belongs to two
+ * teams, so the table's multi-team column has something to render.
+ * `businessUnitId` / `teams` are read-only on this shape: the server derives
+ * them from the membership and from `Team.members`.
+ */
+export const makeOrganizationMember = (
+  overrides: Partial<OrganizationMember> = {},
+): OrganizationMember => ({
+  id: 'member-1',
+  userId: 'user-1',
+  user: { id: 'user-1', firstName: 'Ada', lastName: 'Lovelace', email: 'ada@example.com' },
+  email: 'ada@example.com',
+  firstName: 'Ada',
+  lastName: 'Lovelace',
+  avatar: null,
+  roles: ['ORGANIZATION_ADMIN', 'USER'],
+  enabled: true,
+  status: 'active',
+  businessUnitId: 'bu-1',
+  businessUnit: { id: 'bu-1', name: 'Engineering' },
+  teamIds: ['team-1', 'team-2'],
+  teams: [
+    { id: 'team-1', name: 'Platform', title: 'Platform' },
+    { id: 'team-2', name: 'Field Ops', title: 'Field Ops' },
+  ],
+  created: '2026-02-01T08:00:00.000Z',
+  lastLogin: '2026-10-19T06:15:00.000Z',
+  authProvider: 'local',
+  invited: false,
+  ...overrides,
+});
+
+/**
+ * The four member shapes the People tab must distinguish: an active member with
+ * a unit and two teams, a member with no unit and one team, a deactivated
+ * member, and a pending invitation.
+ */
+export const organizationMemberFixtures = (): OrganizationMember[] => [
+  makeOrganizationMember({ id: 'member-1', userId: 'user-1' }),
+  makeOrganizationMember({
+    id: 'member-2',
+    userId: 'user-2',
+    user: { id: 'user-2', firstName: 'Grace', lastName: 'Hopper', email: 'grace@example.com' },
+    email: 'grace@example.com',
+    firstName: 'Grace',
+    lastName: 'Hopper',
+    roles: ['USER'],
+    businessUnitId: null,
+    businessUnit: null,
+    teamIds: ['team-2'],
+    teams: [{ id: 'team-2', name: 'Field Ops', title: 'Field Ops' }],
+    lastLogin: null,
+  }),
+  makeOrganizationMember({
+    id: 'member-3',
+    userId: 'user-3',
+    user: { id: 'user-3', firstName: 'Alan', lastName: 'Turing', email: 'alan@example.com' },
+    email: 'alan@example.com',
+    firstName: 'Alan',
+    lastName: 'Turing',
+    roles: ['USER'],
+    enabled: false,
+    status: 'deactivated',
+    businessUnitId: 'bu-2',
+    businessUnit: { id: 'bu-2', name: 'Operations' },
+    teamIds: [],
+    teams: [],
+    lastLogin: '2026-05-02T10:00:00.000Z',
+  }),
+  makeOrganizationMember({
+    id: 'invite-1',
+    userId: null,
+    user: null,
+    email: 'pending@example.com',
+    firstName: null,
+    lastName: null,
+    roles: ['USER'],
+    enabled: false,
+    status: 'invited',
+    businessUnitId: null,
+    businessUnit: null,
+    teamIds: [],
+    teams: [],
+    created: '2026-10-18T12:00:00.000Z',
+    lastLogin: null,
+    authProvider: 'invitation',
+    invited: true,
+  }),
+];
+
+/** Generate `count` active members named so paging is stable. */
+export const manyOrganizationMembers = (count: number): OrganizationMember[] =>
+  Array.from({ length: count }, (_unused, index) => {
+    const ordinal = index + 1;
+    const suffix = `${ordinal}`.padStart(2, '0');
+    return makeOrganizationMember({
+      id: `member-${suffix}`,
+      userId: `user-${suffix}`,
+      user: {
+        id: `user-${suffix}`,
+        firstName: 'Member',
+        lastName: suffix,
+        email: `member.${suffix}@example.com`,
+      },
+      email: `member.${suffix}@example.com`,
+      firstName: 'Member',
+      lastName: suffix,
+      roles: ['USER'],
+      businessUnitId: null,
+      businessUnit: null,
+      teamIds: [],
+      teams: [],
+      lastLogin: null,
+    });
+  });
+
+/**
  * One demographic definition, shaped like a seeded ORG-030 base definition
  * (`system: true`) unless overridden.
  */
@@ -325,6 +445,11 @@ export interface ReactoryStubOptions {
   businessUnits?: OrganizationBusinessUnit[];
   /** Teams the structure queries return (mutated in place by writes). */
   teams?: OrganizationTeam[];
+  /**
+   * Member rows the People query returns (mutated in place by writes), so a
+   * post-write `refreshMembers()` observes the new roles/state.
+   */
+  members?: OrganizationMember[];
 }
 
 /**
@@ -339,6 +464,7 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
   const state: Organization[] = options.organizations || [];
   const businessUnits: OrganizationBusinessUnit[] = options.businessUnits || [];
   const teams: OrganizationTeam[] = options.teams || [];
+  const memberRows: OrganizationMember[] = options.members || [];
   const statistics = options.statistics || {};
   const platformRoles = options.roles || ['ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'SYSTEM'];
   const memberships = (options.memberships || []).map((membership) => ({
@@ -482,6 +608,72 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
               total: visible.length,
               hasNext: false,
             },
+          },
+        },
+        errors: [],
+      });
+    }
+
+    // ---- Organization members (ORG-024) ----
+    if (operation === 'OrganizationMembers') {
+      const filter = variables?.filter || {};
+      const page = Number(variables?.paging?.page) > 0 ? Number(variables.paging.page) : 1;
+      const pageSize =
+        Number(variables?.paging?.pageSize) > 0 ? Number(variables.paging.pageSize) : 25;
+
+      const rowStatus = (row: OrganizationMember): string =>
+        row.invited === true
+          ? 'invited'
+          : `${row.status || (row.enabled === false ? 'deactivated' : 'active')}`;
+
+      const search = `${filter.search || ''}`.trim().toLowerCase();
+      const status = `${filter.status || ''}`.trim().toLowerCase();
+
+      const rows = memberRows.filter((row) => {
+        const current = rowStatus(row);
+
+        // Mirrors the service: `invited` switches to the invitation collection,
+        // `deactivated` / `enabled: false` selects disabled memberships, and by
+        // default active members are returned (`includeDeactivated` widens it).
+        if (status === 'invited') {
+          if (current !== 'invited') return false;
+        } else if (status === 'deactivated' || filter.deactivatedOnly === true || filter.enabled === false) {
+          if (current !== 'deactivated') return false;
+        } else if (filter.enabled === true) {
+          if (current !== 'active') return false;
+        } else {
+          if (current === 'invited') return false;
+          if (filter.includeDeactivated !== true && current !== 'active') return false;
+        }
+
+        if (search.length > 0) {
+          const haystack = `${row.firstName || ''} ${row.lastName || ''} ${row.email || ''}`.toLowerCase();
+          if (haystack.indexOf(search) < 0) return false;
+        }
+
+        if (filter.role && !(row.roles || []).some((role) => `${role}` === `${filter.role}`)) {
+          return false;
+        }
+
+        if (filter.businessUnitId && `${row.businessUnitId || ''}` !== `${filter.businessUnitId}`) {
+          return false;
+        }
+
+        if (filter.teamId && !(row.teamIds || []).some((id) => `${id}` === `${filter.teamId}`)) {
+          return false;
+        }
+
+        return true;
+      });
+
+      const total = rows.length;
+      const start = (page - 1) * pageSize;
+
+      return Promise.resolve({
+        data: {
+          OrganizationMembers: {
+            members: rows.slice(start, start + pageSize).map((row) => ({ ...row })),
+            paging: { page, pageSize, total, hasNext: page * pageSize < total },
           },
         },
         errors: [],
@@ -862,6 +1054,15 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
           `${member.id}` !== `${variables?.memberId}`,
       );
 
+      // The member row's `businessUnitId` follows the unit membership; it is
+      // never written by the People tab itself.
+      memberRows.forEach((row) => {
+        if (`${row.userId || ''}` !== `${variables?.memberId}`) return;
+        row.businessUnitId =
+          operation === 'AddBusinessUnitMember' ? `${variables?.id}` : null;
+        row.businessUnit = row.businessUnitId ? unitRef(row.businessUnitId) : null;
+      });
+
       const field =
         operation === 'AddBusinessUnitMember'
           ? 'addMemberToBusinessUnit'
@@ -954,9 +1155,122 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
           operation === 'AddTeamMember' || `${member.id}` !== `${variables?.memberId}`,
       );
 
+      // `teams` on a member row is derived from `Team.members`, so the stub
+      // derives it the same way after add/remove.
+      memberRows.forEach((row) => {
+        if (`${row.userId || ''}` !== `${variables?.memberId}`) return;
+        const ids = new Set((row.teamIds || []).map((id) => `${id}`));
+        if (operation === 'AddTeamMember') ids.add(`${variables?.id}`);
+        else ids.delete(`${variables?.id}`);
+        row.teamIds = Array.from(ids);
+        row.teams = row.teamIds.map((teamId) => {
+          const found = teamById(teamId);
+          return found
+            ? { id: `${found.id}`, name: found.name, title: found.title }
+            : { id: teamId };
+        });
+      });
+
       const field =
         operation === 'AddTeamMember' ? 'addMemberToTeam' : 'removeMemberFromTeam';
       return Promise.resolve({ data: { [field]: true }, errors: [] });
+    }
+
+    // ---- Organization members (ORG-024) ----
+    const memberIndex = (userId: any) =>
+      memberRows.findIndex((row) => `${row.userId || ''}` === `${userId || ''}`);
+    const organizationReference = () => ({ id: 'org-1', name: 'Acme Holdings' });
+
+    if (operation === 'SetOrganizationMemberRoles') {
+      const index = memberIndex(variables?.userId);
+      if (index < 0) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Member not found' }] });
+      }
+
+      memberRows[index] = {
+        ...memberRows[index],
+        roles: Array.isArray(variables?.roles) ? [...variables.roles] : [],
+      };
+
+      return Promise.resolve({
+        data: { setOrganizationMemberRoles: organizationReference() },
+        errors: [],
+      });
+    }
+
+    if (operation === 'DeactivateOrganizationMember') {
+      const index = memberIndex(variables?.userId);
+      if (index < 0) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Member not found' }] });
+      }
+
+      memberRows[index] = {
+        ...memberRows[index],
+        enabled: false,
+        status: 'deactivated',
+      };
+
+      return Promise.resolve({
+        data: { deactivateOrganizationMember: organizationReference() },
+        errors: [],
+      });
+    }
+
+    if (operation === 'RemoveOrganizationMember') {
+      const index = memberIndex(variables?.userId);
+      if (index < 0) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Member not found' }] });
+      }
+
+      memberRows.splice(index, 1);
+
+      return Promise.resolve({
+        data: { removeOrganizationMember: organizationReference() },
+        errors: [],
+      });
+    }
+
+    if (operation === 'InviteOrganizationMember') {
+      const email = `${variables?.email || ''}`.trim().toLowerCase();
+
+      // The server rejects a duplicate instead of creating a second row; the
+      // stub does the same so the tab's per-row reporting can be asserted.
+      if (memberRows.some((row) => `${row.email || ''}`.toLowerCase() === email)) {
+        return Promise.resolve({
+          data: null,
+          errors: [
+            { message: `The email ${email} already belongs to a member of this organization` },
+          ],
+        });
+      }
+
+      const created = makeOrganizationMember({
+        id: `invite-${memberRows.length + 1}`,
+        userId: null,
+        user: null,
+        email,
+        firstName: null,
+        lastName: null,
+        avatar: null,
+        roles: Array.isArray(variables?.roles) ? [...variables.roles] : [],
+        enabled: false,
+        status: 'invited',
+        businessUnitId: variables?.businessUnitId || null,
+        businessUnit: variables?.businessUnitId ? unitRef(variables.businessUnitId) : null,
+        teamIds: [],
+        teams: [],
+        created: '2026-10-22T09:00:00.000Z',
+        lastLogin: null,
+        authProvider: 'invitation',
+        invited: true,
+      });
+
+      memberRows.push(created);
+
+      return Promise.resolve({
+        data: { inviteOrganizationMember: { ...created } },
+        errors: [],
+      });
     }
 
     return Promise.resolve({
@@ -971,6 +1285,7 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
     state,
     businessUnits,
     teams,
+    members: memberRows,
     createNotification: jest.fn(),
     navigation: jest.fn(),
     /** Event bus surface used by the detail shell and the Overview tab. */
