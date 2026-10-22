@@ -214,14 +214,25 @@ describe('OrganizationDetailPanel — tab registry', () => {
     render(<OrganizationDetailPanel reactory={reactory} id="org-1" />);
     await screen.findByRole('heading', { name: 'Acme Holdings' });
 
-    await userEvent.click(screen.getByRole('tab', { name: 'Structure' }));
+    await userEvent.click(screen.getByRole('tab', { name: 'People' }));
 
     expect(await screen.findByTestId('organization-tab-placeholder')).toHaveAttribute(
       'data-ticket',
-      'ORG-022',
+      'ORG-024',
     );
-    expect(screen.getByText('ORG-022 delivers this tab')).toBeInTheDocument();
+    expect(screen.getByText('ORG-024 delivers this tab')).toBeInTheDocument();
     expect(screen.queryByTestId('organization-overview-tab')).not.toBeInTheDocument();
+  });
+
+  it('renders the real structure tab from the registry', async () => {
+    const reactory = makeReactory({ organizations: [makeOrganization()] });
+
+    render(<OrganizationDetailPanel reactory={reactory} id="org-1" />);
+    await screen.findByRole('heading', { name: 'Acme Holdings' });
+
+    await userEvent.click(screen.getByRole('tab', { name: 'Structure' }));
+
+    expect(await screen.findByTestId('organization-structure-tab')).toBeInTheDocument();
   });
 
   it('renders the real branding tab from the registry', async () => {
@@ -515,7 +526,7 @@ describe('OrganizationDetailPanel — unsaved-changes guard', () => {
     await waitForPanelToSettle();
 
     await userEvent.click(await screen.findByRole('tab', { name: 'Structure' }));
-    expect(await screen.findByText('ORG-022 delivers this tab')).toBeInTheDocument();
+    expect(await screen.findByTestId('organization-structure-tab')).toBeInTheDocument();
     expect(screen.queryByText('Discard unsaved changes?')).not.toBeInTheDocument();
   });
 });

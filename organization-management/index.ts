@@ -7,6 +7,7 @@ import OrganizationDetailPanel from './OrganizationDetailPanel';
 import OrganizationOverviewTab from './OrganizationOverviewTab';
 import OrganizationBrandingTab from './OrganizationBrandingTab';
 import OrganizationDemographicsTab from './OrganizationDemographicsTab';
+import OrganizationStructureTab from './OrganizationStructureTab';
 import OrganizationToolbar from './OrganizationToolbar';
 import OrganizationStatusChip from './components/OrganizationStatusChip';
 import OrganizationTabPlaceholder from './components/OrganizationTabPlaceholder';
@@ -16,6 +17,7 @@ import useOrganizationDetail from './hooks/useOrganizationDetail';
 import useOrganizationAdmin, { useDemographicDefinitions } from './hooks/useOrganizationAdmin';
 import useOrganizationBranding from './hooks/useOrganizationBranding';
 import useOrganizationDemographics from './hooks/useOrganizationDemographics';
+import useOrganizationStructure from './hooks/useOrganizationStructure';
 import { ORGANIZATION_MESSAGES, translate } from './i18n';
 
 export {
@@ -26,6 +28,7 @@ export {
   OrganizationOverviewTab,
   OrganizationBrandingTab,
   OrganizationDemographicsTab,
+  OrganizationStructureTab,
   OrganizationTabPlaceholder,
   OrganizationToolbar,
   OrganizationStatusChip,
@@ -36,6 +39,7 @@ export {
   useOrganizationAdmin,
   useOrganizationBranding,
   useOrganizationDemographics,
+  useOrganizationStructure,
   useDemographicDefinitions,
   ORGANIZATION_MESSAGES,
   translate,
@@ -44,6 +48,7 @@ export {
 export * from './types';
 export * from './graphql';
 export * from './demographicDraft';
+export * from './organizationStructure';
 
 /**
  * Component registry entries for the organization management surface.

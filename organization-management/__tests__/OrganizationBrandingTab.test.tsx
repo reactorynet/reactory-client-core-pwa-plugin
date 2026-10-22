@@ -84,7 +84,9 @@ describe('branding tab wiring', () => {
     const structure = ORGANIZATION_TABS.find((tab) => tab.id === 'structure');
 
     expect(branding?.component).toBe(OrganizationBrandingTab);
-    expect(`${structure?.component.displayName || ''}`).toContain('ORG-022');
+    // ORG-022 has replaced the structure placeholder; branding's entry is
+    // unchanged, which is what this assertion pins.
+    expect(`${structure?.component.displayName || ''}`).toBe('OrganizationStructureTab');
   });
 
   it('renders the persisted logo and avatar URLs', async () => {

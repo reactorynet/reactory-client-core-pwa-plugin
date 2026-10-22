@@ -239,6 +239,142 @@ export interface OrganizationError {
 }
 
 /**
+ * A user reference as the structure queries select it.
+ *
+ * `BusinessUnit.owner` / `Team.owner` and the `members` arrays are `User`
+ * references, not free text. Only the display fields are selected: the tab
+ * renders a name (falling back to the email, then the id) and never needs the
+ * rest of the user record.
+ */
+export interface OrganizationStructureUserRef {
+  id?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+}
+
+/**
+ * A `BusinessUnit` as the Structure tab reads it (ORG-022).
+ *
+ * Mirrors `BusinessUnit` in
+ * `reactory-express-server/src/modules/reactory-core/graph/types/Organization/BusinessUnit.graphql`.
+ * `deleted` is the soft-delete flag: soft-deleted units are excluded from
+ * `pagedBusinessUnits` unless `filter.includeDeleted` is set, and are brought
+ * back with `restoreBusinessUnit`.
+ */
+export interface OrganizationBusinessUnit {
+  id: string;
+  name: string;
+  description?: string | null;
+  avatar?: string | null;
+  organization?: string | OrganizationBusinessUnitRef | null;
+  owner?: OrganizationStructureUserRef | null;
+  members?: OrganizationStructureUserRef[] | null;
+  deleted?: boolean | null;
+}
+
+/**
+ * A `Team` as the Structure tab reads it (ORG-022).
+ *
+ * `businessUnit` is the link that makes the hierarchy possible: a team is
+ * nested under the unit whose id it carries. `null` means the team is not (yet)
+ * assigned and belongs in the "Unassigned teams" group.
+ *
+ * The server resolves `title`/`name` to the same value (see
+ * `TeamResolver.title`/`.name`), so the tab reads both and prefers whichever is
+ * present rather than assuming which one a payload carries.
+ */
+export interface OrganizationTeam {
+  id: string;
+  title?: string | null;
+  name?: string | null;
+  description?: string | null;
+  avatar?: string | null;
+  organization?: string | OrganizationBusinessUnitRef | null;
+  businessUnit?: OrganizationBusinessUnitRef | null;
+  owner?: OrganizationStructureUserRef | null;
+  members?: OrganizationStructureUserRef[] | null;
+  deleted?: boolean | null;
+}
+
+/** One business unit node with the teams nested beneath it. */
+export interface OrganizationStructureNode {
+  businessUnit: OrganizationBusinessUnit;
+  teams: OrganizationTeam[];
+}
+
+/**
+ * The rendered hierarchy.
+ *
+ * `nodes` keeps the order the server returned (the paged query sorts by name).
+ * `unassignedTeams` holds teams whose `businessUnit` is null **and** teams that
+ * point at a unit the current view does not contain (a soft-deleted unit while
+ * the deleted filter is off) — a team must never disappear just because its
+ * parent did.
+ */
+export interface OrganizationStructureTree {
+  nodes: OrganizationStructureNode[];
+  unassignedTeams: OrganizationTeam[];
+}
+
+/**
+ * Result of a structure write.
+ *
+ * The failure is returned alongside the record for the same reason the branding
+ * hook does it: the caller has to decide what to say *now*, and reading hook
+ * state immediately after `await` would still see the pre-render value.
+ */
+export interface OrganizationStructureWriteResult<T> {
+  record: T | null;
+  error: OrganizationError | null;
+}
+
+/** Result of a mutation that only answers with a boolean. */
+export interface OrganizationStructureFlagResult {
+  ok: boolean;
+  error: OrganizationError | null;
+}
+
+/**
+ * Input for creating a business unit.
+ *
+ * `owner` is required by `BusinessUnitInput` server-side, and `organization` is
+ * supplied by the hook from the tab's own organization — the form never asks
+ * the user which organization a unit belongs to.
+ */
+export interface OrganizationBusinessUnitCreateInput {
+  name: string;
+  description?: string | null;
+  owner: string;
+}
+
+/** Input for updating a business unit (`BusinessUnitUpdateInput`). */
+export interface OrganizationBusinessUnitUpdateInput {
+  name?: string;
+  description?: string | null;
+  owner?: string | null;
+}
+
+/**
+ * Input for creating a team.
+ *
+ * `createTeam` server-side only persists the organization, the name and the
+ * optional business unit — owner and description are applied through
+ * `updateTeam`, which is why they live on the update input only.
+ */
+export interface OrganizationTeamCreateInput {
+  name: string;
+  businessUnitId?: string | null;
+}
+
+/** Input for updating a team. `businessUnit` is deliberately absent. */
+export interface OrganizationTeamUpdateInput {
+  name?: string;
+  description?: string | null;
+  owner?: string | null;
+}
+
+/**
  * Result of the guarded demographics-definitions probe.
  *
  * `OrganizationDemographicDefinitions` ships with ORG-030/ORG-031. Until then

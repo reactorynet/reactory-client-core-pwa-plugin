@@ -1,5 +1,11 @@
 import type { DemographicDefinition } from '../../demographic-form';
-import type { Organization, OrganizationStatistics, OrganizationTheme } from '../types';
+import type {
+  Organization,
+  OrganizationBusinessUnit,
+  OrganizationStatistics,
+  OrganizationTeam,
+  OrganizationTheme,
+} from '../types';
 
 /**
  * Test fixtures and a stubbed Reactory SDK for the organization management
@@ -117,6 +123,73 @@ export const statisticsFor = (
   businessUnits: 2,
   teams: 3,
   ...overrides,
+});
+
+/** A `User` reference in the shape the structure queries select. */
+export const makeUserRef = (
+  id: string,
+  firstName = 'Ada',
+  lastName = 'Lovelace',
+): { id: string; firstName: string; lastName: string; email: string } => ({
+  id,
+  firstName,
+  lastName,
+  email: `${firstName}.${lastName}@example.com`.toLowerCase(),
+});
+
+/**
+ * A business unit as `pagedBusinessUnits` returns it.
+ *
+ * `deleted` is the soft-delete flag the "show deleted" filter acts on, so the
+ * fixture defaults to a live unit and tests opt into a deleted one explicitly.
+ */
+export const makeBusinessUnit = (
+  overrides: Partial<OrganizationBusinessUnit> = {},
+): OrganizationBusinessUnit => ({
+  id: 'bu-1',
+  name: 'Engineering',
+  description: 'Builds and runs the platform.',
+  avatar: null,
+  deleted: false,
+  organization: { id: 'org-1' },
+  owner: makeUserRef('user-owner-1', 'Grace', 'Hopper'),
+  members: [makeUserRef('user-member-1', 'Alan', 'Turing')],
+  ...overrides,
+});
+
+/** A team as `pagedTeams` returns it, linked to `bu-1` unless overridden. */
+export const makeTeam = (overrides: Partial<OrganizationTeam> = {}): OrganizationTeam => ({
+  id: 'team-1',
+  name: 'Platform',
+  title: 'Platform',
+  description: 'Core platform squad.',
+  avatar: null,
+  deleted: false,
+  organization: { id: 'org-1' },
+  businessUnit: { id: 'bu-1', name: 'Engineering' },
+  owner: makeUserRef('user-owner-2', 'Katherine', 'Johnson'),
+  members: [makeUserRef('user-member-2', 'Margaret', 'Hamilton')],
+  ...overrides,
+});
+
+/**
+ * A two-unit hierarchy with one nested team, one empty unit and one team that
+ * belongs to no unit — the three shapes the Structure tab must distinguish.
+ */
+export const structureFixtures = () => ({
+  businessUnits: [
+    makeBusinessUnit({ id: 'bu-1', name: 'Engineering' }),
+    makeBusinessUnit({ id: 'bu-2', name: 'Operations', description: null, members: [] }),
+  ],
+  teams: [
+    makeTeam({ id: 'team-1', name: 'Platform' }),
+    makeTeam({
+      id: 'team-2',
+      name: 'Field Ops',
+      title: 'Field Ops',
+      businessUnit: null,
+    }),
+  ],
 });
 
 /**
@@ -248,6 +321,10 @@ export interface ReactoryStubOptions {
     roles: string[];
     enabled?: boolean;
   }>;
+  /** Business units the structure queries return (mutated in place by writes). */
+  businessUnits?: OrganizationBusinessUnit[];
+  /** Teams the structure queries return (mutated in place by writes). */
+  teams?: OrganizationTeam[];
 }
 
 /**
@@ -260,6 +337,8 @@ export interface ReactoryStubOptions {
  */
 export const makeReactory = (options: ReactoryStubOptions = {}) => {
   const state: Organization[] = options.organizations || [];
+  const businessUnits: OrganizationBusinessUnit[] = options.businessUnits || [];
+  const teams: OrganizationTeam[] = options.teams || [];
   const statistics = options.statistics || {};
   const platformRoles = options.roles || ['ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'SYSTEM'];
   const memberships = (options.memberships || []).map((membership) => ({
@@ -359,6 +438,50 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
           OrganizationDemographicValues: {
             values: [],
             paging: { page: 1, pageSize: 1, total, hasNext: total > 1 },
+          },
+        },
+        errors: [],
+      });
+    }
+
+    // ---- Organization structure (ORG-022) ----
+    if (operation === 'OrganizationStructureBusinessUnits') {
+      // The server excludes soft-deleted units unless `includeDeleted` is set;
+      // the stub applies the same rule so the "show deleted" toggle is
+      // observable in the rendered tree.
+      const includeDeleted = variables?.includeDeleted === true;
+      const visible = businessUnits.filter(
+        (unit) => includeDeleted || unit.deleted !== true,
+      );
+
+      return Promise.resolve({
+        data: {
+          OrganizationStructureBusinessUnits: {
+            businessUnits: visible.map((unit) => ({ ...unit })),
+            paging: {
+              page: 1,
+              pageSize: 500,
+              total: visible.length,
+              hasNext: false,
+            },
+          },
+        },
+        errors: [],
+      });
+    }
+
+    if (operation === 'OrganizationStructureTeams') {
+      const visible = teams.filter((team) => team.deleted !== true);
+      return Promise.resolve({
+        data: {
+          OrganizationStructureTeams: {
+            teams: visible.map((team) => ({ ...team })),
+            paging: {
+              page: 1,
+              pageSize: 500,
+              total: visible.length,
+              hasNext: false,
+            },
           },
         },
         errors: [],
@@ -651,6 +774,191 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
       });
     }
 
+    // ---- Organization structure (ORG-022) ----
+    const unitById = (id: any) =>
+      businessUnits.find((unit) => `${unit.id}` === `${id}`) || null;
+    const teamById = (id: any) => teams.find((team) => `${team.id}` === `${id}`) || null;
+    const unitRef = (id: any) => {
+      const unit = unitById(id);
+      return unit ? { id: `${unit.id}`, name: unit.name } : null;
+    };
+    const memberRef = (memberId: any) => ({ id: `${memberId}` });
+
+    if (operation === 'CreateBusinessUnit') {
+      const input = variables?.input || {};
+      const created: OrganizationBusinessUnit = {
+        id: `bu-created-${businessUnits.length + 1}`,
+        name: input.name,
+        description: input.description ?? null,
+        avatar: null,
+        deleted: false,
+        organization: { id: input.organization },
+        owner: { id: input.owner },
+        members: [],
+      };
+      businessUnits.push(created);
+      return Promise.resolve({ data: { createBusinessUnit: { ...created } }, errors: [] });
+    }
+
+    if (operation === 'UpdateBusinessUnit') {
+      const index = businessUnits.findIndex((unit) => `${unit.id}` === `${variables?.id}`);
+      if (index < 0) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Business unit not found' }] });
+      }
+
+      const input = variables?.input || {};
+      const updated: OrganizationBusinessUnit = {
+        ...businessUnits[index],
+        name: input.name ?? businessUnits[index].name,
+        description: input.description ?? null,
+        owner: input.owner ? { id: `${input.owner}` } : null,
+      };
+      businessUnits[index] = updated;
+
+      // The server keeps each team's `businessUnit { name }` reference in step
+      // with the unit it points at.
+      teams.forEach((team) => {
+        if (team.businessUnit && `${team.businessUnit.id}` === `${updated.id}`) {
+          team.businessUnit = { id: `${updated.id}`, name: updated.name };
+        }
+      });
+
+      return Promise.resolve({ data: { updateBusinessUnit: { ...updated } }, errors: [] });
+    }
+
+    if (operation === 'DeleteBusinessUnit' || operation === 'RestoreBusinessUnit') {
+      const index = businessUnits.findIndex((unit) => `${unit.id}` === `${variables?.id}`);
+      if (index < 0) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Business unit not found' }] });
+      }
+
+      const updated: OrganizationBusinessUnit = {
+        ...businessUnits[index],
+        deleted: operation === 'DeleteBusinessUnit',
+      };
+      businessUnits[index] = updated;
+
+      // The response is keyed by the GraphQL *field*, not the operation name.
+      const field =
+        operation === 'DeleteBusinessUnit' ? 'deleteBusinessUnit' : 'restoreBusinessUnit';
+      return Promise.resolve({ data: { [field]: { ...updated } }, errors: [] });
+    }
+
+    if (operation === 'AddBusinessUnitMember' || operation === 'RemoveBusinessUnitMember') {
+      const unit = unitById(variables?.id);
+      if (!unit) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Business unit not found' }] });
+      }
+
+      const members = Array.isArray(unit.members) ? [...unit.members] : [];
+      if (operation === 'AddBusinessUnitMember') {
+        if (!members.some((member) => `${member.id}` === `${variables?.memberId}`)) {
+          members.push(memberRef(variables?.memberId));
+        }
+      }
+      unit.members = members.filter(
+        (member) =>
+          operation === 'AddBusinessUnitMember' ||
+          `${member.id}` !== `${variables?.memberId}`,
+      );
+
+      const field =
+        operation === 'AddBusinessUnitMember'
+          ? 'addMemberToBusinessUnit'
+          : 'removeMemberFromBusinessUnit';
+      return Promise.resolve({ data: { [field]: true }, errors: [] });
+    }
+
+    if (operation === 'CreateTeam') {
+      const input = variables?.input || {};
+      const created: OrganizationTeam = {
+        id: `team-created-${teams.length + 1}`,
+        name: input.name,
+        title: input.name,
+        description: null,
+        avatar: null,
+        deleted: false,
+        organization: { id: input.organization },
+        businessUnit: input.businessUnit ? unitRef(input.businessUnit) : null,
+        owner: null,
+        members: [],
+      };
+      teams.push(created);
+      return Promise.resolve({ data: { createTeam: { ...created } }, errors: [] });
+    }
+
+    if (operation === 'UpdateTeam') {
+      const index = teams.findIndex((team) => `${team.id}` === `${variables?.id}`);
+      if (index < 0) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Team not found' }] });
+      }
+
+      const input = variables?.input || {};
+      const updated: OrganizationTeam = {
+        ...teams[index],
+        name: input.name ?? teams[index].name,
+        title: input.name ?? teams[index].title,
+        description: input.description ?? null,
+        owner: input.owner ? { id: `${input.owner}` } : null,
+      };
+      teams[index] = updated;
+      return Promise.resolve({ data: { updateTeam: { ...updated } }, errors: [] });
+    }
+
+    if (operation === 'MoveTeamToBusinessUnit') {
+      const index = teams.findIndex((team) => `${team.id}` === `${variables?.id}`);
+      if (index < 0) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Team not found' }] });
+      }
+
+      const target = unitById(variables?.businessUnitId);
+      if (!target) {
+        // Mirrors the server's missing / cross-organization unit rejection.
+        return Promise.resolve({
+          data: null,
+          errors: [{ message: 'Business unit not found in this organization' }],
+        });
+      }
+
+      const moved: OrganizationTeam = {
+        ...teams[index],
+        businessUnit: { id: `${target.id}`, name: target.name },
+      };
+      teams[index] = moved;
+      return Promise.resolve({ data: { moveTeamToBusinessUnit: { ...moved } }, errors: [] });
+    }
+
+    if (operation === 'DeleteTeam') {
+      const index = teams.findIndex((team) => `${team.id}` === `${variables?.id}`);
+      if (index < 0) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Team not found' }] });
+      }
+      teams.splice(index, 1);
+      return Promise.resolve({ data: { deleteTeam: true }, errors: [] });
+    }
+
+    if (operation === 'AddTeamMember' || operation === 'RemoveTeamMember') {
+      const team = teamById(variables?.id);
+      if (!team) {
+        return Promise.resolve({ data: null, errors: [{ message: 'Team not found' }] });
+      }
+
+      const members = Array.isArray(team.members) ? [...team.members] : [];
+      if (operation === 'AddTeamMember') {
+        if (!members.some((member) => `${member.id}` === `${variables?.memberId}`)) {
+          members.push(memberRef(variables?.memberId));
+        }
+      }
+      team.members = members.filter(
+        (member) =>
+          operation === 'AddTeamMember' || `${member.id}` !== `${variables?.memberId}`,
+      );
+
+      const field =
+        operation === 'AddTeamMember' ? 'addMemberToTeam' : 'removeMemberFromTeam';
+      return Promise.resolve({ data: { [field]: true }, errors: [] });
+    }
+
     return Promise.resolve({
       data: null,
       errors: [{ message: `Unhandled mutation: ${operation}` }],
@@ -661,6 +969,8 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
     graphqlQuery,
     graphqlMutation,
     state,
+    businessUnits,
+    teams,
     createNotification: jest.fn(),
     navigation: jest.fn(),
     /** Event bus surface used by the detail shell and the Overview tab. */

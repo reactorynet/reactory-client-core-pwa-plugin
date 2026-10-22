@@ -11,6 +11,7 @@ import {
 import OrganizationOverviewTab from './OrganizationOverviewTab';
 import OrganizationBrandingTab from './OrganizationBrandingTab';
 import OrganizationDemographicsTab from './OrganizationDemographicsTab';
+import OrganizationStructureTab from './OrganizationStructureTab';
 import OrganizationTabPlaceholder from './components/OrganizationTabPlaceholder';
 import type { OrganizationMessageKey } from './i18n';
 import type { OrganizationTabDefinition, OrganizationTabProps } from './types';
@@ -65,10 +66,9 @@ export const ORGANIZATION_TABS: OrganizationTabDefinition[] = [
     id: 'structure',
     labelKey: 'reactory.organizations.detail.tab.structure',
     icon: <AccountTreeOutlinedIcon fontSize="small" />,
-    component: placeholderTab(
-      'ORG-022',
-      'reactory.organizations.detail.tab.structure.placeholder',
-    ),
+    // ORG-022 replaced this entry's placeholder; the other placeholder entries
+    // and the shell are untouched.
+    component: OrganizationStructureTab,
   },
   {
     id: 'people',
