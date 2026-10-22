@@ -39,6 +39,12 @@ import { envelopeError, operationPayload, serverMessageOf } from '../utils';
  *   `OrganizationError` alongside the value, so the tab can notify with the
  *   server's message straight after `await` instead of reading pre-render hook
  *   state.
+ * - **A read failure and a write failure are different states.** `loadError`
+ *   means "the definitions could not be read", and the pane renders it as a
+ *   banner whose Retry re-reads. `writeError` means "the last write was
+ *   refused", and belongs next to the write that failed. Sharing one state made
+ *   every failed save appear as a load banner whose Retry re-read the
+ *   definitions instead of retrying the write.
  * - **Usage counts are best-effort.** `DemographicDefinition` has no count
  *   field, so a count is one single-row value page per key. A failure leaves
  *   that key's count `null` (rendered as an em dash) and never surfaces as a
@@ -77,9 +83,15 @@ export interface UseOrganizationDemographicsResult {
   counting: boolean;
   /** True while a definition write is in flight. */
   saving: boolean;
-  /** Last failure, as a translatable key plus the server's own text. */
-  error: OrganizationError | null;
-  clearError: () => void;
+  /** The last **read** failure, for the pane's banner. Never set by a write. */
+  loadError: OrganizationError | null;
+  /**
+   * The last **write** failure, for the surface that issued the write. Cleared
+   * at the start of the next write and by `clearWriteError`.
+   */
+  writeError: OrganizationError | null;
+  /** Clears the write failure only; a read failure is cleared by a re-read. */
+  clearWriteError: () => void;
   /** Re-reads the definitions (and their usage counts). */
   refreshDefinitions: () => Promise<void>;
   /** Create (no `id`) or update (with `id`) one definition. */
@@ -131,7 +143,8 @@ export const useOrganizationDemographics = (
   const [loading, setLoading] = useState<boolean>(autoLoad && organizationId.length > 0);
   const [counting, setCounting] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
-  const [error, setError] = useState<OrganizationError | null>(null);
+  const [loadError, setLoadError] = useState<OrganizationError | null>(null);
+  const [writeError, setWriteError] = useState<OrganizationError | null>(null);
 
   const mountedRef = useRef<boolean>(true);
   const sequenceRef = useRef(0);
@@ -144,7 +157,7 @@ export const useOrganizationDemographics = (
     };
   }, []);
 
-  const clearError = useCallback(() => setError(null), []);
+  const clearWriteError = useCallback(() => setWriteError(null), []);
 
   /** Convert a thrown failure into the hook's error contract. */
   const toOrganizationError = useCallback(
@@ -245,13 +258,13 @@ export const useOrganizationDemographics = (
     if (!organizationId) {
       setDefinitions([]);
       setUsage({});
-      setError(null);
+      setLoadError(null);
       setLoading(false);
       return;
     }
 
     if (!reactory || typeof reactory.graphqlQuery !== 'function') {
-      setError({ key: 'reactory.organizations.error.apiUnavailable' });
+      setLoadError({ key: 'reactory.organizations.error.apiUnavailable' });
       setLoading(false);
       return;
     }
@@ -260,7 +273,7 @@ export const useOrganizationDemographics = (
     sequenceRef.current = sequence;
 
     setLoading(true);
-    setError(null);
+    setLoadError(null);
 
     try {
       const result = await reactory.graphqlQuery(
@@ -273,7 +286,7 @@ export const useOrganizationDemographics = (
 
       const failure = envelopeError(result);
       if (failure) {
-        setError({
+        setLoadError({
           key: 'reactory.organizations.error.definitionsFailed',
           serverMessage: failure,
         });
@@ -292,7 +305,7 @@ export const useOrganizationDemographics = (
       void loadUsageCounts(list.map((definition) => `${definition.key || ''}`));
     } catch (caught: any) {
       if (sequence !== sequenceRef.current || !mountedRef.current) return;
-      setError({
+      setLoadError({
         key: 'reactory.organizations.error.definitionsFailed',
         serverMessage: serverMessageOf(caught),
       });
@@ -315,14 +328,16 @@ export const useOrganizationDemographics = (
       apply: (payload: any) => T,
     ): Promise<OrganizationDemographicWriteResult<T>> => {
       setSaving(true);
-      setError(null);
+      // Only the write channel: a read failure stays on screen until a re-read
+      // succeeds and must not be cleared by an unrelated save.
+      setWriteError(null);
 
       try {
         const payload = await runMutation(document, variables, operationName, fallbackKey);
         return { value: apply(payload), error: null };
       } catch (caught: any) {
         const failure = toOrganizationError(caught, fallbackKey);
-        if (mountedRef.current) setError(failure);
+        if (mountedRef.current) setWriteError(failure);
         return { value: null, error: failure };
       } finally {
         if (mountedRef.current) setSaving(false);
@@ -425,8 +440,9 @@ export const useOrganizationDemographics = (
     loading,
     counting,
     saving,
-    error,
-    clearError,
+    loadError,
+    writeError,
+    clearWriteError,
     refreshDefinitions: read,
     saveDefinition,
     deleteDefinition,

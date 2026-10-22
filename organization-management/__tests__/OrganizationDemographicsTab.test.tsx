@@ -235,6 +235,33 @@ describe('ordering', () => {
     ]);
   });
 
+  it('does not raise the pane load banner for a refused write', async () => {
+    const reactory = makeReactory({
+      organizations: [makeOrganization()],
+      demographicDefinitions: baseDemographicDefinitions(),
+      demographicValueCounts: { gender: 12 },
+      mutationImpl: (operation: string) =>
+        operation === REORDER
+          ? { data: null, errors: [{ message: 'At least one demographic definition key is required to reorder' }] }
+          : undefined,
+    });
+
+    const { props } = setup({ reactory });
+    await waitForList();
+
+    // The read succeeded, so there is no load failure to retry.
+    expect(screen.queryByTestId('organization-demographics-load-error')).toBeNull();
+
+    fireEvent.click(screen.getByTestId('demographic-definition-move-down-gender'));
+
+    await waitFor(() => expect(props.notify).toHaveBeenCalledWith(expect.any(String), 'error'));
+
+    // A refused write is reported by notify(); it must NOT be rendered as the
+    // pane's load banner, whose Retry re-reads instead of retrying the write.
+    expect(screen.queryByTestId('organization-demographics-load-error')).toBeNull();
+    expect(queryCallsFor(reactory, DEFINITIONS_QUERY)).toHaveLength(1);
+  });
+
   it('keeps the current order when the server refuses the change', async () => {
     const reactory = makeReactory({
       organizations: [makeOrganization()],
