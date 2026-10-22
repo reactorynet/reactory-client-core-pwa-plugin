@@ -144,14 +144,21 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
   const remainingOrdinal = useMemo(() => nextOrdinal(definitions), [definitions]);
 
   const openCreate = useCallback(() => {
+    // A failure from a previous attempt belongs to that attempt, not to the
+    // drawer the user is opening now.
+    demographics.clearWriteError();
     setEditing(null);
     setDrawerOpen(true);
-  }, []);
+  }, [demographics]);
 
-  const openEdit = useCallback((definition: DemographicDefinition) => {
-    setEditing(definition);
-    setDrawerOpen(true);
-  }, []);
+  const openEdit = useCallback(
+    (definition: DemographicDefinition) => {
+      demographics.clearWriteError();
+      setEditing(definition);
+      setDrawerOpen(true);
+    },
+    [demographics],
+  );
 
   /**
    * Close the drawer and release the guard.
@@ -160,14 +167,14 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
    * refuses backdrop/Escape dismissal, so this is always an explicit discard.
    */
   const closeDrawer = useCallback(() => {
+    demographics.clearWriteError();
     setDirty(false);
     setDrawerOpen(false);
     setEditing(null);
-  }, []);
+  }, [demographics]);
 
   const handleSave = useCallback(
     async (input: Record<string, any>) => {
-      const creating = !editing;
       const result = await demographics.saveDefinition(input);
 
       if (result.error) {
@@ -313,7 +320,11 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
     await demographics.refreshDefinitions();
   }, [deleting, demographics, notify, notifyFailure, safeRefresh, t]);
 
-  const loadError = resolveError(t, demographics.error);
+  // The banner is for a **read** failure only. A refused write is reported by the
+  // surface that issued it (the drawer or the delete dialog) plus notify();
+  // rendering it here made Retry re-read the definitions instead of retrying
+  // the write that actually failed.
+  const loadError = resolveError(t, demographics.loadError);
   const systemCount = definitions.filter((definition) => definition.system === true).length;
 
   /** Stored-value count for one definition, as display text. */
@@ -692,7 +703,7 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
           definition={editing}
           ordinal={remainingOrdinal}
           saving={demographics.saving}
-          error={demographics.error}
+          error={demographics.writeError}
           onClose={closeDrawer}
           onSave={(input) => void handleSave(input)}
           onDirtyChange={setDirty}
