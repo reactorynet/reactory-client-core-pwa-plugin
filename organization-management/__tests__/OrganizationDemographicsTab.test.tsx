@@ -82,7 +82,9 @@ describe('registry wiring', () => {
     const people = ORGANIZATION_TABS.find((tab) => tab.id === 'people');
 
     expect(demographics?.component).toBe(OrganizationDemographicsTab);
-    expect(`${structure?.component.displayName || ''}`).toContain('ORG-022');
+    // ORG-022 has replaced the structure placeholder; the people placeholder
+    // this ticket must leave alone is still in place.
+    expect(`${structure?.component.displayName || ''}`).toBe('OrganizationStructureTab');
     expect(`${people?.component.displayName || ''}`).toContain('ORG-024');
   });
 });

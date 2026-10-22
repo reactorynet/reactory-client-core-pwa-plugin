@@ -352,14 +352,6 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
     [notify, t],
   );
 
-  const closeAll = useCallback(() => {
-    setUnitForm(null);
-    setTeamForm(null);
-    setMoveForm(null);
-    setMembersForm(null);
-    setDeleteTarget(null);
-  }, []);
-
   /* ---------------------------------------------------------------------- *
    * Business unit dialogs
    * ---------------------------------------------------------------------- */
@@ -815,7 +807,6 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                     onChange={(event) => structure.setIncludeDeleted(event.target.checked)}
                     inputProps={{
                       'aria-label': t('reactory.organizations.structure.showDeleted'),
-                      'data-testid': 'structure-show-deleted',
                     }}
                   />
                 }

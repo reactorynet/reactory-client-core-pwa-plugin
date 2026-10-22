@@ -538,7 +538,7 @@ export const ORGANIZATION_MESSAGES = {
   'reactory.organizations.structure.unit.delete': 'Delete {{name}}',
   'reactory.organizations.structure.unit.restore': 'Restore {{name}}',
   'reactory.organizations.structure.unit.members': 'Manage members of {{name}}',
-  'reactory.organizations.structure.unit.teamCount': '{{count}} teams',
+  'reactory.organizations.structure.unit.teamCount': 'Teams: {{count}}',
   'reactory.organizations.structure.unit.noTeams': 'No teams in this business unit',
   'reactory.organizations.structure.unit.deleted': 'Deleted',
   'reactory.organizations.structure.unit.owner': 'Owner: {{name}}',
@@ -598,7 +598,7 @@ export const ORGANIZATION_MESSAGES = {
   'reactory.organizations.structure.restore.confirm': 'Restore',
   'reactory.organizations.structure.members.title': 'Members of {{name}}',
   'reactory.organizations.structure.members.empty': 'No members yet',
-  'reactory.organizations.structure.members.count': '{{count}} members',
+  'reactory.organizations.structure.members.count': 'Members: {{count}}',
   'reactory.organizations.structure.members.memberId': 'User id',
   'reactory.organizations.structure.members.memberIdRequired':
     'Enter the user id of the member to add.',
