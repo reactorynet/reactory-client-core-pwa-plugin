@@ -39,7 +39,11 @@ import { ORGANIZATION_TABS, organizationTabById, OVERVIEW_TAB_ID } from './organ
 import useOrganizationDetail, { resolveOrganizationId } from './hooks/useOrganizationDetail';
 import useOrganizationAdmin from './hooks/useOrganizationAdmin';
 import type { OrganizationNotifyType } from './types';
-import { organizationStatus, resolveOrganizationPermissions } from './utils';
+import {
+  organizationStatus,
+  resolveOrganizationListRoute,
+  resolveOrganizationPermissions,
+} from './utils';
 
 export interface OrganizationDetailPanelProps {
   reactory?: any;
@@ -47,8 +51,22 @@ export interface OrganizationDetailPanelProps {
   id?: string;
   /** Alternative route-argument name used by some route configs. */
   organizationId?: string;
-  /** Called by the back action; defaults to navigating to `/organizations`. */
+  /**
+   * Called by the back action.
+   *
+   * Takes precedence over `listRoute`; a function, so code-only.
+   */
   onBack?: () => void;
+  /**
+   * Where Back navigates when the host supplies no `onBack` handler.
+   *
+   * A plain string precisely so a route config can supply it — `componentProps`
+   * is JSON, so the older function overrides are unreachable from configuration.
+   * Defaults to `/organizations` (the legacy panel); pass
+   * `'/organizations/manage'` when the surface is mounted under that prefix. A
+   * trailing slash is normalised away.
+   */
+  listRoute?: string;
 }
 
 /** Event emitted after any write, so hosts can refresh their own projections. */
@@ -96,6 +114,7 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
   id,
   organizationId,
   onBack,
+  listRoute,
 }) => {
   const hookReactory = useReactory();
   const reactory = propReactory || hookReactory;
@@ -176,15 +195,22 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
     [unsavedChanges],
   );
 
+  /**
+   * Back target: `onBack` if the host owns the destination, otherwise `listRoute`
+   * — `'/organizations'` when nothing is configured, so a host that passes
+   * neither keeps the pre-ORG-016 behaviour.
+   */
+  const backRoute = resolveOrganizationListRoute(listRoute);
+
   const navigateBack = useCallback(() => {
     if (typeof onBack === 'function') {
       onBack();
       return;
     }
     if (reactory && typeof reactory.navigation === 'function') {
-      reactory.navigation('/organizations');
+      reactory.navigation(backRoute);
     }
-  }, [onBack, reactory]);
+  }, [backRoute, onBack, reactory]);
 
   const handleBack = useCallback(() => guard(navigateBack), [guard, navigateBack]);
 

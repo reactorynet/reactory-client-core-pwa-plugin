@@ -153,7 +153,78 @@ export const resolveOrganizationPermissions = (reactory: any): OrganizationPermi
  *
  * Kept free of React so they can be unit tested directly and reused by both the
  * list and the detail shell.
+ *
+ * The path helpers below are the single place that decides where the surface
+ * lives. ORG-010/011 assumed `/organizations/*`; ORG-015 mounted the same UI at
+ * `/organizations/manage/*`, so every internal route is built from a
+ * configurable base path instead of a literal. Every default stays
+ * `/organizations`: a component that receives no `basePath` behaves exactly as
+ * it did before.
  */
+export const DEFAULT_ORGANIZATIONS_BASE_PATH = '/organizations';
+
+/**
+ * Collapse duplicate separators and drop any trailing slash.
+ *
+ * `'/organizations/manage/'` and `'/organizations/manage'` must both produce
+ * `'/organizations/manage'`, so that appending `/` + id never yields `//` — the
+ * router treats a doubled slash as a different (unrouted) path.
+ *
+ * Only repeated slashes *after* the first character are collapsed, so a scheme
+ * separator (`https://`) survives if a host ever passes a URL.
+ */
+export const normalizeOrganizationPath = (path?: string | null): string => {
+  const value = (path || '').trim();
+  if (!value) return '';
+  return value.replace(/([^:/])\/{2,}/g, '$1/').replace(/\/+$/, '');
+};
+
+/**
+ * Resolve the base path of the organization surface.
+ *
+ * Undefined / empty means "the legacy surface", `'/organizations'`, which is the
+ * backwards-compatible default. Anything else is normalised: leading slash
+ * added, duplicate slashes collapsed, trailing slash removed. An explicit `'/'`
+ * resolves to the empty prefix, so the detail route becomes `/<id>`.
+ */
+export const resolveOrganizationBasePath = (basePath?: string | null): string => {
+  if (basePath === undefined || basePath === null || `${basePath}`.trim() === '') {
+    return DEFAULT_ORGANIZATIONS_BASE_PATH;
+  }
+
+  const normalized = normalizeOrganizationPath(basePath);
+  if (!normalized) return '';
+  return normalized.startsWith('/') ? normalized : `/${normalized}`;
+};
+
+/**
+ * Build the detail route for one organization.
+ *
+ * Exactly one separator between the base and the id, whatever the host passed:
+ * `basePath + '/' + id` with the base normalised first.
+ */
+export const organizationDetailPath = (
+  basePath: string | null | undefined,
+  organizationId: string | null | undefined,
+): string => `${resolveOrganizationBasePath(basePath)}/${organizationId ?? ''}`;
+
+/**
+ * Resolve a "back to the list" target.
+ *
+ * An explicit `listRoute` wins over the base path, because a host may keep the
+ * detail view under `/organizations/manage` while the list lives elsewhere (or
+ * the reverse). It is normalised the same way, so a trailing slash cannot leak a
+ * `//` into the URL. When it is absent the base path *is* the list route.
+ */
+export const resolveOrganizationListRoute = (
+  listRoute?: string | null,
+  basePath?: string | null,
+): string => {
+  if (listRoute === undefined || listRoute === null || `${listRoute}`.trim() === '') {
+    return resolveOrganizationBasePath(basePath);
+  }
+  return normalizeOrganizationPath(listRoute) || listRoute;
+};
 
 /** Read an error message out of a GraphQL envelope, a rejection or anything else. */
 export const resolveErrorMessage = (error: any, fallback: string): string => {

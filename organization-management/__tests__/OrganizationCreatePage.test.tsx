@@ -86,3 +86,93 @@ describe('OrganizationCreatePage', () => {
     await waitFor(() => expect(reactory.navigation).toHaveBeenCalledWith('/orgs/org-created-1'));
   });
 });
+
+/**
+ * Route configuration (ORG-016).
+ *
+ * ORG-015 mounted the surface at `/organizations/manage/*` while this wrapper
+ * still cancelled to the literal `/organizations` and sent a fresh organization
+ * to `/organizations/<id>` — a path with no route. `basePath` is the
+ * serialisable knob a route config can pass (`componentProps` is JSON, so
+ * `detailRoute` cannot be configured); `listRoute` still overrides where
+ * "cancel" goes, and the defaults remain `/organizations`.
+ */
+describe('OrganizationCreatePage — basePath', () => {
+  /** Walk the wizard's four steps and submit. */
+  const submitCreate = async (name = 'Acme Holdings') => {
+    await userEvent.type(screen.getByLabelText(/^Name/), name);
+    await userEvent.click(screen.getByRole('button', { name: 'Next' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Next' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Next' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Create organization' }));
+  };
+
+  it('sends the user to `${basePath}/<id>` after a successful create', async () => {
+    const reactory = makeReactory();
+
+    render(<OrganizationCreatePage reactory={reactory} basePath="/organizations/manage" />);
+
+    await submitCreate();
+
+    await waitFor(() =>
+      expect(reactory.navigation).toHaveBeenCalledWith('/organizations/manage/org-created-1'),
+    );
+  });
+
+  it('cancels to basePath when no list route is supplied', async () => {
+    const reactory = makeReactory();
+
+    render(<OrganizationCreatePage reactory={reactory} basePath="/organizations/manage" />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    // The list now lives under the manage prefix too, so cancelling must not
+    // fall back to the legacy panel.
+    expect(reactory.navigation).toHaveBeenCalledWith('/organizations/manage');
+  });
+
+  it('does not double the slash for a basePath with a trailing slash', async () => {
+    const reactory = makeReactory();
+
+    render(<OrganizationCreatePage reactory={reactory} basePath="/organizations/manage/" />);
+
+    await submitCreate();
+
+    await waitFor(() => expect(reactory.navigation).toHaveBeenCalledTimes(1));
+    const [path] = reactory.navigation.mock.calls[0];
+    expect(path).toBe('/organizations/manage/org-created-1');
+    expect(path).not.toContain('//');
+  });
+
+  it('keeps an explicit listRoute ahead of basePath', async () => {
+    const reactory = makeReactory();
+
+    render(
+      <OrganizationCreatePage
+        reactory={reactory}
+        basePath="/organizations/manage"
+        listRoute="/admin/organizations"
+      />,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(reactory.navigation).toHaveBeenCalledWith('/admin/organizations');
+  });
+
+  it('keeps the detailRoute function ahead of basePath', async () => {
+    const reactory = makeReactory();
+
+    render(
+      <OrganizationCreatePage
+        reactory={reactory}
+        basePath="/organizations/manage"
+        detailRoute={(organization) => `/orgs/${organization.id}`}
+      />,
+    );
+
+    await submitCreate();
+
+    await waitFor(() => expect(reactory.navigation).toHaveBeenCalledWith('/orgs/org-created-1'));
+  });
+});

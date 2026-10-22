@@ -5,12 +5,35 @@ import { useReactory } from '@reactory/client-core/api';
 import OrganizationCreateWizard from './OrganizationCreateWizard';
 import { makeTranslator, resolveError } from './i18n';
 import type { Organization, OrganizationError } from './types';
+import {
+  DEFAULT_ORGANIZATIONS_BASE_PATH,
+  organizationDetailPath,
+  resolveOrganizationListRoute,
+} from './utils';
 
 export interface OrganizationCreatePageProps {
   reactory?: any;
-  /** Where "cancel" and a completed create send the user. */
+  /**
+   * Base path of the organization surface.
+   *
+   * Serializable on purpose: a route config's `componentProps` is JSON, so a host
+   * cannot hand the panel a `detailRoute` function. Defaults to `/organizations`;
+   * pass `'/organizations/manage'` when the surface is mounted under that
+   * prefix. A trailing slash is normalised away.
+   */
+  basePath?: string;
+  /**
+   * Where "cancel" sends the user.
+   *
+   * Defaults to `basePath` (which itself defaults to `/organizations`), so a host
+   * that only relocates the surface does not also have to repeat the list route.
+   */
   listRoute?: string;
-  /** Detail route for the organization that was just created. */
+  /**
+   * Override the detail route for the organization that was just created.
+   *
+   * Takes precedence over `basePath`; a function, so code-only.
+   */
   detailRoute?: (organization: Organization) => string;
 }
 
@@ -25,7 +48,8 @@ export interface OrganizationCreatePageProps {
  */
 export const OrganizationCreatePage: React.FC<OrganizationCreatePageProps> = ({
   reactory: propReactory,
-  listRoute = '/organizations',
+  basePath = DEFAULT_ORGANIZATIONS_BASE_PATH,
+  listRoute,
   detailRoute,
 }) => {
   const hookReactory = useReactory();
@@ -33,6 +57,9 @@ export const OrganizationCreatePage: React.FC<OrganizationCreatePageProps> = ({
   const t = makeTranslator(reactory);
 
   const [open, setOpen] = useState(true);
+
+  /** Cancel target: an explicit `listRoute`, else the surface's own base path. */
+  const listTarget = resolveOrganizationListRoute(listRoute, basePath);
 
   const navigate = useCallback(
     (path: string) => {
@@ -57,8 +84,8 @@ export const OrganizationCreatePage: React.FC<OrganizationCreatePageProps> = ({
 
   const handleClose = useCallback(() => {
     setOpen(false);
-    navigate(listRoute);
-  }, [listRoute, navigate]);
+    navigate(listTarget);
+  }, [listTarget, navigate]);
 
   const handleCreated = useCallback(
     (organization: Organization, warning?: OrganizationError | null) => {
@@ -76,11 +103,13 @@ export const OrganizationCreatePage: React.FC<OrganizationCreatePageProps> = ({
         notify(t('reactory.organizations.wizard.review.created', { name: organization.name }));
       }
 
+      // Same rule as the list panel: the function override wins, otherwise the
+      // detail view is `${basePath}/<id>`.
       navigate(
-        detailRoute ? detailRoute(organization) : `/organizations/${organization.id}`,
+        detailRoute ? detailRoute(organization) : organizationDetailPath(basePath, organization.id),
       );
     },
-    [detailRoute, navigate, notify, t],
+    [basePath, detailRoute, navigate, notify, t],
   );
 
   return (
