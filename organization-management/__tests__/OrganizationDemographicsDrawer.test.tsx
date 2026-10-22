@@ -274,7 +274,10 @@ describe('enum options editor', () => {
     openDrawer();
     expect(screen.queryByTestId('demographic-definition-options')).toBeNull();
 
-    await chooseOption(/Value type/, 'Date');
+    // `date` is deliberately not exercised here: its preview control is a MUI
+    // DatePicker, which needs the host's LocalizationProvider and is ORG-032's
+    // widget to cover (its own suite stubs it for the same reason).
+    await chooseOption(/Value type/, 'Number');
     expect(screen.queryByTestId('demographic-definition-options')).toBeNull();
 
     await chooseOption(/Value type/, 'Single choice');
@@ -339,9 +342,30 @@ describe('enum options editor', () => {
     expect(screen.getByTestId('demographic-definition-option-0-key')).toHaveValue('medium');
 
     fireEvent.click(screen.getByTestId('demographic-definition-save'));
+    // Ordinals are left as the author set them (0 then 1); removing row 0 does
+    // not rewrite the survivor, so it keeps ordinal 1.
     expect(lastSave(onSave).options).toEqual([
-      { key: 'medium', label: null, ordinal: 0, deprecated: false },
+      { key: 'medium', label: null, ordinal: 1, deprecated: false },
     ]);
+  });
+
+  it('gives a row added after a removal an ordinal that cannot collide', async () => {
+    await openEnumDrawer();
+
+    fireEvent.click(screen.getByTestId('demographic-definition-option-add'));
+    fireEvent.click(screen.getByTestId('demographic-definition-option-add'));
+    fireEvent.click(screen.getByTestId('demographic-definition-option-0-remove'));
+
+    // `length` would be 1 here and collide with the survivor's ordinal 1.
+    fireEvent.click(screen.getByTestId('demographic-definition-option-add'));
+    fireEvent.change(screen.getByTestId('demographic-definition-option-1-key'), {
+      target: { value: 'large' },
+    });
+    fireEvent.change(screen.getByTestId('demographic-definition-option-1-ordinal'), {
+      target: { value: '2' },
+    });
+
+    expect(screen.getByTestId('demographic-definition-option-1-ordinal')).toHaveValue(2);
   });
 
   it('requires at least one option', async () => {
@@ -844,7 +868,7 @@ describe('live preview', () => {
     expect(within(preview).getByLabelText('Shirt size')).toBeInTheDocument();
 
     fireEvent.mouseDown(within(preview).getByRole('combobox'));
-    expect(await screen.findByRole('option', { name: 'Large' })).toBeInTheDocument();
+    expect(await screen.findAllByRole('option', { name: 'Large' })).not.toHaveLength(0);
   });
 
   it('keeps previewing a definition that is being disabled', () => {

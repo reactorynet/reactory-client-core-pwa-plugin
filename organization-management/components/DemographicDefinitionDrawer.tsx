@@ -211,19 +211,24 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
   }, [creating, draft, invalid, onSave]);
 
   const addOption = useCallback((): void => {
-    setDraft((previous) => ({
-      ...previous,
-      options: [
-        ...previous.options,
-        {
-          id: nextRowId('option'),
-          key: '',
-          label: '',
-          ordinal: previous.options.length,
-          deprecated: false,
-        },
-      ],
-    }));
+    setDraft((previous) => {
+      // `max + 1`, not `length`: after a row is removed, `length` can collide
+      // with an ordinal that is still in use, and a collision makes the order
+      // ambiguous for the renderer (which sorts on this field).
+      const nextOrdinal = previous.options.reduce(
+        (highest, row) =>
+          Math.max(highest, Number.isFinite(Number(row.ordinal)) ? Number(row.ordinal) + 1 : 0),
+        0,
+      );
+
+      return {
+        ...previous,
+        options: [
+          ...previous.options,
+          { id: nextRowId('option'), key: '', label: '', ordinal: nextOrdinal, deprecated: false },
+        ],
+      };
+    });
   }, []);
 
   const removeOption = useCallback((index: number): void => {
