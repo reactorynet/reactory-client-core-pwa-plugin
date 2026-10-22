@@ -390,3 +390,155 @@ export type DemographicDefinitionsState =
       reason: 'no-organization' | 'not-implemented' | 'error';
       message?: string | null;
     };
+
+/* ------------------------------------------------------------------------- *
+ * Organization members (ORG-024)
+ *
+ * Mirrors the `OrganizationMember` type added by ORG-023 in
+ * `reactory-express-server/src/modules/reactory-core/graph/types/Organization/Organization.graphql`.
+ *
+ * Two fields deserve a note, because the People tab is built on them:
+ *
+ *   - `businessUnitId` / `businessUnit` are read from the membership
+ *     subdocument (`User.memberships[n].businessUnitId`). There is **no**
+ *     mutation that accepts a member's business unit: assigning one goes
+ *     through `addMemberToBusinessUnit` / `removeMemberFromBusinessUnit`.
+ *   - `teamIds` / `teams` are **derived** server-side from `Team.members`; the
+ *     membership itself has no team field. Assigning a team goes through
+ *     `addMemberToTeam` / `removeMemberFromTeam`.
+ *
+ * Both are therefore read-only on this shape and the tab never sends them back.
+ * ------------------------------------------------------------------------- */
+
+/** Lifecycle states of a member row; `invited` means a pending invitation. */
+export type OrganizationMemberStatus = 'active' | 'deactivated' | 'invited';
+
+/** A team reference on a member row, derived from `Team.members`. */
+export interface OrganizationMemberTeamRef {
+  id?: string | null;
+  name?: string | null;
+  title?: string | null;
+}
+
+/** The identity slice of the `User` a membership points at. */
+export interface OrganizationMemberUserRef {
+  id?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+  avatar?: string | null;
+}
+
+/**
+ * One membership row (`PagedOrganizationMembers.members`).
+ *
+ * `id` is the membership id, or the invitation id for a pending invitation.
+ * `userId` is null for an invitation, which is why every write is keyed on
+ * `userId` and the tab hides row actions when it is absent.
+ */
+export interface OrganizationMember {
+  id: string;
+  userId?: string | null;
+  user?: OrganizationMemberUserRef | null;
+  email?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  avatar?: string | null;
+  roles?: string[] | null;
+  enabled?: boolean | null;
+  status?: OrganizationMemberStatus | string | null;
+  businessUnitId?: string | null;
+  businessUnit?: OrganizationBusinessUnitRef | null;
+  teamIds?: string[] | null;
+  teams?: OrganizationMemberTeamRef[] | null;
+  created?: string | number | Date | null;
+  lastLogin?: string | number | Date | null;
+  authProvider?: string | null;
+  invited?: boolean | null;
+}
+
+/**
+ * `OrganizationMemberFilter`.
+ *
+ * `search` matches name and email case-insensitively. `status` is the canonical
+ * switch: `active` (the server default), `deactivated` or `invited`;
+ * `includeDeactivated` widens the active view rather than replacing `status`,
+ * because `status: 'invited'` switches the server to the invitation collection
+ * entirely.
+ */
+export interface OrganizationMemberFilter {
+  search?: string | null;
+  role?: string | null;
+  enabled?: boolean | null;
+  status?: OrganizationMemberStatus | string | null;
+  includeDeactivated?: boolean | null;
+  deactivatedOnly?: boolean | null;
+  businessUnitId?: string | null;
+  teamId?: string | null;
+}
+
+/** `PagingResult`, as the member envelope returns it. */
+export interface OrganizationMemberPaging {
+  page: number;
+  pageSize: number;
+  total: number;
+  hasNext: boolean;
+}
+
+/** `PagedOrganizationMembers` — the same envelope as business units and teams. */
+export interface OrganizationMemberPage {
+  members: OrganizationMember[];
+  paging: OrganizationMemberPaging;
+}
+
+/** Result of a mutation that only reports success or failure. */
+export interface OrganizationMemberWriteResult {
+  ok: boolean;
+  error: OrganizationError | null;
+}
+
+/** What `inviteOrganizationMember` accepts. `roles`/`businessUnitId` are optional. */
+export interface OrganizationMemberInviteInput {
+  email: string;
+  roles?: string[] | null;
+  businessUnitId?: string | null;
+}
+
+/** Result of a single invite: the pending member the server returned. */
+export interface OrganizationMemberInviteResult {
+  member: OrganizationMember | null;
+  error: OrganizationError | null;
+}
+
+/**
+ * How one email in an invite batch fared.
+ *
+ * The server has no bulk-invite mutation, so the tab invites one address at a
+ * time and reports every row independently — a duplicate or an invalid address
+ * must not discard the outcomes of the addresses around it.
+ */
+export type OrganizationMemberInviteOutcomeStatus =
+  | 'invited'
+  | 'already-member'
+  | 'invalid-email'
+  | 'error';
+
+export interface OrganizationMemberInviteOutcome {
+  email: string;
+  status: OrganizationMemberInviteOutcomeStatus;
+  /** The server's own message (untranslatable), or null. */
+  message: string | null;
+  /** The pending member returned for a successful invite. */
+  member?: OrganizationMember | null;
+}
+
+/**
+ * A member's desired assignment.
+ *
+ * `businessUnitId` is single-valued because a membership points at one unit;
+ * `teamIds` is a set because a user may belong to several teams.
+ */
+export interface OrganizationMemberAssignment {
+  businessUnitId: string | null;
+  teamIds: string[];
+}

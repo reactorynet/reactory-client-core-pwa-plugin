@@ -589,6 +589,139 @@ export const REMOVE_TEAM_MEMBER = `
   }
 `;
 
+/* ------------------------------------------------------------------------- *
+ * Organization members (ORG-024)
+ *
+ * `OrganizationMembers` is the membership-shaped read that shipped with ORG-023.
+ * It returns the same `{ paging, <collection> }` envelope as
+ * `pagedBusinessUnits` / `pagedTeams`, which is what lets the People tab page
+ * with the same controls as the Structure tab.
+ *
+ * `businessUnitId` and `teams` are read-only here: the server derives the unit
+ * from the membership and the teams from `Team.members`, and no mutation accepts
+ * either. Assignment therefore uses the ORG-020/021 business-unit and team
+ * documents below, never a field on this shape.
+ * ------------------------------------------------------------------------- */
+
+/**
+ * Fields selected for one member row.
+ *
+ * `user` repeats the identity fields the table renders, so a row is usable on
+ * its own; `teams { id name title }` carries both names the server may resolve
+ * for a team (`TeamResolver.title` / `.name`). `teamIds` is selected as well
+ * because it is the stable set the assignment dialog diffs against.
+ */
+export const ORGANIZATION_MEMBER_FIELDS = `
+  id
+  userId
+  user { id firstName lastName email avatar }
+  email
+  firstName
+  lastName
+  avatar
+  roles
+  enabled
+  status
+  businessUnitId
+  businessUnit { id name }
+  teamIds
+  teams { id name title }
+  created
+  lastLogin
+  authProvider
+  invited
+`;
+
+/** Default page size for the People table. */
+export const MEMBER_PAGE_SIZE = 25;
+
+/**
+ * One page of members, filtered server-side.
+ *
+ * Every filter the tab exposes is passed straight through: filtering on the
+ * client would make `paging.total` describe the loaded page rather than the
+ * result set, and paging would then skip or repeat rows.
+ */
+export const ORGANIZATION_MEMBERS = `
+  query OrganizationMembers($organizationId: String!, $filter: OrganizationMemberFilter, $paging: PagingRequest) {
+    OrganizationMembers(organizationId: $organizationId, filter: $filter, paging: $paging) {
+      paging { page pageSize total hasNext }
+      members {
+        ${ORGANIZATION_MEMBER_FIELDS}
+      }
+    }
+  }
+`;
+
+/**
+ * The membership mutations answer with the whole `Organization`.
+ *
+ * The People tab only needs to know the write succeeded and then re-reads the
+ * page, so the selection stays a reference (`id`, `name`) instead of pulling the
+ * whole organization on every role change.
+ */
+export const ORGANIZATION_MEMBER_WRITE_FIELDS = `
+  id
+  name
+`;
+
+/** Add a user to the organization (creates or re-activates their membership). */
+export const ADD_ORGANIZATION_MEMBER = `
+  mutation AddOrganizationMember($id: String!, $userId: String!, $roles: [String!]) {
+    addOrganizationMember(id: $id, userId: $userId, roles: $roles) {
+      ${ORGANIZATION_MEMBER_WRITE_FIELDS}
+    }
+  }
+`;
+
+/** Remove a user's membership. Destructive; the tab confirms first. */
+export const REMOVE_ORGANIZATION_MEMBER = `
+  mutation RemoveOrganizationMember($id: String!, $userId: String!) {
+    removeOrganizationMember(id: $id, userId: $userId) {
+      ${ORGANIZATION_MEMBER_WRITE_FIELDS}
+    }
+  }
+`;
+
+/** Replace a member's roles. `roles` is non-nullable, so an empty array clears. */
+export const SET_ORGANIZATION_MEMBER_ROLES = `
+  mutation SetOrganizationMemberRoles($id: String!, $userId: String!, $roles: [String!]!) {
+    setOrganizationMemberRoles(id: $id, userId: $userId, roles: $roles) {
+      ${ORGANIZATION_MEMBER_WRITE_FIELDS}
+    }
+  }
+`;
+
+/**
+ * Invite an email address.
+ *
+ * There is no bulk variant: a batch is one call per address so each outcome is
+ * reported on its own. The mutation answers with the pending member
+ * (`invited: true`, `status: 'invited'`, `userId: null`).
+ */
+export const INVITE_ORGANIZATION_MEMBER = `
+  mutation InviteOrganizationMember($id: String!, $email: String!, $roles: [String!], $businessUnitId: String) {
+    inviteOrganizationMember(id: $id, email: $email, roles: $roles, businessUnitId: $businessUnitId) {
+      ${ORGANIZATION_MEMBER_FIELDS}
+    }
+  }
+`;
+
+/**
+ * Disable a membership without deleting it.
+ *
+ * The server keeps the membership (and the member's business unit/team
+ * participation) and refuses organization access on the next authorization
+ * check, so the row moves to `status: 'deactivated'` rather than disappearing.
+ */
+export const DEACTIVATE_ORGANIZATION_MEMBER = `
+  mutation DeactivateOrganizationMember($id: String!, $userId: String!) {
+    deactivateOrganizationMember(id: $id, userId: $userId) {
+      ${ORGANIZATION_MEMBER_WRITE_FIELDS}
+    }
+  }
+`;
+
 /** Operation names, used by the hooks and by the test fixtures. */
 export const OPERATIONS = {
   coreOrganizations: 'CoreOrganizations',
@@ -625,4 +758,10 @@ export const OPERATIONS = {
   deleteTeam: 'deleteTeam',
   addTeamMember: 'addMemberToTeam',
   removeTeamMember: 'removeMemberFromTeam',
+  organizationMembers: 'OrganizationMembers',
+  addOrganizationMember: 'addOrganizationMember',
+  removeOrganizationMember: 'removeOrganizationMember',
+  setOrganizationMemberRoles: 'setOrganizationMemberRoles',
+  inviteOrganizationMember: 'inviteOrganizationMember',
+  deactivateOrganizationMember: 'deactivateOrganizationMember',
 } as const;
