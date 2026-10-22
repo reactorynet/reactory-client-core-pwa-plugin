@@ -22,6 +22,28 @@ afterEach(cleanup);
 
 const pendingPromise = () => new Promise(() => {});
 
+/**
+ * Wait until the shell is reachable again after a modal has closed.
+ *
+ * While a MUI Dialog/Menu is mounted it marks every sibling of its portal
+ * `aria-hidden` — that is the whole panel — so role queries cannot see the tab
+ * bar until the modal's exit transition has unmounted it. Measured on a loaded
+ * host that transition takes close to a second, which is the entire budget of
+ * Testing Library's `findBy*` default; querying straight after an action that
+ * closes a dialog therefore races the transition and reports "unable to find
+ * role=tab" against a perfectly correct panel.
+ *
+ * The probe is the tab bar rather than a dialog title: the title is derived from
+ * `pendingAction`, which is cleared the moment the user confirms, so it changes
+ * while the dialog is still animating out. The tab bar becoming queryable is the
+ * exact precondition for the assertions that follow.
+ */
+const waitForPanelToSettle = async (): Promise<void> => {
+  await waitFor(() => expect(screen.getByRole('tab', { name: 'Overview' })).toBeInTheDocument(), {
+    timeout: 5000,
+  });
+};
+
 describe('organizationIdFromPath', () => {
   it('reads the id from the detail route', async () => {
     const { organizationIdFromPath } = await import('../utils');
@@ -401,6 +423,7 @@ describe('OrganizationDetailPanel — unsaved-changes guard', () => {
     // The archive dialog opens; cancelling it changes nothing at all.
     expect(await screen.findByText('Archive Acme Holdings')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    await waitForPanelToSettle();
 
     // The form still holds the edit, so leaving must still ask.
     await userEvent.click(await screen.findByRole('tab', { name: 'Branding' }));
@@ -437,10 +460,16 @@ describe('OrganizationDetailPanel — unsaved-changes guard', () => {
         expect.objectContaining({ type: 'error' }),
       ),
     );
+    await waitForPanelToSettle();
 
     // Nothing was archived and nothing was reloaded: the edit is still there.
     await userEvent.click(await screen.findByRole('tab', { name: 'People' }));
     expect(await screen.findByText('Discard unsaved changes?')).toBeInTheDocument();
+
+    // The guard fired for a form that still holds the edit, so keeping editing
+    // must return the user to exactly what they typed.
+    await userEvent.click(screen.getByRole('button', { name: 'Keep editing' }));
+    expect(screen.getByLabelText(/^Name/)).toHaveValue('Acme Holdings Ltd');
   });
 
   it('keeps guarding when the restore mutation fails', async () => {
@@ -469,6 +498,7 @@ describe('OrganizationDetailPanel — unsaved-changes guard', () => {
         expect.objectContaining({ type: 'error' }),
       ),
     );
+    await waitForPanelToSettle();
 
     await userEvent.click(await screen.findByRole('tab', { name: 'Structure' }));
     expect(await screen.findByText('Discard unsaved changes?')).toBeInTheDocument();
@@ -482,6 +512,7 @@ describe('OrganizationDetailPanel — unsaved-changes guard', () => {
     await userEvent.click(screen.getByRole('tab', { name: 'People' }));
     await userEvent.click(screen.getByRole('button', { name: 'Discard changes' }));
     expect(await screen.findByText('ORG-024 delivers this tab')).toBeInTheDocument();
+    await waitForPanelToSettle();
 
     await userEvent.click(await screen.findByRole('tab', { name: 'Structure' }));
     expect(await screen.findByText('ORG-022 delivers this tab')).toBeInTheDocument();
