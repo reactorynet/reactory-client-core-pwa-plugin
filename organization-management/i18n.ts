@@ -317,6 +317,205 @@ export const ORGANIZATION_MESSAGES = {
     'The theme CSS could not be published.',
   'reactory.organizations.error.imageUploadFailed': 'The image could not be uploaded.',
   'reactory.organizations.error.imageRemoveFailed': 'The image could not be removed.',
+
+  // ---- Detail: Demographics tab (ORG-031) ----
+  'reactory.organizations.demographics.title': 'Demographic definitions',
+  'reactory.organizations.demographics.subtitle':
+    'What this organization tracks about its people, how each field is typed and rendered, and the order it appears in.',
+  'reactory.organizations.demographics.loading': 'Loading demographic definitions…',
+  'reactory.organizations.demographics.counting': 'Counting stored values…',
+  'reactory.organizations.demographics.loadFailed':
+    'The demographic definitions could not be loaded.',
+  'reactory.organizations.demographics.empty.title': 'No demographic definitions',
+  'reactory.organizations.demographics.empty.body':
+    'This organization has no definitions yet. Create one, or reseed the base set from the organization setup.',
+  'reactory.organizations.demographics.new': 'New definition',
+  'reactory.organizations.demographics.edit': 'Edit {{title}}',
+  'reactory.organizations.demographics.delete': 'Delete {{title}}',
+  'reactory.organizations.demographics.enable': 'Enable {{title}}',
+  'reactory.organizations.demographics.required': 'Require {{title}}',
+  'reactory.organizations.demographics.moveUp': 'Move {{title}} up',
+  'reactory.organizations.demographics.moveDown': 'Move {{title}} down',
+  'reactory.organizations.demographics.dragHandle': 'Reorder {{title}}',
+  'reactory.organizations.demographics.reorderHint':
+    'Drag a row, or use the arrow buttons, to change the order the fields appear in.',
+  'reactory.organizations.demographics.column.definition': 'Definition',
+  'reactory.organizations.demographics.column.category': 'Category',
+  'reactory.organizations.demographics.column.type': 'Type',
+  'reactory.organizations.demographics.column.usage': 'Values',
+  'reactory.organizations.demographics.column.required': 'Required',
+  'reactory.organizations.demographics.column.enabled': 'Enabled',
+  'reactory.organizations.demographics.column.actions': 'Actions',
+  'reactory.organizations.demographics.usage.count': '{{count}}',
+  'reactory.organizations.demographics.usage.none': '0',
+  'reactory.organizations.demographics.usage.unknown': '—',
+  'reactory.organizations.demographics.usage.hint':
+    'How many stored values reference the definition. A definition with values cannot be deleted; disable it instead.',
+  'reactory.organizations.demographics.yes': 'Yes',
+  'reactory.organizations.demographics.no': 'No',
+  'reactory.organizations.demographics.system.badge': 'System',
+  'reactory.organizations.demographics.system.hint':
+    'A base definition seeded with the organization. You may rename, reorder, require or disable it, but its value type is fixed.',
+  'reactory.organizations.demographics.category.personal': 'Personal',
+  'reactory.organizations.demographics.category.employment': 'Employment',
+  'reactory.organizations.demographics.category.organizational': 'Organizational',
+  'reactory.organizations.demographics.category.compliance': 'Compliance',
+  'reactory.organizations.demographics.type.string': 'Text',
+  'reactory.organizations.demographics.type.number': 'Number',
+  'reactory.organizations.demographics.type.boolean': 'Yes / no',
+  'reactory.organizations.demographics.type.date': 'Date',
+  'reactory.organizations.demographics.type.enum': 'Single choice',
+  'reactory.organizations.demographics.type.multi-enum': 'Multiple choice',
+  'reactory.organizations.demographics.type.object': 'Structured object',
+  'reactory.organizations.demographics.type.array': 'List',
+  'reactory.organizations.demographics.type.reference': 'Reference',
+
+  // ---- Demographics: drawer ----
+  'reactory.organizations.demographics.drawer.createTitle': 'New demographic definition',
+  'reactory.organizations.demographics.drawer.editTitle': 'Edit {{title}}',
+  'reactory.organizations.demographics.drawer.subtitle':
+    'The preview shows the field exactly as members will see it.',
+  'reactory.organizations.demographics.section.identity': 'Identity',
+  'reactory.organizations.demographics.section.typing': 'Typing and validation',
+  'reactory.organizations.demographics.section.widget': 'Widget binding',
+  'reactory.organizations.demographics.section.behaviour': 'Behaviour',
+  'reactory.organizations.demographics.section.preview': 'Live preview',
+  'reactory.organizations.demographics.field.key': 'Key',
+  'reactory.organizations.demographics.field.keyHint':
+    'Lower case letters, digits and underscores. Stored as the value key and cannot be changed later.',
+  'reactory.organizations.demographics.field.keyImmutable':
+    'The key is permanent: stored values reference it. Create a new definition to use a different key.',
+  'reactory.organizations.demographics.field.title': 'Title',
+  'reactory.organizations.demographics.field.titleHint': 'Shown as the field label.',
+  'reactory.organizations.demographics.field.description': 'Description',
+  'reactory.organizations.demographics.field.descriptionHint':
+    'Helper text shown under the field.',
+  'reactory.organizations.demographics.field.icon': 'Icon',
+  'reactory.organizations.demographics.field.iconHint':
+    'Optional Material icon name, for example badge.',
+  'reactory.organizations.demographics.field.category': 'Category',
+  'reactory.organizations.demographics.field.valueType': 'Value type',
+  'reactory.organizations.demographics.field.valueTypeLocked':
+    'This is a system definition, so its value type cannot change. Stored values were validated against it.',
+  'reactory.organizations.demographics.field.ordinal': 'Ordinal',
+  'reactory.organizations.demographics.field.ordinalHint':
+    'Position in the form. Reordering the list writes this for you.',
+  'reactory.organizations.demographics.field.schema': 'JSON Schema',
+  'reactory.organizations.demographics.field.schemaHint':
+    'Optional JSON Schema fragment validated on every write. Required for structured objects and lists.',
+  'reactory.organizations.demographics.field.options': 'Options',
+  'reactory.organizations.demographics.field.optionsHint':
+    'One row per choice. The key is stored; the label is what members read.',
+  'reactory.organizations.demographics.field.optionKey': 'Key',
+  'reactory.organizations.demographics.field.optionLabel': 'Label',
+  'reactory.organizations.demographics.field.optionOrdinal': 'Order',
+  'reactory.organizations.demographics.field.optionDeprecated': 'Retired',
+  'reactory.organizations.demographics.options.add': 'Add option',
+  'reactory.organizations.demographics.options.remove': 'Remove option',
+  'reactory.organizations.demographics.options.empty': 'No options yet.',
+  'reactory.organizations.demographics.field.referenceModel': 'Reference model',
+  'reactory.organizations.demographics.field.referenceMultiple': 'Allow several references',
+  'reactory.organizations.demographics.field.widgetFqn': 'Component FQN',
+  'reactory.organizations.demographics.field.widgetFqnHint':
+    'Optional custom widget, resolved through the component registry. Leave empty to use the built-in control for the value type.',
+  'reactory.organizations.demographics.widget.resolved': 'Resolved: {{fqn}}',
+  'reactory.organizations.demographics.widget.unresolved':
+    'No component is registered as {{fqn}}. The form falls back to the built-in control.',
+  'reactory.organizations.demographics.widget.registryUnavailable':
+    'The component registry is not available in this host, so the binding cannot be checked.',
+  'reactory.organizations.demographics.field.widgetProps': 'Component props (JSON)',
+  'reactory.organizations.demographics.field.widgetPropsHint':
+    'Passed to the widget before the field contract, so the contract always wins.',
+  'reactory.organizations.demographics.field.widgetPropsMap': 'Component props map',
+  'reactory.organizations.demographics.field.widgetPropsMapHint':
+    'Maps a dotted path in the render context onto a prop name, for example definition.options → options.',
+  'reactory.organizations.demographics.widget.mapSource': 'Context path',
+  'reactory.organizations.demographics.widget.mapProp': 'Prop name',
+  'reactory.organizations.demographics.widget.addMapping': 'Add mapping',
+  'reactory.organizations.demographics.widget.removeMapping': 'Remove mapping',
+  'reactory.organizations.demographics.flag.required': 'Required',
+  'reactory.organizations.demographics.flag.requiredHint':
+    'Members must supply a value before their demographics can be saved.',
+  'reactory.organizations.demographics.flag.multiValued': 'Multiple values',
+  'reactory.organizations.demographics.flag.multiValuedHint':
+    'Stores a list of the declared value type.',
+  'reactory.organizations.demographics.flag.sensitive': 'Sensitive',
+  'reactory.organizations.demographics.flag.sensitiveHint':
+    'Personal information: hidden from non-administrators and gated in reporting.',
+  'reactory.organizations.demographics.flag.searchable': 'Searchable',
+  'reactory.organizations.demographics.flag.searchableHint':
+    'Indexed for reporting and member search.',
+  'reactory.organizations.demographics.flag.enabled': 'Enabled',
+  'reactory.organizations.demographics.flag.enabledHint':
+    'Disabled definitions keep their stored values but are not captured.',
+  'reactory.organizations.demographics.preview.hint':
+    'Driven by this draft. Nothing is saved until you save the definition.',
+  'reactory.organizations.demographics.preview.label': 'Preview field',
+  'reactory.organizations.demographics.save': 'Save definition',
+  'reactory.organizations.demographics.saving': 'Saving…',
+  'reactory.organizations.demographics.cancel': 'Cancel',
+  'reactory.organizations.demographics.saved': '{{title}} was saved.',
+  'reactory.organizations.demographics.saveFailed': 'The definition could not be saved.',
+  'reactory.organizations.demographics.enableFailed':
+    'The definition could not be enabled or disabled.',
+  'reactory.organizations.demographics.enabled': '{{title}} is now enabled.',
+  'reactory.organizations.demographics.disabled': '{{title}} is now disabled.',
+  'reactory.organizations.demographics.requiredSaved':
+    '{{title}} is now {{state}}.',
+  'reactory.organizations.demographics.requiredState.required': 'required',
+  'reactory.organizations.demographics.requiredState.optional': 'optional',
+  'reactory.organizations.demographics.reorderFailed':
+    'The new order could not be saved.',
+  'reactory.organizations.demographics.reordered': 'Order saved.',
+  'reactory.organizations.demographics.delete.title': 'Delete {{title}}?',
+  'reactory.organizations.demographics.delete.body':
+    'The definition is soft-deleted, so existing values keep resolving. A definition that still has values cannot be deleted — disable it instead.',
+  'reactory.organizations.demographics.delete.blockedHint':
+    'If values still reference this definition the server refuses the delete and nothing changes.',
+  'reactory.organizations.demographics.delete.confirm': 'Delete',
+  'reactory.organizations.demographics.delete.failed':
+    'The definition could not be deleted.',
+  'reactory.organizations.demographics.deleted': '{{title}} was deleted.',
+  'reactory.organizations.demographics.error.keyRequired': 'A key is required.',
+  'reactory.organizations.demographics.error.keyInvalid':
+    'Use lower case letters, digits and underscores, starting with a letter.',
+  'reactory.organizations.demographics.error.titleRequired': 'A title is required.',
+  'reactory.organizations.demographics.error.valueTypeInvalid':
+    'Choose one of the supported value types.',
+  'reactory.organizations.demographics.error.ordinalInvalid':
+    'The ordinal must be a whole number of zero or more.',
+  'reactory.organizations.demographics.error.schemaInvalidJson':
+    'The schema is not valid JSON.',
+  'reactory.organizations.demographics.error.schemaNotObject':
+    'The schema must be a JSON object.',
+  'reactory.organizations.demographics.error.schemaInvalidType':
+    'schema.type must be one of object, array, string, number, integer, boolean or null.',
+  'reactory.organizations.demographics.error.schemaInvalidProperties':
+    'schema.properties must be a JSON object.',
+  'reactory.organizations.demographics.error.schemaInvalidRequired':
+    'schema.required must be a list of property names.',
+  'reactory.organizations.demographics.error.schemaInvalidItems':
+    'schema.items must be a JSON object.',
+  'reactory.organizations.demographics.error.schemaInvalidEnum':
+    'schema.enum must be a list.',
+  'reactory.organizations.demographics.error.optionsRequired':
+    'A single or multiple choice definition needs at least one option.',
+  'reactory.organizations.demographics.error.optionKeyRequired':
+    'Every option with a label needs a key.',
+  'reactory.organizations.demographics.error.optionKeyDuplicate':
+    'Option keys must be unique.',
+  'reactory.organizations.demographics.error.referenceRequired':
+    'Choose the model this definition references.',
+  'reactory.organizations.demographics.error.widgetPropsInvalidJson':
+    'The component props are not valid JSON.',
+  'reactory.organizations.demographics.error.widgetPropsNotObject':
+    'The component props must be a JSON object.',
+  'reactory.organizations.demographics.error.propsMapSourceInvalid':
+    'Every context path must be a dotted path without empty segments.',
+  'reactory.organizations.demographics.error.propsMapPropInvalid':
+    'Every mapping needs a prop name.',
+  'reactory.organizations.demographics.error.propsMapDuplicateSource':
+    'A context path can only be mapped once.',
 } as const;
 
 export type OrganizationMessageKey = keyof typeof ORGANIZATION_MESSAGES;

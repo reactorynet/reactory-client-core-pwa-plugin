@@ -10,6 +10,7 @@ import {
 
 import OrganizationOverviewTab from './OrganizationOverviewTab';
 import OrganizationBrandingTab from './OrganizationBrandingTab';
+import OrganizationDemographicsTab from './OrganizationDemographicsTab';
 import OrganizationTabPlaceholder from './components/OrganizationTabPlaceholder';
 import type { OrganizationMessageKey } from './i18n';
 import type { OrganizationTabDefinition, OrganizationTabProps } from './types';
@@ -79,10 +80,9 @@ export const ORGANIZATION_TABS: OrganizationTabDefinition[] = [
     id: 'demographics',
     labelKey: 'reactory.organizations.detail.tab.demographics',
     icon: <InsightsOutlinedIcon fontSize="small" />,
-    component: placeholderTab(
-      'ORG-031',
-      'reactory.organizations.detail.tab.demographics.placeholder',
-    ),
+    // ORG-031 replaced this entry's placeholder; the other placeholder entries
+    // and the shell are untouched.
+    component: OrganizationDemographicsTab,
   },
   {
     id: 'settings',
