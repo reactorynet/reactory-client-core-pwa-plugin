@@ -837,7 +837,11 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
         deleted: operation === 'DeleteBusinessUnit',
       };
       businessUnits[index] = updated;
-      return Promise.resolve({ data: { [operation]: { ...updated } }, errors: [] });
+
+      // The response is keyed by the GraphQL *field*, not the operation name.
+      const field =
+        operation === 'DeleteBusinessUnit' ? 'deleteBusinessUnit' : 'restoreBusinessUnit';
+      return Promise.resolve({ data: { [field]: { ...updated } }, errors: [] });
     }
 
     if (operation === 'AddBusinessUnitMember' || operation === 'RemoveBusinessUnitMember') {
@@ -857,7 +861,12 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
           operation === 'AddBusinessUnitMember' ||
           `${member.id}` !== `${variables?.memberId}`,
       );
-      return Promise.resolve({ data: { [operation]: true }, errors: [] });
+
+      const field =
+        operation === 'AddBusinessUnitMember'
+          ? 'addMemberToBusinessUnit'
+          : 'removeMemberFromBusinessUnit';
+      return Promise.resolve({ data: { [field]: true }, errors: [] });
     }
 
     if (operation === 'CreateTeam') {
@@ -944,7 +953,10 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
         (member) =>
           operation === 'AddTeamMember' || `${member.id}` !== `${variables?.memberId}`,
       );
-      return Promise.resolve({ data: { [operation]: true }, errors: [] });
+
+      const field =
+        operation === 'AddTeamMember' ? 'addMemberToTeam' : 'removeMemberFromTeam';
+      return Promise.resolve({ data: { [field]: true }, errors: [] });
     }
 
     return Promise.resolve({

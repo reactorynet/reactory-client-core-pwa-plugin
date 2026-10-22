@@ -418,7 +418,7 @@ describe('moving a team between units', () => {
 
 describe('membership', () => {
   it('adds and removes a business unit member', async () => {
-    const { reactory } = setup();
+    const { props, reactory } = setup();
     await ready();
 
     await userEvent.click(screen.getByTestId('structure-unit-members-bu-1'));
@@ -435,6 +435,9 @@ describe('membership', () => {
       id: 'bu-1',
       memberId: 'user-new-1',
     });
+    await waitFor(() =>
+      expect(props.notify).toHaveBeenCalledWith('user-new-1 added.', 'success'),
+    );
 
     await userEvent.click(await screen.findByTestId('structure-member-remove-user-member-1'));
 
@@ -445,10 +448,13 @@ describe('membership', () => {
       id: 'bu-1',
       memberId: 'user-member-1',
     });
+    await waitFor(() =>
+      expect(props.notify).toHaveBeenCalledWith('Alan Turing removed.', 'success'),
+    );
   });
 
   it('adds and removes a team member', async () => {
-    const { reactory } = setup();
+    const { props, reactory } = setup();
     await ready();
 
     await userEvent.click(screen.getByTestId('structure-team-members-team-1'));
@@ -463,6 +469,9 @@ describe('membership', () => {
       id: 'team-1',
       memberId: 'user-new-2',
     });
+    await waitFor(() =>
+      expect(props.notify).toHaveBeenCalledWith('user-new-2 added.', 'success'),
+    );
 
     await userEvent.click(await screen.findByTestId('structure-member-remove-user-member-2'));
 
@@ -471,6 +480,9 @@ describe('membership', () => {
       id: 'team-1',
       memberId: 'user-member-2',
     });
+    await waitFor(() =>
+      expect(props.notify).toHaveBeenCalledWith('Margaret Hamilton removed.', 'success'),
+    );
   });
 });
 
