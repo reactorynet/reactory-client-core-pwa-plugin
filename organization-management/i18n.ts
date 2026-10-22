@@ -516,6 +516,114 @@ export const ORGANIZATION_MESSAGES = {
     'Every mapping needs a prop name.',
   'reactory.organizations.demographics.error.propsMapDuplicateSource':
     'A context path can only be mapped once.',
+
+  // ---- Structure (ORG-022) ----
+  // The Structure tab renders one hierarchy of business units with their teams
+  // nested beneath. Every string below — including validation messages and
+  // success notifications — is resolved through `t()`.
+  'reactory.organizations.structure.title': 'Organization structure',
+  'reactory.organizations.structure.hint':
+    'Business units, and the teams that report into each one.',
+  'reactory.organizations.structure.loading': 'Loading structure…',
+  'reactory.organizations.structure.showDeleted': 'Show deleted business units',
+  'reactory.organizations.structure.showDeletedHint':
+    'Deleted units are kept on the server and can be restored.',
+  'reactory.organizations.structure.empty': 'No business units yet',
+  'reactory.organizations.structure.emptyHint':
+    'Create the first business unit to group your teams.',
+  'reactory.organizations.structure.emptyReadOnly':
+    'This organization has no business units yet.',
+  'reactory.organizations.structure.unit.create': 'Add business unit',
+  'reactory.organizations.structure.unit.edit': 'Edit {{name}}',
+  'reactory.organizations.structure.unit.delete': 'Delete {{name}}',
+  'reactory.organizations.structure.unit.restore': 'Restore {{name}}',
+  'reactory.organizations.structure.unit.members': 'Manage members of {{name}}',
+  'reactory.organizations.structure.unit.teamCount': '{{count}} teams',
+  'reactory.organizations.structure.unit.noTeams': 'No teams in this business unit',
+  'reactory.organizations.structure.unit.deleted': 'Deleted',
+  'reactory.organizations.structure.unit.owner': 'Owner: {{name}}',
+  'reactory.organizations.structure.unit.ownerNone': 'No owner',
+  'reactory.organizations.structure.unit.createTitle': 'New business unit',
+  'reactory.organizations.structure.unit.editTitle': 'Edit business unit',
+  'reactory.organizations.structure.team.create': 'Add team',
+  'reactory.organizations.structure.team.createIn': 'Add team to {{name}}',
+  'reactory.organizations.structure.team.edit': 'Edit {{name}}',
+  'reactory.organizations.structure.team.delete': 'Delete {{name}}',
+  'reactory.organizations.structure.team.move': 'Move {{name}} to another business unit',
+  'reactory.organizations.structure.team.members': 'Manage members of {{name}}',
+  'reactory.organizations.structure.team.createTitle': 'New team',
+  'reactory.organizations.structure.team.editTitle': 'Edit team',
+  'reactory.organizations.structure.team.createHint':
+    'Teams are created with a name and, optionally, a business unit. Owner and description are set from Edit.',
+  'reactory.organizations.structure.team.deleted': 'Deleted',
+  'reactory.organizations.structure.team.moveTitle': 'Move {{name}}',
+  'reactory.organizations.structure.team.moveBody':
+    'Choose the business unit this team should report into.',
+  'reactory.organizations.structure.team.moveTarget': 'Business unit',
+  'reactory.organizations.structure.team.moveNoTargets':
+    'There is no other business unit to move this team to.',
+  'reactory.organizations.structure.team.moveConfirm': 'Move team',
+  'reactory.organizations.structure.team.currentUnit': 'Business unit: {{name}}',
+  'reactory.organizations.structure.team.unassigned': 'Unassigned',
+  'reactory.organizations.structure.unassigned.title': 'Unassigned teams',
+  'reactory.organizations.structure.unassigned.hint':
+    'These teams are not linked to a business unit.',
+  'reactory.organizations.structure.unassigned.count': '{{count}} unassigned',
+  'reactory.organizations.structure.name': 'Name',
+  'reactory.organizations.structure.namePlaceholder': 'e.g. Engineering',
+  'reactory.organizations.structure.nameRequired': 'A name is required.',
+  'reactory.organizations.structure.description': 'Description',
+  'reactory.organizations.structure.descriptionPlaceholder':
+    'What this group is responsible for',
+  'reactory.organizations.structure.owner': 'Owner user id',
+  'reactory.organizations.structure.ownerHint': 'The id of the user who owns this record.',
+  'reactory.organizations.structure.ownerRequired':
+    'An owner user id is required to create a business unit.',
+  'reactory.organizations.structure.businessUnit': 'Business unit',
+  'reactory.organizations.structure.businessUnitUnassigned':
+    'Unassigned (no business unit)',
+  'reactory.organizations.structure.save': 'Save',
+  'reactory.organizations.structure.saving': 'Saving…',
+  'reactory.organizations.structure.cancel': 'Cancel',
+  'reactory.organizations.structure.close': 'Close',
+  'reactory.organizations.structure.delete.title': 'Delete {{name}}?',
+  'reactory.organizations.structure.delete.unitBody':
+    'The business unit is soft-deleted: its teams and members are kept, and it can be restored later.',
+  'reactory.organizations.structure.delete.teamBody':
+    'The team is soft-deleted and is removed from the structure.',
+  'reactory.organizations.structure.delete.confirm': 'Delete',
+  'reactory.organizations.structure.restore.title': 'Restore {{name}}?',
+  'reactory.organizations.structure.restore.body':
+    'The business unit will be listed again with its teams and members.',
+  'reactory.organizations.structure.restore.confirm': 'Restore',
+  'reactory.organizations.structure.members.title': 'Members of {{name}}',
+  'reactory.organizations.structure.members.empty': 'No members yet',
+  'reactory.organizations.structure.members.count': '{{count}} members',
+  'reactory.organizations.structure.members.memberId': 'User id',
+  'reactory.organizations.structure.members.memberIdRequired':
+    'Enter the user id of the member to add.',
+  'reactory.organizations.structure.members.add': 'Add member',
+  'reactory.organizations.structure.members.remove': 'Remove {{name}}',
+  'reactory.organizations.structure.notify.unitCreated': 'Business unit {{name}} created.',
+  'reactory.organizations.structure.notify.unitSaved': 'Business unit {{name}} saved.',
+  'reactory.organizations.structure.notify.unitDeleted': 'Business unit {{name}} deleted.',
+  'reactory.organizations.structure.notify.unitRestored': 'Business unit {{name}} restored.',
+  'reactory.organizations.structure.notify.teamCreated': 'Team {{name}} created.',
+  'reactory.organizations.structure.notify.teamSaved': 'Team {{name}} saved.',
+  'reactory.organizations.structure.notify.teamDeleted': 'Team {{name}} deleted.',
+  'reactory.organizations.structure.notify.teamMoved': 'Team {{name}} moved to {{unit}}.',
+  'reactory.organizations.structure.notify.memberAdded': '{{name}} added.',
+  'reactory.organizations.structure.notify.memberRemoved': '{{name}} removed.',
+  'reactory.organizations.error.structureLoadFailed':
+    'The organization structure could not be loaded.',
+  'reactory.organizations.error.structureSaveFailed': 'The change could not be saved.',
+  'reactory.organizations.error.structureDeleteFailed': 'The record could not be deleted.',
+  'reactory.organizations.error.structureRestoreFailed':
+    'The business unit could not be restored.',
+  'reactory.organizations.error.structureMoveFailed':
+    'The team could not be moved to that business unit.',
+  'reactory.organizations.error.structureMemberFailed':
+    'The membership could not be updated.',
 } as const;
 
 export type OrganizationMessageKey = keyof typeof ORGANIZATION_MESSAGES;

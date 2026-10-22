@@ -385,6 +385,210 @@ export const ORGANIZATION_UPLOAD_IMAGE = `
   }
 `;
 
+/* ------------------------------------------------------------------------- *
+ * Organization structure (ORG-022)
+ *
+ * Every document below targets the API that shipped with ORG-020 (business
+ * units) and ORG-021 (teams + the business-unit link). Two details are easy to
+ * get wrong and are deliberate here:
+ *
+ *   - `businessUnitsForOrganization` and `teamsForOrganization` take `id`, not
+ *     `organizationId`. The paged variants take `organizationId`. The tab uses
+ *     the paged ones because only `ReactoryBusinessUnitFilter` can ask for
+ *     soft-deleted units (`includeDeleted`), which is what makes Restore
+ *     reachable.
+ *   - `moveTeamToBusinessUnit` takes `id` (the team) and `businessUnitId`. A
+ *     team's unit is never moved by sending `businessUnit` through
+ *     `updateTeam`: that path would bypass the server's explicit move
+ *     validation, which is the point of the dedicated mutation.
+ * ------------------------------------------------------------------------- */
+
+/** Fields selected for a business unit node. */
+export const BUSINESS_UNIT_FIELDS = `
+  id
+  name
+  description
+  avatar
+  deleted
+  organization { id }
+  owner { id firstName lastName email }
+  members { id firstName lastName email }
+`;
+
+/** Fields selected for a team node, including the unit link. */
+export const TEAM_FIELDS = `
+  id
+  title
+  name
+  description
+  avatar
+  deleted
+  organization { id }
+  businessUnit { id name }
+  owner { id firstName lastName email }
+  members { id firstName lastName email }
+`;
+
+/**
+ * How many rows the structure view asks for in one page.
+ *
+ * Both paged queries are used (rather than the flat `*ForOrganization`
+ * variants) because only the paged filters can express "include soft-deleted
+ * business units". The structure screen is a whole-organization view, so it
+ * loads one large page and does not paginate in the UI.
+ */
+export const STRUCTURE_PAGE_SIZE = 500;
+
+/**
+ * Business units for the organization, optionally including soft-deleted ones.
+ *
+ * `filter.includeDeleted` is the server's own flag (`ReactoryBusinessUnitFilter`)
+ * — the tab toggles it, it does not invent a client-side filter.
+ */
+export const ORGANIZATION_STRUCTURE_BUSINESS_UNITS = `
+  query OrganizationStructureBusinessUnits($organizationId: String!, $includeDeleted: Boolean) {
+    OrganizationStructureBusinessUnits: pagedBusinessUnits(
+      organizationId: $organizationId
+      filter: { includeDeleted: $includeDeleted }
+      paging: { page: 1, pageSize: ${STRUCTURE_PAGE_SIZE} }
+    ) {
+      paging { total page pageSize hasNext }
+      businessUnits {
+        ${BUSINESS_UNIT_FIELDS}
+      }
+    }
+  }
+`;
+
+/** Teams for the organization, with their business-unit link. */
+export const ORGANIZATION_STRUCTURE_TEAMS = `
+  query OrganizationStructureTeams($organizationId: String!) {
+    OrganizationStructureTeams: pagedTeams(
+      organizationId: $organizationId
+      paging: { page: 1, pageSize: ${STRUCTURE_PAGE_SIZE} }
+    ) {
+      paging { total page pageSize hasNext }
+      teams {
+        ${TEAM_FIELDS}
+      }
+    }
+  }
+`;
+
+/**
+ * Create a business unit.
+ *
+ * `BusinessUnitInput` requires `organization` and `owner`; `owner` comes from
+ * the form (defaulted to the signed-in user), `organization` from the tab's
+ * organization.
+ */
+export const CREATE_BUSINESS_UNIT = `
+  mutation CreateBusinessUnit($input: BusinessUnitInput!) {
+    createBusinessUnit(input: $input) {
+      ${BUSINESS_UNIT_FIELDS}
+    }
+  }
+`;
+
+/** Update a business unit's identity fields (`BusinessUnitUpdateInput`). */
+export const UPDATE_BUSINESS_UNIT = `
+  mutation UpdateBusinessUnit($id: String!, $input: BusinessUnitUpdateInput) {
+    updateBusinessUnit(id: $id, input: $input) {
+      ${BUSINESS_UNIT_FIELDS}
+    }
+  }
+`;
+
+/** Soft-delete a business unit. Returns the unit with `deleted: true`. */
+export const DELETE_BUSINESS_UNIT = `
+  mutation DeleteBusinessUnit($id: String!) {
+    deleteBusinessUnit(id: $id) {
+      ${BUSINESS_UNIT_FIELDS}
+    }
+  }
+`;
+
+/** Restore a soft-deleted business unit. */
+export const RESTORE_BUSINESS_UNIT = `
+  mutation RestoreBusinessUnit($id: String!) {
+    restoreBusinessUnit(id: $id) {
+      ${BUSINESS_UNIT_FIELDS}
+    }
+  }
+`;
+
+/** Add a user to a business unit. Answers with a boolean. */
+export const ADD_BUSINESS_UNIT_MEMBER = `
+  mutation AddBusinessUnitMember($id: String!, $memberId: String!) {
+    addMemberToBusinessUnit(id: $id, memberId: $memberId)
+  }
+`;
+
+/** Remove a user from a business unit. Answers with a boolean. */
+export const REMOVE_BUSINESS_UNIT_MEMBER = `
+  mutation RemoveBusinessUnitMember($id: String!, $memberId: String!) {
+    removeMemberFromBusinessUnit(id: $id, memberId: $memberId)
+  }
+`;
+
+/**
+ * Create a team inside the organization, optionally inside a business unit.
+ *
+ * The server's `createTeam` only reads `organization`, `name`/`title` and
+ * `businessUnit`; owner and description are set through `updateTeam`.
+ */
+export const CREATE_TEAM = `
+  mutation CreateTeam($input: TeamInput) {
+    createTeam(input: $input) {
+      ${TEAM_FIELDS}
+    }
+  }
+`;
+
+/** Update a team. Never carries `businessUnit` — see `MOVE_TEAM_TO_BUSINESS_UNIT`. */
+export const UPDATE_TEAM = `
+  mutation UpdateTeam($id: String!, $input: TeamInput) {
+    updateTeam(id: $id, input: $input) {
+      ${TEAM_FIELDS}
+    }
+  }
+`;
+
+/**
+ * Move a team into a business unit.
+ *
+ * The single supported way to change a team's unit. The service re-validates
+ * both sides and enforces the cross-organization guard.
+ */
+export const MOVE_TEAM_TO_BUSINESS_UNIT = `
+  mutation MoveTeamToBusinessUnit($id: String!, $businessUnitId: String!) {
+    moveTeamToBusinessUnit(id: $id, businessUnitId: $businessUnitId) {
+      ${TEAM_FIELDS}
+    }
+  }
+`;
+
+/** Soft-delete a team. Answers with a boolean. */
+export const DELETE_TEAM = `
+  mutation DeleteTeam($id: String!) {
+    deleteTeam(id: $id)
+  }
+`;
+
+/** Add a user to a team. Answers with a boolean. */
+export const ADD_TEAM_MEMBER = `
+  mutation AddTeamMember($id: String!, $memberId: String!) {
+    addMemberToTeam(id: $id, memberId: $memberId)
+  }
+`;
+
+/** Remove a user from a team. Answers with a boolean. */
+export const REMOVE_TEAM_MEMBER = `
+  mutation RemoveTeamMember($id: String!, $memberId: String!) {
+    removeMemberFromTeam(id: $id, memberId: $memberId)
+  }
+`;
+
 /** Operation names, used by the hooks and by the test fixtures. */
 export const OPERATIONS = {
   coreOrganizations: 'CoreOrganizations',
@@ -407,4 +611,18 @@ export const OPERATIONS = {
   organizationDeleteTheme: 'OrganizationDeleteTheme',
   organizationPublishThemeCss: 'OrganizationPublishThemeCss',
   organizationUploadImage: 'OrganizationUploadImage',
+  organizationStructureBusinessUnits: 'OrganizationStructureBusinessUnits',
+  organizationStructureTeams: 'OrganizationStructureTeams',
+  createBusinessUnit: 'createBusinessUnit',
+  updateBusinessUnit: 'updateBusinessUnit',
+  deleteBusinessUnit: 'deleteBusinessUnit',
+  restoreBusinessUnit: 'restoreBusinessUnit',
+  addBusinessUnitMember: 'addMemberToBusinessUnit',
+  removeBusinessUnitMember: 'removeMemberFromBusinessUnit',
+  createTeam: 'createTeam',
+  updateTeam: 'updateTeam',
+  moveTeamToBusinessUnit: 'moveTeamToBusinessUnit',
+  deleteTeam: 'deleteTeam',
+  addTeamMember: 'addMemberToTeam',
+  removeTeamMember: 'removeMemberFromTeam',
 } as const;
