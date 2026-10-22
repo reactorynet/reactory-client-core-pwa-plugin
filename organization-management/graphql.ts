@@ -129,21 +129,112 @@ export const RESTORE_ORGANIZATION = `
 `;
 
 /**
- * ORG-030/ORG-031 will add this query. It is defined here so the wizard has a
- * single place to guard; `useDemographicDefinitions` treats a schema-level
- * rejection as "not available yet" rather than an error.
+ * Every field the Demographics configuration pane (ORG-031) reads.
+ *
+ * Mirrors `type DemographicDefinition` in
+ * `reactory-express-server/src/modules/reactory-core/graph/types/Demographics`.
+ * `schema`, `componentProps` and `componentPropsMap` are the server's `Any`
+ * scalar and are read as opaque JSON — the editor validates their structure
+ * client-side before they are sent back.
+ */
+export const DEMOGRAPHIC_DEFINITION_FIELDS = `
+  id
+  organization
+  key
+  title
+  description
+  icon
+  category
+  valueType
+  schema
+  options { key label ordinal deprecated }
+  reference { model multiple }
+  widget { componentFqn componentProps componentPropsMap }
+  required
+  multiValued
+  sensitive
+  searchable
+  enabled
+  ordinal
+  roles
+  system
+`;
+
+/**
+ * The organization's definitions, ordered by `ordinal` by the server.
+ *
+ * `includeDisabled` is optional rather than required-with-default so the create
+ * wizard's guard (`useDemographicDefinitions` in `hooks/useOrganizationAdmin`)
+ * can keep calling this document with `{ organizationId }` alone and still
+ * receive the enabled set.
  */
 export const ORGANIZATION_DEMOGRAPHIC_DEFINITIONS = `
-  query OrganizationDemographicDefinitions($organizationId: String!) {
-    OrganizationDemographicDefinitions(organizationId: $organizationId) {
-      id
-      key
-      title
-      description
-      category
-      valueType
-      required
-      ordinal
+  query OrganizationDemographicDefinitions($organizationId: String!, $includeDisabled: Boolean) {
+    OrganizationDemographicDefinitions(organizationId: $organizationId, includeDisabled: $includeDisabled) {
+      ${DEMOGRAPHIC_DEFINITION_FIELDS}
+    }
+  }
+`;
+
+/**
+ * Create or update one definition.
+ *
+ * `key` is only ever sent on create: the server freezes it once the definition
+ * exists, and `buildDefinitionInput` in `./demographicDraft` refuses to include
+ * it for an update.
+ */
+export const ORGANIZATION_SAVE_DEMOGRAPHIC_DEFINITION = `
+  mutation OrganizationSaveDemographicDefinition($organizationId: String!, $definition: DemographicDefinitionInput!) {
+    OrganizationSaveDemographicDefinition(organizationId: $organizationId, definition: $definition) {
+      ${DEMOGRAPHIC_DEFINITION_FIELDS}
+    }
+  }
+`;
+
+/**
+ * Soft-delete one definition.
+ *
+ * The server refuses when stored values still reference the definition; the
+ * pane surfaces that refusal verbatim and keeps the row, so this mutation
+ * resolves `false`/throws rather than silently succeeding.
+ */
+export const ORGANIZATION_DELETE_DEMOGRAPHIC_DEFINITION = `
+  mutation OrganizationDeleteDemographicDefinition($organizationId: String!, $key: String!) {
+    OrganizationDeleteDemographicDefinition(organizationId: $organizationId, key: $key)
+  }
+`;
+
+/** Apply the supplied key order as the definitions' `ordinal`. */
+export const ORGANIZATION_REORDER_DEMOGRAPHIC_DEFINITIONS = `
+  mutation OrganizationReorderDemographicDefinitions($organizationId: String!, $keys: [String!]!) {
+    OrganizationReorderDemographicDefinitions(organizationId: $organizationId, keys: $keys) {
+      ${DEMOGRAPHIC_DEFINITION_FIELDS}
+    }
+  }
+`;
+
+/** Toggle one definition without touching any stored value. */
+export const ORGANIZATION_SET_DEMOGRAPHIC_ENABLED = `
+  mutation OrganizationSetDemographicEnabled($organizationId: String!, $key: String!, $enabled: Boolean!) {
+    OrganizationSetDemographicEnabled(organizationId: $organizationId, key: $key, enabled: $enabled) {
+      ${DEMOGRAPHIC_DEFINITION_FIELDS}
+    }
+  }
+`;
+
+/**
+ * One page of stored values, used only to count them.
+ *
+ * `DemographicDefinition` carries no usage count and the server has no
+ * aggregation query, so the configuration pane asks for a single-row page per
+ * definition and reads `paging.total`. `pageSize: 1` keeps the payload to one
+ * document per key; the count is best-effort and never blocks the list.
+ */
+export const ORGANIZATION_DEMOGRAPHIC_VALUES = `
+  query OrganizationDemographicValues($organizationId: String!, $filter: DemographicValueFilter, $paging: PagingRequest) {
+    OrganizationDemographicValues(organizationId: $organizationId, filter: $filter, paging: $paging) {
+      values { key }
+      paging { page pageSize total hasNext }
     }
   }
 `;
@@ -304,6 +395,11 @@ export const OPERATIONS = {
   archiveOrganization: 'archiveOrganization',
   restoreOrganization: 'restoreOrganization',
   organizationDemographicDefinitions: 'OrganizationDemographicDefinitions',
+  organizationDemographicValues: 'OrganizationDemographicValues',
+  organizationSaveDemographicDefinition: 'OrganizationSaveDemographicDefinition',
+  organizationDeleteDemographicDefinition: 'OrganizationDeleteDemographicDefinition',
+  organizationReorderDemographicDefinitions: 'OrganizationReorderDemographicDefinitions',
+  organizationSetDemographicEnabled: 'OrganizationSetDemographicEnabled',
   organizationBranding: 'OrganizationBranding',
   organizationThemeCss: 'OrganizationThemeCss',
   organizationSaveTheme: 'OrganizationSaveTheme',

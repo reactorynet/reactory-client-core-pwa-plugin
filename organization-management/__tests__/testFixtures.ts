@@ -1,3 +1,4 @@
+import type { DemographicDefinition } from '../../demographic-form';
 import type { Organization, OrganizationStatistics, OrganizationTheme } from '../types';
 
 /**
@@ -118,6 +119,86 @@ export const statisticsFor = (
   ...overrides,
 });
 
+/**
+ * One demographic definition, shaped like a seeded ORG-030 base definition
+ * (`system: true`) unless overridden.
+ */
+export const makeDemographicDefinition = (
+  overrides: Partial<DemographicDefinition> = {},
+): DemographicDefinition => ({
+  id: 'def-1',
+  organization: 'org-1',
+  key: 'gender',
+  title: 'Gender',
+  description: 'How the member identifies.',
+  icon: null,
+  category: 'personal',
+  valueType: 'enum',
+  schema: null,
+  options: [
+    { key: 'female', label: 'Female', ordinal: 0, deprecated: false },
+    { key: 'male', label: 'Male', ordinal: 1, deprecated: false },
+  ],
+  reference: null,
+  widget: null,
+  required: false,
+  multiValued: false,
+  sensitive: false,
+  searchable: true,
+  enabled: true,
+  ordinal: 0,
+  roles: [],
+  system: true,
+  deleted: false,
+  ...overrides,
+});
+
+/**
+ * A small base set plus one custom definition, in ordinal order.
+ *
+ * Three shapes are deliberate: an `enum` (options editor), a `date` (no
+ * options), and a custom `reference` (the reference picker, and the one row that
+ * may be edited or deleted freely).
+ */
+export const baseDemographicDefinitions = (): DemographicDefinition[] => [
+  makeDemographicDefinition(),
+  makeDemographicDefinition({
+    id: 'def-2',
+    key: 'dateofbirth',
+    title: 'Date of birth',
+    description: null,
+    category: 'personal',
+    valueType: 'date',
+    options: [],
+    sensitive: true,
+    searchable: false,
+    ordinal: 1,
+  }),
+  makeDemographicDefinition({
+    id: 'def-3',
+    key: 'team',
+    title: 'Team',
+    description: 'The team the member belongs to.',
+    category: 'organizational',
+    valueType: 'reference',
+    options: [],
+    reference: { model: 'Team', multiple: false },
+    ordinal: 2,
+  }),
+  makeDemographicDefinition({
+    id: 'def-4',
+    key: 'shirtsize',
+    title: 'Shirt size',
+    description: 'Used for uniform orders.',
+    category: 'employment',
+    valueType: 'string',
+    options: [],
+    system: false,
+    searchable: false,
+    ordinal: 3,
+  }),
+];
+
 export interface ReactoryStubOptions {
   /** Mutable array: create/archive mutations update it so a refresh reflects them. */
   organizations?: Organization[];
@@ -129,6 +210,21 @@ export interface ReactoryStubOptions {
   hangOrganizations?: boolean;
   /** Published `styles.css` per theme name, for `OrganizationThemeCss`. */
   themeCss?: Record<string, string>;
+  /**
+   * Definitions the Demographics pane reads (ORG-031), mutated in place so a
+   * post-write `refreshDefinitions()` observes the change.
+   *
+   * Omitted keeps the pre-ORG-030 behaviour the create-wizard tests assert:
+   * `OrganizationDemographicDefinitions` answers with a schema-level rejection.
+   */
+  demographicDefinitions?: DemographicDefinition[];
+  /**
+   * Stored-value counts per definition key.
+   *
+   * `OrganizationDemographicValues` reports these as `paging.total`, and a
+   * non-zero count makes the delete mutation refuse, exactly as the server does.
+   */
+  demographicValueCounts?: Record<string, number>;
   i18n?: any;
   /**
    * Platform roles the caller holds (`loggedIn.roles`). Matched against what
@@ -230,15 +326,42 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
     }
 
     if (operation === 'OrganizationDemographicDefinitions') {
-      // The query does not exist yet: this is the shape the schema returns.
+      if (!options.demographicDefinitions) {
+        // No fixture supplied: this is the shape a schema without ORG-030 returns.
+        return Promise.resolve({
+          data: null,
+          errors: [
+            {
+              message:
+                'Cannot query field "OrganizationDemographicDefinitions" on type "Query".',
+            },
+          ],
+        });
+      }
+
+      const includeDisabled = variables?.includeDisabled === true;
+      const definitions = options.demographicDefinitions.filter(
+        (definition) => includeDisabled || definition.enabled !== false,
+      );
+
       return Promise.resolve({
-        data: null,
-        errors: [
-          {
-            message:
-              'Cannot query field "OrganizationDemographicDefinitions" on type "Query".',
+        data: { OrganizationDemographicDefinitions: definitions.map((entry) => ({ ...entry })) },
+        errors: [],
+      });
+    }
+
+    if (operation === 'OrganizationDemographicValues') {
+      const key = variables?.filter?.key;
+      const total = Number((options.demographicValueCounts || {})[key] || 0);
+
+      return Promise.resolve({
+        data: {
+          OrganizationDemographicValues: {
+            values: [],
+            paging: { page: 1, pageSize: 1, total, hasNext: total > 1 },
           },
-        ],
+        },
+        errors: [],
       });
     }
 
@@ -373,6 +496,159 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
 
     if (operation === 'OrganizationPublishThemeCss') {
       return Promise.resolve({ data: { OrganizationPublishThemeCss: true }, errors: [] });
+    }
+
+    if (operation === 'OrganizationSaveDemographicDefinition') {
+      const list = options.demographicDefinitions;
+      if (!list) {
+        return Promise.resolve({
+          data: null,
+          errors: [{ message: 'Demographics are not available in this environment.' }],
+        });
+      }
+
+      const input = variables?.definition || {};
+      const index = input.id
+        ? list.findIndex((entry) => entry.id === input.id)
+        : list.findIndex((entry) => entry.key === input.key);
+
+      if (index < 0) {
+        if (!input.key) {
+          return Promise.resolve({ data: null, errors: [{ message: 'A key is required' }] });
+        }
+
+        const created: DemographicDefinition = {
+          id: `def-new-${list.length + 1}`,
+          organization: 'org-1',
+          key: input.key,
+          title: input.title || input.key,
+          description: input.description ?? null,
+          icon: input.icon ?? null,
+          category: input.category ?? 'personal',
+          valueType: input.valueType || 'string',
+          schema: input.schema ?? null,
+          options: input.options ?? [],
+          reference: input.reference ?? null,
+          widget: input.widget ?? null,
+          required: input.required === true,
+          multiValued: input.multiValued === true,
+          sensitive: input.sensitive === true,
+          searchable: input.searchable === true,
+          enabled: input.enabled !== false,
+          ordinal: Number(input.ordinal || 0),
+          roles: input.roles || [],
+          system: input.system === true,
+          deleted: false,
+        };
+
+        list.push(created);
+        return Promise.resolve({
+          data: { OrganizationSaveDemographicDefinition: { ...created } },
+          errors: [],
+        });
+      }
+
+      const existing = list[index];
+
+      // Mirrors the server's frozen value type for a seeded definition.
+      if (
+        existing.system === true &&
+        input.valueType !== undefined &&
+        input.valueType !== existing.valueType
+      ) {
+        return Promise.resolve({
+          data: null,
+          errors: [
+            {
+              message: `System demographic definition [${existing.key}] cannot change its value type from [${existing.valueType}] to [${input.valueType}]`,
+            },
+          ],
+        });
+      }
+
+      // The server ignores `key` on update; the key is never reassigned here.
+      const { key: _ignoredKey, ...patch } = input;
+      const updated = { ...existing, ...patch } as DemographicDefinition;
+      list[index] = updated;
+
+      return Promise.resolve({
+        data: { OrganizationSaveDemographicDefinition: { ...updated } },
+        errors: [],
+      });
+    }
+
+    if (operation === 'OrganizationSetDemographicEnabled') {
+      const list = options.demographicDefinitions || [];
+      const index = list.findIndex((entry) => entry.key === variables?.key);
+      if (index < 0) {
+        return Promise.resolve({
+          data: null,
+          errors: [{ message: `Demographic definition [${variables?.key}] not found` }],
+        });
+      }
+
+      const updated = { ...list[index], enabled: variables?.enabled === true };
+      list[index] = updated;
+      return Promise.resolve({
+        data: { OrganizationSetDemographicEnabled: { ...updated } },
+        errors: [],
+      });
+    }
+
+    if (operation === 'OrganizationReorderDemographicDefinitions') {
+      const list = options.demographicDefinitions || [];
+      const keys: string[] = Array.isArray(variables?.keys) ? variables.keys : [];
+
+      const ordered = keys.map((key, ordinal) => {
+        const index = list.findIndex((entry) => entry.key === key);
+        if (index < 0) return null;
+        list[index] = { ...list[index], ordinal };
+        return { ...list[index] };
+      });
+
+      if (ordered.some((entry) => entry === null)) {
+        return Promise.resolve({
+          data: null,
+          errors: [{ message: 'Demographic definition(s) not found' }],
+        });
+      }
+
+      return Promise.resolve({
+        data: { OrganizationReorderDemographicDefinitions: ordered },
+        errors: [],
+      });
+    }
+
+    if (operation === 'OrganizationDeleteDemographicDefinition') {
+      const list = options.demographicDefinitions || [];
+      const key = variables?.key;
+      const index = list.findIndex((entry) => entry.key === key);
+
+      if (index < 0) {
+        return Promise.resolve({
+          data: null,
+          errors: [{ message: `Demographic definition [${key}] not found` }],
+        });
+      }
+
+      const references = Number((options.demographicValueCounts || {})[key] || 0);
+      if (references > 0) {
+        // The refusal the pane must surface instead of removing the row.
+        return Promise.resolve({
+          data: null,
+          errors: [
+            {
+              message: `Demographic definition [${key}] cannot be deleted because ${references} value(s) still reference it. Disable the definition instead.`,
+            },
+          ],
+        });
+      }
+
+      list.splice(index, 1);
+      return Promise.resolve({
+        data: { OrganizationDeleteDemographicDefinition: true },
+        errors: [],
+      });
     }
 
     return Promise.resolve({
