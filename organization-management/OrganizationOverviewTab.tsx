@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 
+import { emitOrganizationUpdated } from './events';
 import useOrganizationAdmin from './hooks/useOrganizationAdmin';
 import { resolveError, type OrganizationMessageKey } from './i18n';
 import { NAME_MAX_LENGTH } from './OrganizationCreateWizard';
@@ -390,9 +391,7 @@ export const OrganizationOverviewTab: React.FC<OrganizationTabProps> = ({
 
     notify(t('reactory.organizations.overview.saved', { name: saved.name }), 'success');
 
-    if (reactory && typeof reactory.emit === 'function') {
-      reactory.emit('core.OrganizationUpdatedEvent', saved);
-    }
+    emitOrganizationUpdated(reactory, saved);
 
     try {
       await refresh();

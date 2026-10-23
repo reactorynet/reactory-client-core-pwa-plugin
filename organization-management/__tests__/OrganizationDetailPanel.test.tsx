@@ -302,6 +302,12 @@ describe('OrganizationDetailPanel — archive and restore', () => {
       'core.OrganizationUpdatedEvent',
       expect.objectContaining({ id: 'org-1', status: 'archived' }),
     );
+    // ... and on the postal bus App.tsx actually subscribes on (ORG-043 RC-1).
+    expect(reactory.amq.$pub.def).toHaveBeenCalledWith(
+      'core.OrganizationUpdatedEvent',
+      expect.objectContaining({ id: 'org-1', status: 'archived' }),
+      'core.OrganizationUpdatedEvent',
+    );
   });
 
   it('restores an archived organization from the overflow menu', async () => {

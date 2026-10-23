@@ -34,6 +34,7 @@ import {
 import { useReactory } from '@reactory/client-core/api';
 
 import OrganizationStatusChip from './components/OrganizationStatusChip';
+import { ORGANIZATION_UPDATED_EVENT, emitOrganizationUpdated } from './events';
 import { makeTranslator, resolveError } from './i18n';
 import { ORGANIZATION_TABS, organizationTabById, OVERVIEW_TAB_ID } from './organizationTabs';
 import useOrganizationDetail, { resolveOrganizationId } from './hooks/useOrganizationDetail';
@@ -69,8 +70,14 @@ export interface OrganizationDetailPanelProps {
   listRoute?: string;
 }
 
-/** Event emitted after any write, so hosts can refresh their own projections. */
-export const ORGANIZATION_UPDATED_EVENT = 'core.OrganizationUpdatedEvent';
+/**
+ * Event emitted after any write, so hosts can refresh their own projections.
+ *
+ * Defined in `./events` because the tabs this panel renders cannot import
+ * from here without closing a module cycle (panel -> tab registry -> tab).
+ * Re-exported so every existing import site is unchanged.
+ */
+export { ORGANIZATION_UPDATED_EVENT } from './events';
 
 /** Re-exported so route helpers and tests have one import site. */
 export { organizationIdFromPath } from './utils';
@@ -276,9 +283,7 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
         }),
         'success',
       );
-      if (reactory && typeof reactory.emit === 'function') {
-        reactory.emit(ORGANIZATION_UPDATED_EVENT, { id: organization.id, status: 'archived' });
-      }
+      emitOrganizationUpdated(reactory, { id: organization.id, status: 'archived' });
       await refresh();
       return;
     }
@@ -299,9 +304,7 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
         t('reactory.organizations.restore.success', { name: result.organization.name || organization.name }),
         'success',
       );
-      if (reactory && typeof reactory.emit === 'function') {
-        reactory.emit(ORGANIZATION_UPDATED_EVENT, result.organization);
-      }
+      emitOrganizationUpdated(reactory, result.organization);
       await refresh();
       return;
     }

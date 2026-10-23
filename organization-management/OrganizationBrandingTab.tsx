@@ -35,6 +35,7 @@ import {
   Palette as PaletteIcon,
 } from '@mui/icons-material';
 
+import { emitOrganizationUpdated } from './events';
 import useOrganizationBranding from './hooks/useOrganizationBranding';
 import { resolveError, type OrganizationMessageKey } from './i18n';
 import type {
@@ -375,6 +376,8 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
         return;
       }
 
+      emitOrganizationUpdated(reactory, result.organization);
+
       notify(
         t('reactory.organizations.branding.image.uploaded', {
           type: t(IMAGE_LABEL_KEYS[imageType]),
@@ -383,7 +386,7 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
       );
       await safeRefresh();
     },
-    [branding, notify, safeRefresh, t],
+    [branding, notify, reactory, safeRefresh, t],
   );
 
   const handleRemoveImage = useCallback(
@@ -398,6 +401,8 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
         return;
       }
 
+      emitOrganizationUpdated(reactory, result.organization);
+
       notify(
         t('reactory.organizations.branding.image.removed', {
           type: t(IMAGE_LABEL_KEYS[imageType]),
@@ -406,7 +411,7 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
       );
       await safeRefresh();
     },
-    [branding, notify, safeRefresh, t],
+    [branding, notify, reactory, safeRefresh, t],
   );
 
   /**
@@ -427,6 +432,8 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
           );
           return;
         }
+
+        emitOrganizationUpdated(reactory, result.organization);
 
         notify(t('reactory.organizations.branding.themes.inherited'), 'success');
         await safeRefresh();
@@ -450,13 +457,15 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
         return;
       }
 
+      emitOrganizationUpdated(reactory, result.organization);
+
       notify(
         t('reactory.organizations.branding.themes.activated', { name: `${first.name}` }),
         'success',
       );
       await safeRefresh();
     },
-    [branding, notify, safeRefresh, t],
+    [branding, notify, reactory, safeRefresh, t],
   );
 
   const handleModeChange = useCallback(
@@ -473,13 +482,15 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
         return;
       }
 
+      emitOrganizationUpdated(reactory, result.organization);
+
       notify(
         t('reactory.organizations.branding.themes.activated', { name: branding.theme }),
         'success',
       );
       await safeRefresh();
     },
-    [branding, notify, safeRefresh, t],
+    [branding, notify, reactory, safeRefresh, t],
   );
 
   const handleActivateTheme = useCallback(
@@ -494,13 +505,15 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
         return;
       }
 
+      emitOrganizationUpdated(reactory, result.organization);
+
       notify(
         t('reactory.organizations.branding.themes.activated', { name: themeName }),
         'success',
       );
       await safeRefresh();
     },
-    [branding, notify, safeRefresh, t],
+    [branding, notify, reactory, safeRefresh, t],
   );
 
   const openCreateTheme = useCallback(() => {
@@ -560,13 +573,15 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
       setEditingTheme(null);
       setThemeDirty(false);
 
+      emitOrganizationUpdated(reactory, result.organization);
+
       notify(
         t('reactory.organizations.branding.themes.saved', { name: `${themePayload.name}` }),
         'success',
       );
       await safeRefresh();
     },
-    [branding, notify, safeRefresh, t],
+    [branding, notify, reactory, safeRefresh, t],
   );
 
   const handleConfirmDelete = useCallback(async () => {
@@ -585,9 +600,11 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
       return;
     }
 
+    emitOrganizationUpdated(reactory, result.organization);
+
     notify(t('reactory.organizations.branding.themes.deleted', { name: themeName }), 'success');
     await safeRefresh();
-  }, [branding, deleteTarget, notify, safeRefresh, t]);
+  }, [branding, deleteTarget, notify, reactory, safeRefresh, t]);
 
   const openCssStudio = useCallback(
     async (theme: IThemeRecord) => {
