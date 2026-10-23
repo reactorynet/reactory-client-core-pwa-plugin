@@ -63,6 +63,17 @@ export interface OrganizationListPanelProps {
   /** Called after a create, before the detail view is opened. */
   onOrganizationCreated?: (organization: Organization) => void;
   /**
+   * Open an organization in place instead of navigating to its detail route.
+   *
+   * When supplied, this **replaces** navigation for both paths that open a
+   * detail view — a row activation and the create flow's follow-up — so a host
+   * can compose the list with its own detail surface (ORG-042b). Omitting it
+   * keeps the historical behaviour: `basePath`/`detailRoute` build a path and
+   * `reactory.navigation(path)` is called, which is what `/organizations` and
+   * `/organizations/manage` rely on.
+   */
+  onSelectOrganization?: (organization: Organization) => void;
+  /**
    * Base path of the organization surface, i.e. where the detail view lives.
    *
    * A plain string precisely so a *route config* can supply it: `componentProps`
@@ -141,6 +152,7 @@ export const OrganizationListPanel: React.FC<OrganizationListPanelProps> = ({
   reactory: propReactory,
   initialStatusFilter = 'active',
   onOrganizationCreated,
+  onSelectOrganization,
   basePath = DEFAULT_ORGANIZATIONS_BASE_PATH,
   detailRoute,
 }) => {
@@ -192,12 +204,19 @@ export const OrganizationListPanel: React.FC<OrganizationListPanelProps> = ({
   /**
    * Open the detail view for a row, or for an organization just created.
    *
-   * The route is built from `basePath` — not a literal — so the whole surface can
-   * be mounted under `/organizations/manage` (ORG-016). `detailRoute` still wins
-   * when a host supplies the function.
+   * A host that owns the detail surface passes `onSelectOrganization` and no
+   * route is built at all (ORG-042b: the application organizations tab renders
+   * the detail in place). Otherwise the route is built from `basePath` — not a
+   * literal — so the whole surface can be mounted under `/organizations/manage`
+   * (ORG-016); `detailRoute` still wins when a host supplies the function.
    */
   const openOrganization = useCallback(
     (organization: Organization) => {
+      if (typeof onSelectOrganization === 'function') {
+        onSelectOrganization(organization);
+        return;
+      }
+
       const path = detailRoute
         ? detailRoute(organization)
         : organizationDetailPath(basePath, organization.id);
@@ -206,7 +225,7 @@ export const OrganizationListPanel: React.FC<OrganizationListPanelProps> = ({
         reactory.navigation(path);
       }
     },
-    [reactory, basePath, detailRoute],
+    [reactory, basePath, detailRoute, onSelectOrganization],
   );
 
   const handleCreated = useCallback(

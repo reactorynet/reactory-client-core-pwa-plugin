@@ -714,3 +714,42 @@ describe('OrganizationListPanel — basePath', () => {
     );
   });
 });
+/**
+ * Host-owned detail surface (ORG-042b).
+ *
+ * The application organizations panel composes this list with
+ * `OrganizationDetailPanel`, so it must be able to open a row *in place*. The
+ * optional `onSelectOrganization` prop is that hook — and its contract is
+ * additive: when it is omitted, navigation is exactly what the `/organizations`
+ * and `/organizations/manage` surfaces have always done (pinned above).
+ */
+describe('OrganizationListPanel — onSelectOrganization', () => {
+  it('hands the selected organization to the host instead of navigating', async () => {
+    const reactory = makeReactory({ organizations: activeOrganizations() });
+    const onSelectOrganization = jest.fn();
+
+    await renderPanel(reactory, { onSelectOrganization });
+    await screen.findByText('Acme Holdings');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Open Acme Holdings' }));
+
+    expect(onSelectOrganization).toHaveBeenCalledTimes(1);
+    expect(onSelectOrganization.mock.calls[0][0].id).toBe('org-1');
+    expect(reactory.navigation).not.toHaveBeenCalled();
+  });
+
+  it('uses the callback for the detail view opened after a create', async () => {
+    const reactory = makeReactory({ organizations: activeOrganizations() });
+    const onSelectOrganization = jest.fn();
+
+    await renderPanel(reactory, { onSelectOrganization });
+    await screen.findByText('Acme Holdings');
+
+    await userEvent.click(screen.getByRole('button', { name: 'New organization' }));
+    await completeWizard('Gamma Logistics');
+
+    await waitFor(() => expect(onSelectOrganization).toHaveBeenCalledTimes(1));
+    expect(onSelectOrganization.mock.calls[0][0].id).toBe('org-created-3');
+    expect(reactory.navigation).not.toHaveBeenCalled();
+  });
+});
