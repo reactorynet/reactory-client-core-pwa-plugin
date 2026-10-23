@@ -742,6 +742,197 @@ export const ORGANIZATION_MESSAGES = {
     'That is not a valid email address.',
   'reactory.organizations.error.memberAssignFailed':
     'The business unit or team assignment could not be changed.',
+
+  // ---- Demographics values pane (ORG-033) ----
+  'reactory.organizations.error.valuesLoadFailed':
+    'The demographic values could not be read.',
+  'reactory.organizations.error.aggregatesLoadFailed':
+    'The demographic completeness summary could not be read.',
+  'reactory.organizations.error.valueSaveFailed':
+    'The demographic value could not be saved.',
+  'reactory.organizations.error.valueDeleteFailed':
+    'The demographic value could not be deleted.',
+
+  // Pane switch (one Demographics tab, two views)
+  'reactory.organizations.demographics.pane.configuration': 'Configuration',
+  'reactory.organizations.demographics.pane.values': 'Values',
+  'reactory.organizations.demographics.values.title': 'Demographic values',
+  'reactory.organizations.demographics.values.subtitle':
+    'Stored values for this organization, one row per member and definition.',
+  'reactory.organizations.demographics.values.loading': 'Loading values…',
+  'reactory.organizations.demographics.values.retry': 'Retry',
+  'reactory.organizations.demographics.values.empty.title':
+    'No values match this filter',
+  'reactory.organizations.demographics.values.empty.body':
+    'Adjust the definition or member filter, or wait for members to submit their demographics.',
+  'reactory.organizations.demographics.values.readOnly':
+    'Demographic values are administrator-only. Ask an organization administrator for a report.',
+
+  // Table
+  'reactory.organizations.demographics.values.column.user': 'Member',
+  'reactory.organizations.demographics.values.column.definition': 'Definition',
+  'reactory.organizations.demographics.values.column.value': 'Value',
+  'reactory.organizations.demographics.values.column.source': 'Source',
+  'reactory.organizations.demographics.values.column.verified': 'Verified',
+  'reactory.organizations.demographics.values.column.updated': 'Updated',
+  'reactory.organizations.demographics.values.column.actions': 'Actions',
+  'reactory.organizations.demographics.values.rowsPerPage': 'Rows per page',
+  'reactory.organizations.demographics.values.displayedRows':
+    '{{from}}–{{to}} of {{count}}',
+  'reactory.organizations.demographics.values.yes': 'Yes',
+  'reactory.organizations.demographics.values.no': 'No',
+  'reactory.organizations.demographics.values.source.user': 'Member',
+  'reactory.organizations.demographics.values.source.admin': 'Administrator',
+  'reactory.organizations.demographics.values.source.import': 'Import',
+  'reactory.organizations.demographics.values.source.api': 'API',
+  'reactory.organizations.demographics.values.unknownUser': 'Unknown member',
+
+  // Filters
+  'reactory.organizations.demographics.values.filter.definition': 'Definition',
+  'reactory.organizations.demographics.values.filter.definitionAll':
+    'All definitions',
+  'reactory.organizations.demographics.values.filter.user': 'Member',
+  'reactory.organizations.demographics.values.filter.userPlaceholder':
+    'Email or user id',
+  'reactory.organizations.demographics.values.filter.userHint':
+    'Press Enter or leave the field to apply the filter.',
+  'reactory.organizations.demographics.values.filter.clear': 'Clear filters',
+
+  // Row actions
+  'reactory.organizations.demographics.values.edit': 'Edit value',
+  'reactory.organizations.demographics.values.delete': 'Delete value',
+  'reactory.organizations.demographics.values.saved': 'Value for {{key}} saved',
+  'reactory.organizations.demographics.values.deleted':
+    'Value for {{key}} deleted',
+  'reactory.organizations.demographics.values.delete.title':
+    'Delete {{key}} for {{user}}?',
+  'reactory.organizations.demographics.values.delete.body':
+    'This removes the stored value. The definition and the member’s other values are unaffected.',
+  'reactory.organizations.demographics.values.delete.confirm': 'Delete',
+  'reactory.organizations.demographics.values.delete.failed':
+    'The value could not be deleted.',
+
+  // Edit drawer
+  'reactory.organizations.demographics.values.drawer.title': 'Edit {{key}}',
+  'reactory.organizations.demographics.values.drawer.subtitle':
+    'Editing the value for {{user}}. It is validated against the definition on save.',
+  'reactory.organizations.demographics.values.drawer.save': 'Save value',
+  'reactory.organizations.demographics.values.drawer.saving': 'Saving…',
+  'reactory.organizations.demographics.values.drawer.cancel': 'Cancel',
+  'reactory.organizations.demographics.values.drawer.errors':
+    'The server rejected this value:',
+  'reactory.organizations.demographics.values.drawer.required':
+    'This definition is required, so a value is needed.',
+  'reactory.organizations.demographics.values.drawer.close': 'Close',
+
+  // Bulk edit
+  'reactory.organizations.demographics.values.bulk.open': 'Bulk edit',
+  'reactory.organizations.demographics.values.bulk.title': 'Bulk edit values',
+  'reactory.organizations.demographics.values.bulk.subtitle':
+    'Editing the values on this page. Only changed rows are submitted.',
+  'reactory.organizations.demographics.values.bulk.empty':
+    'There is nothing to edit on this page.',
+  'reactory.organizations.demographics.values.bulk.save': 'Save {{count}} change(s)',
+  'reactory.organizations.demographics.values.bulk.saving': 'Saving…',
+  'reactory.organizations.demographics.values.bulk.cancel': 'Cancel',
+  'reactory.organizations.demographics.values.bulk.closed': 'Close',
+  'reactory.organizations.demographics.values.bulk.result.title': 'Results',
+  'reactory.organizations.demographics.values.bulk.result.saved': 'Saved',
+  'reactory.organizations.demographics.values.bulk.result.rejected': 'Not saved',
+  'reactory.organizations.demographics.values.bulk.result.summary':
+    '{{saved}} saved, {{failed}} not saved.',
+  'reactory.organizations.demographics.values.bulk.result.allSaved':
+    '{{count}} value(s) saved.',
+
+  // CSV
+  'reactory.organizations.demographics.values.csv.export': 'Export loaded rows',
+  'reactory.organizations.demographics.values.csv.exportHint':
+    'Exports the {{count}} row(s) currently loaded, not the whole result set.',
+  'reactory.organizations.demographics.values.csv.import': 'Import CSV',
+  'reactory.organizations.demographics.values.csv.importTitle':
+    'Import demographic values',
+  'reactory.organizations.demographics.values.csv.subtitle':
+    'Map each column to a definition, check the preview, then submit.',
+  'reactory.organizations.demographics.values.csv.chooseFile': 'Choose a CSV file',
+  'reactory.organizations.demographics.values.csv.fileHint':
+    'The first row must be a header row. Quoted fields, embedded commas and embedded newlines are supported.',
+  'reactory.organizations.demographics.values.csv.mapping.title': 'Column mapping',
+  'reactory.organizations.demographics.values.csv.mapping.column': 'Column',
+  'reactory.organizations.demographics.values.csv.mapping.target': 'Maps to',
+  'reactory.organizations.demographics.values.csv.mapping.ignore': 'Ignore',
+  'reactory.organizations.demographics.values.csv.mapping.user':
+    'User (email or id)',
+  'reactory.organizations.demographics.values.csv.preview.title': 'Preview',
+  'reactory.organizations.demographics.values.csv.preview.row': 'Row',
+  'reactory.organizations.demographics.values.csv.preview.user': 'Member',
+  'reactory.organizations.demographics.values.csv.preview.values': 'Values',
+  'reactory.organizations.demographics.values.csv.preview.status': 'Status',
+  'reactory.organizations.demographics.values.csv.preview.valid': 'Ready',
+  'reactory.organizations.demographics.values.csv.preview.invalid': 'Not imported',
+  'reactory.organizations.demographics.values.csv.preview.missingUserColumn':
+    'Map one column to User before importing.',
+  'reactory.organizations.demographics.values.csv.preview.noRows':
+    'The file has no data rows.',
+  'reactory.organizations.demographics.values.csv.preview.summary':
+    '{{valid}} row(s) ready, {{invalid}} row(s) will be skipped.',
+  'reactory.organizations.demographics.values.csv.submit': 'Import {{count}} row(s)',
+  'reactory.organizations.demographics.values.csv.submitting': 'Importing…',
+  'reactory.organizations.demographics.values.csv.cancel': 'Cancel',
+  'reactory.organizations.demographics.values.csv.close': 'Close',
+  'reactory.organizations.demographics.values.csv.result.title':
+    'Import results',
+  'reactory.organizations.demographics.values.csv.result.summary':
+    '{{saved}} saved, {{failed}} not saved.',
+  'reactory.organizations.demographics.values.csv.success':
+    '{{count}} value(s) imported.',
+  'reactory.organizations.demographics.values.csv.partial':
+    '{{saved}} imported, {{failed}} could not be imported.',
+  'reactory.organizations.demographics.values.csv.error.noValues':
+    'This row has no mapped value.',
+  'reactory.organizations.demographics.values.csv.error.invalidNumber':
+    'Not a number.',
+  'reactory.organizations.demographics.values.csv.error.invalidBoolean':
+    'Use true/false or yes/no.',
+  'reactory.organizations.demographics.values.csv.error.invalidDate':
+    'Not a date.',
+  'reactory.organizations.demographics.values.csv.error.invalidOption':
+    'Not one of the definition’s options.',
+  'reactory.organizations.demographics.values.csv.error.invalidJson':
+    'Not valid JSON.',
+  'reactory.organizations.demographics.values.csv.error.unknownUser':
+    'No member of this organization matches this user.',
+  'reactory.organizations.demographics.values.csv.error.unknownDefinition':
+    'The mapped definition no longer exists.',
+  'reactory.organizations.demographics.values.csv.error.duplicate':
+    'This member and definition appear more than once.',
+
+  // Completeness (ORG-035 aggregates)
+  'reactory.organizations.demographics.completeness.title':
+    'Completeness by definition',
+  'reactory.organizations.demographics.completeness.subtitle':
+    'The aggregate report withholds cohorts smaller than the organization’s threshold.',
+  'reactory.organizations.demographics.completeness.threshold':
+    'Cohorts smaller than {{count}} members are suppressed.',
+  'reactory.organizations.demographics.completeness.reported':
+    '{{reported}} of {{total}} definition(s) reported',
+  'reactory.organizations.demographics.completeness.suppressedCount':
+    '{{count}} definition(s) withheld entirely',
+  'reactory.organizations.demographics.completeness.suppressedNotice':
+    'A withheld definition means no cohort was large enough to report. It does not mean nobody answered.',
+  'reactory.organizations.demographics.completeness.definition.suppressed':
+    'Withheld',
+  'reactory.organizations.demographics.completeness.definition.coverage':
+    '{{count}} member(s) covered',
+  'reactory.organizations.demographics.completeness.definition.suppressedCohorts':
+    '{{count}} cohort(s) withheld',
+  'reactory.organizations.demographics.completeness.caveat':
+    'Counts cover only cohorts at or above the threshold, so they are not organization totals.',
+  'reactory.organizations.demographics.completeness.loading':
+    'Loading completeness…',
+  'reactory.organizations.demographics.completeness.empty':
+    'No definition has a reportable cohort yet.',
+  'reactory.organizations.demographics.completeness.unavailable':
+    'The completeness summary is unavailable.',
 } as const;
 
 export type OrganizationMessageKey = keyof typeof ORGANIZATION_MESSAGES;

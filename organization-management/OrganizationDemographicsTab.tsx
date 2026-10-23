@@ -15,12 +15,14 @@ import {
   IconButton,
   Stack,
   Switch,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Tabs,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -34,6 +36,7 @@ import {
 } from '@mui/icons-material';
 
 import useOrganizationDemographics from './hooks/useOrganizationDemographics';
+import DemographicValuesPane from './DemographicValuesPane';
 import DemographicDefinitionDrawer, {
   categoryLabel,
   valueTypeLabel,
@@ -94,9 +97,18 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
     includeUsage: !readOnly,
   });
 
+  /**
+   * The tab has two views. Configuration is the ORG-031 definition editor and
+   * keeps its behaviour exactly as it shipped; Values is the ORG-033 read/write
+   * pane for stored values. Both live inside this one registered tab.
+   */
+  const [pane, setPane] = useState<'configuration' | 'values'>('configuration');
+
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState<DemographicDefinition | null>(null);
   const [dirty, setDirty] = useState(false);
+  /** Dirty state reported by the values view (its drawers and CSV mapper). */
+  const [valuesDirty, setValuesDirty] = useState(false);
 
   const [deleting, setDeleting] = useState<DemographicDefinition | null>(null);
   const [deleteError, setDeleteError] = useState<OrganizationError | null>(null);
@@ -106,13 +118,14 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
   const definitions = demographics.definitions;
 
   /**
-   * Dirty state means exactly one thing: the drawer holds a draft that differs
-   * from the definition it was opened with. It is cleared only when the drawer
-   * closes after a save or a discard — never because a request was attempted.
+   * Dirty state means exactly one thing: a surface in this tab holds input that
+   * differs from what is stored. It is cleared only when that surface closes
+   * after a save or a discard — never because a request was attempted. Either
+   * view can hold it, so the shell is told about whichever is dirty.
    */
   useEffect(() => {
-    onUnsavedChanges(dirty);
-  }, [dirty, onUnsavedChanges]);
+    onUnsavedChanges(dirty || valuesDirty);
+  }, [dirty, onUnsavedChanges, valuesDirty]);
 
   // Switching tabs unmounts the pane; the shell must stop guarding for a drawer
   // that no longer exists.
@@ -342,6 +355,41 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
 
   return (
     <Stack spacing={2} data-testid="organization-demographics-tab">
+      {/*
+        The pane switch lives *inside* the Demographics tab: the tab registry
+        entry is not duplicated, and the configuration view is untouched below.
+      */}
+      <Tabs
+        value={pane}
+        onChange={(_event, next) => setPane(next === 'values' ? 'values' : 'configuration')}
+        data-testid="organization-demographics-panes"
+        sx={{ borderBottom: 1, borderColor: 'divider' }}
+      >
+        <Tab
+          value="configuration"
+          label={t('reactory.organizations.demographics.pane.configuration')}
+          data-testid="organization-demographics-pane-configuration"
+        />
+        <Tab
+          value="values"
+          label={t('reactory.organizations.demographics.pane.values')}
+          data-testid="organization-demographics-pane-values"
+        />
+      </Tabs>
+
+      {pane === 'values' ? (
+        <DemographicValuesPane
+          reactory={reactory}
+          t={t}
+          organization={organization}
+          definitions={definitions}
+          canManage={canWrite}
+          refresh={refresh}
+          notify={notify}
+          onDirtyChange={setValuesDirty}
+        />
+      ) : (
+        <>
       {readOnly && (
         <Alert severity="info" variant="outlined" data-testid="organization-demographics-readonly">
           {t('reactory.organizations.detail.readOnly')}
@@ -708,6 +756,8 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
           onSave={(input) => void handleSave(input)}
           onDirtyChange={setDirty}
         />
+      )}
+        </>
       )}
     </Stack>
   );

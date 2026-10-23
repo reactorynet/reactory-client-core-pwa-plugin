@@ -7,6 +7,7 @@ import OrganizationDetailPanel from './OrganizationDetailPanel';
 import OrganizationOverviewTab from './OrganizationOverviewTab';
 import OrganizationBrandingTab from './OrganizationBrandingTab';
 import OrganizationDemographicsTab from './OrganizationDemographicsTab';
+import DemographicValuesPane from './DemographicValuesPane';
 import OrganizationPeopleTab from './OrganizationPeopleTab';
 import OrganizationStructureTab from './OrganizationStructureTab';
 import OrganizationToolbar from './OrganizationToolbar';
@@ -18,6 +19,7 @@ import useOrganizationDetail from './hooks/useOrganizationDetail';
 import useOrganizationAdmin, { useDemographicDefinitions } from './hooks/useOrganizationAdmin';
 import useOrganizationBranding from './hooks/useOrganizationBranding';
 import useOrganizationDemographics from './hooks/useOrganizationDemographics';
+import useOrganizationDemographicValues from './hooks/useOrganizationDemographicValues';
 import useOrganizationMembers from './hooks/useOrganizationMembers';
 import useOrganizationStructure from './hooks/useOrganizationStructure';
 import { ORGANIZATION_MESSAGES, translate } from './i18n';
@@ -30,6 +32,7 @@ export {
   OrganizationOverviewTab,
   OrganizationBrandingTab,
   OrganizationDemographicsTab,
+  DemographicValuesPane,
   OrganizationPeopleTab,
   OrganizationStructureTab,
   OrganizationTabPlaceholder,
@@ -42,6 +45,7 @@ export {
   useOrganizationAdmin,
   useOrganizationBranding,
   useOrganizationDemographics,
+  useOrganizationDemographicValues,
   useOrganizationMembers,
   useOrganizationStructure,
   useDemographicDefinitions,
@@ -52,6 +56,8 @@ export {
 export * from './types';
 export * from './graphql';
 export * from './demographicDraft';
+export * from './demographicCsv';
+export * from './demographicValues';
 export * from './organizationStructure';
 
 /**

@@ -542,3 +542,177 @@ export interface OrganizationMemberAssignment {
   businessUnitId: string | null;
   teamIds: string[];
 }
+/* ------------------------------------------------------------------------- *
+ * Organization demographic values (ORG-033)
+ *
+ * Mirrors the `DemographicValue`, `DemographicValueFilter` and ORG-035
+ * aggregate types in
+ * `reactory-express-server/src/modules/reactory-core/graph/types/Demographics/Demographics.graphql`.
+ *
+ * Two server facts shape this surface and are deliberately visible here:
+ *
+ *   - `DemographicValue.user` is a **String id**, not a populated `User`. The
+ *     table therefore resolves a display name from the organization's member
+ *     list and falls back to the id; nothing pretends the value payload carries
+ *     a name.
+ *   - `DemographicValueFilter` has exactly seven fields. There is no `search`,
+ *     no sort and no completeness filter, so neither the pane nor this type
+ *     invents one.
+ * ------------------------------------------------------------------------- */
+
+/** A failure the server attached to a field, e.g. `values[2].value`. */
+export interface OrganizationFieldError {
+  path: string;
+  message: string;
+}
+
+/** Where a stored value came from (`DemographicValue.source`). */
+export type DemographicValueSource = 'user' | 'admin' | 'import' | 'api';
+
+/** One stored value (`DemographicValue`). */
+export interface OrganizationDemographicValue {
+  id?: string | null;
+  organization?: string | null;
+  /** `User` id. Resolved to a name/email by the pane when it can be. */
+  user?: string | null;
+  membership?: string | null;
+  definition?: string | null;
+  /** Definition key snapshot taken at write time. */
+  key: string;
+  value?: unknown;
+  /** Value-type snapshot taken at write time. */
+  valueType?: string | null;
+  source?: DemographicValueSource | string | null;
+  verified?: boolean | null;
+  effectiveFrom?: string | number | Date | null;
+  effectiveTo?: string | number | Date | null;
+  updatedBy?: string | null;
+  createdAt?: string | number | Date | null;
+  updatedAt?: string | number | Date | null;
+}
+
+/**
+ * `DemographicValueFilter`.
+ *
+ * Only the fields the server documents. `user` must be an ObjectId, which is
+ * why the pane resolves an email to a user id before it sends the filter.
+ */
+export interface OrganizationDemographicValueFilter {
+  user?: string | null;
+  membership?: string | null;
+  key?: string | null;
+  definition?: string | null;
+  value?: unknown;
+  source?: string | null;
+  verified?: boolean | null;
+}
+
+/** One page of stored values (`PagedDemographicValues`). */
+export interface OrganizationDemographicValuePage {
+  values: OrganizationDemographicValue[];
+  paging: OrganizationPaging;
+}
+
+/**
+ * `DemographicAggregateFilter`.
+ *
+ * Not exposed by the values pane (the ticket asks for definition and user
+ * filters only), but typed so the hook can pass a filter without inventing a
+ * document.
+ */
+export interface OrganizationDemographicAggregateFilter {
+  businessUnit?: string | null;
+  team?: string | null;
+  region?: string | null;
+  effectiveFrom?: string | Date | null;
+  effectiveTo?: string | Date | null;
+}
+
+/** One bucket of a distribution. Counts are distinct members, not selections. */
+export interface OrganizationDemographicAggregateBucket {
+  key: string;
+  label: string;
+  count: number;
+  percentage: number;
+}
+
+/**
+ * Aggregation of one definition (`DemographicDefinitionAggregate`).
+ *
+ * `suppressed: true` means nothing may be reported — nobody answered **or**
+ * every cohort was below the threshold; the payload makes the two
+ * indistinguishable on purpose. `suppressedCohorts` is null in that case, and a
+ * bucket count when only part of the distribution was withheld.
+ */
+export interface OrganizationDemographicDefinitionAggregate {
+  definitionKey: string;
+  title: string;
+  category?: string | null;
+  valueType: string;
+  multiValued: boolean;
+  sensitive: boolean;
+  suppressed: boolean;
+  suppressedCohorts?: number | null;
+  /** Distinct members behind the **surviving** buckets — never a population count. */
+  cohortTotal: number;
+  percentageDenominator: number;
+  /** Always `respondents` today, so a percentage is never read as headcount. */
+  denominatorKind: string;
+  buckets?: OrganizationDemographicAggregateBucket[] | null;
+}
+
+/** Echo of the filters the aggregate query actually applied. */
+export interface OrganizationDemographicAggregateFilterEcho {
+  businessUnit?: string | null;
+  team?: string | null;
+  region?: string | null;
+  effectiveFrom?: string | null;
+  effectiveTo?: string | null;
+  definitionKeys: string[];
+  cohortRestricted: boolean;
+}
+
+/** `DemographicAggregateReport` — the thresholded completeness source. */
+export interface OrganizationDemographicAggregateReport {
+  organization: string;
+  minimumAggregationGroupSize: number;
+  filter?: OrganizationDemographicAggregateFilterEcho | null;
+  definitions: OrganizationDemographicDefinitionAggregate[];
+  reportedDefinitions: number;
+  suppressedDefinitions: number;
+}
+
+/**
+ * A value write payload (`DemographicValueInput`).
+ *
+ * `user` + `key` identify the row: the server upserts on
+ * (organization, definition, user), so the document id is optional.
+ */
+export interface OrganizationDemographicValueInput {
+  user: string;
+  key: string;
+  value: unknown;
+  source?: string | null;
+  verified?: boolean | null;
+  membership?: string | null;
+}
+
+/** Result of a value write: the accepted records, plus per-field detail. */
+export interface OrganizationDemographicValueWriteResult {
+  values: OrganizationDemographicValue[];
+  error: OrganizationError | null;
+  fieldErrors: OrganizationFieldError[];
+}
+
+/** How one row of a bulk submission fared. */
+export type OrganizationDemographicBulkOutcomeStatus = 'saved' | 'rejected';
+
+export interface OrganizationDemographicBulkOutcome {
+  /** Position in the submitted array. */
+  index: number;
+  user: string;
+  key: string;
+  status: OrganizationDemographicBulkOutcomeStatus;
+  /** Untranslatable server text, or null. */
+  message: string | null;
+}
