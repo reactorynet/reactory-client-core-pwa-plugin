@@ -30,6 +30,26 @@ import {
   selectOption,
 } from './testFixtures';
 
+/**
+ * The shared `DateSelectorWidget` wraps a MUI `DatePicker`, which needs a
+ * `LocalizationProvider`/adapter. The host provides one at runtime; stubbing it
+ * here keeps these tests about the values pane (the same approach the ORG-032
+ * suite takes) while still letting a `date` row render.
+ */
+jest.mock('@reactory/client-core/components/reactory/ux/mui/widgets/DateSelector', () => {
+  const ReactLib = require('react');
+  return {
+    __esModule: true,
+    DateWidget: (props: any) =>
+      ReactLib.createElement('input', {
+        'data-testid': 'shared-date-selector',
+        'aria-label': props.uiSchema?.['ui:options']?.label,
+        value: props.formData || '',
+        onChange: (event: any) => props.onChange(event.target.value),
+      }),
+  };
+});
+
 afterEach(cleanup);
 
 const DEFINITIONS_QUERY = 'OrganizationDemographicDefinitions';
@@ -424,7 +444,7 @@ describe('bulk save', () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByTestId('demographic-bulk-outcomes')).toBeInTheDocument(),
+      expect(screen.getByTestId('demographic-bulk-results')).toBeInTheDocument(),
     );
     expect(screen.getByTestId('demographic-bulk-outcome-0')).toHaveTextContent('Saved');
     expect(screen.getByTestId('demographic-bulk-outcome-1')).toHaveTextContent('Saved');

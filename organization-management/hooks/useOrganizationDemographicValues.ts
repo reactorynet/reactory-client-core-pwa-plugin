@@ -188,6 +188,9 @@ export const collectFieldErrors = (source: any): OrganizationFieldError[] => {
 
   push(source.extensions && source.extensions.fields);
   push(source.fields);
+  // A failure already normalised by this module carries the fields directly on
+  // the thrown error, so they are not lost when the call is re-thrown.
+  push(source.fieldErrors);
 
   const envelopes: any[] = [];
   if (Array.isArray(source.errors)) envelopes.push(...source.errors);

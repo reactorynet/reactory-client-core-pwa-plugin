@@ -33,29 +33,28 @@ import {
   UploadFile as UploadFileIcon,
 } from '@mui/icons-material';
 
-import useOrganizationDemographicValues from '../hooks/useOrganizationDemographicValues';
-import DemographicValueDrawer from './DemographicValueDrawer';
-import DemographicBulkEditDrawer from './DemographicBulkEditDrawer';
-import DemographicImportDialog from './DemographicImportDialog';
+import useOrganizationDemographicValues from './hooks/useOrganizationDemographicValues';
+import DemographicValueDrawer from './components/DemographicValueDrawer';
+import DemographicBulkEditDrawer from './components/DemographicBulkEditDrawer';
+import DemographicImportDialog from './components/DemographicImportDialog';
 import {
   buildDemographicCsv,
   describeUser,
   demographicValueRowId,
   formatDemographicValue,
   resolveUserId,
-} from '../demographicValues';
-import { resolveError, type OrganizationMessageKey } from '../i18n';
-import { formatUpdated } from '../utils';
-import type { DemographicDefinition } from '../../demographic-form';
+} from './demographicValues';
+import { resolveError, type OrganizationMessageKey } from './i18n';
+import { formatUpdated } from './utils';
+import type { DemographicDefinition } from '../demographic-form';
 import type {
   Organization,
   OrganizationDemographicValue,
   OrganizationError,
   OrganizationFieldError,
   OrganizationNotifyType,
-  OrganizationTabProps,
   OrganizationTranslator,
-} from '../types';
+} from './types';
 
 /**
  * Demographics → **Values** (ORG-033).

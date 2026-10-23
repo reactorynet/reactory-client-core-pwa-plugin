@@ -902,7 +902,7 @@ export const ORGANIZATION_MESSAGES = {
   'reactory.organizations.demographics.values.csv.error.unknownUser':
     'No member of this organization matches this user.',
   'reactory.organizations.demographics.values.csv.error.unknownDefinition':
-    'The mapped definition no longer exists.';
+    'The mapped definition no longer exists.',
   'reactory.organizations.demographics.values.csv.error.duplicate':
     'This member and definition appear more than once.',
 
