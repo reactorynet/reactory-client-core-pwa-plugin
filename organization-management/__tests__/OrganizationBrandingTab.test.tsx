@@ -16,6 +16,7 @@ import OrganizationBrandingTab, {
   nextThemeName,
   validateBrandingImage,
 } from '../OrganizationBrandingTab';
+import { ORGANIZATION_UPDATED_EVENT } from '../events';
 import { ORGANIZATION_TABS } from '../organizationTabs';
 import { makeTranslator } from '../i18n';
 import type { OrganizationTabProps } from '../types';
@@ -77,6 +78,16 @@ const fileOf = (name: string, type: string, size?: number): any => {
   if (typeof size === 'number') Object.defineProperty(file, 'size', { value: size });
   return file;
 };
+
+/**
+ * The emit calls the tab made for `core.OrganizationUpdatedEvent`.
+ *
+ * Filtering by event name (rather than counting every emit) keeps these
+ * assertions honest if the tab ever raises another event: only the update
+ * notification is the contract here.
+ */
+const emitCallsFor = (reactory: any, event = ORGANIZATION_UPDATED_EVENT) =>
+  reactory.emit.mock.calls.filter((call: any[]) => call[0] === event);
 
 describe('branding tab wiring', () => {
   it('replaces only the branding registry entry', () => {
@@ -388,6 +399,144 @@ describe('theme lifecycle', () => {
 
     expect(props.notify).toHaveBeenCalledWith('CSS for Acme Theme published.', 'success');
     expect(props.refresh).toHaveBeenCalled();
+  });
+});
+
+describe('organization updated event (ORG-043)', () => {
+  /**
+   * ORG-014's acceptance criterion is "apply on theme change": saving branding
+   * must make the admin's own shell re-resolve the theme without a reload. The
+   * Overview tab already emits `core.OrganizationUpdatedEvent`; the Branding tab
+   * must do the same for every write it commits.
+   *
+   * One emit per mutation - never one per field change, and never on failure.
+   */
+  it('emits the saved organization once after a successful theme save', async () => {
+    const { props, reactory } = setup();
+
+    fireEvent.click(screen.getByRole('button', { name: 'New theme' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save theme' }));
+
+    await waitFor(() =>
+      expect(props.notify).toHaveBeenCalledWith('Theme “theme-1” saved.', 'success'),
+    );
+
+    const calls = emitCallsFor(reactory);
+    expect(calls).toHaveLength(1);
+    const [event, payload] = calls[0];
+    expect(event).toBe(ORGANIZATION_UPDATED_EVENT);
+    // The payload is the organization the mutation returned, not the tab's
+    // local draft: the new theme is already on it.
+    expect(payload.id).toBe('org-1');
+    expect((payload.themes || []).map((theme: any) => theme.name)).toContain('theme-1');
+
+    // Creating a theme touches many editor fields and the save builds the whole
+    // payload at once; the event must still be raised once.
+    expect(reactory.emit).toHaveBeenCalledTimes(1);
+  });
+
+  it('emits the returned organization after activating a theme', async () => {
+    const { reactory } = setup();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Activate Ocean' }));
+
+    await waitFor(() => expect(emitCallsFor(reactory)).toHaveLength(1));
+
+    const [event, payload] = emitCallsFor(reactory)[0];
+    expect(event).toBe(ORGANIZATION_UPDATED_EVENT);
+    expect(payload.id).toBe('org-1');
+    expect(payload.theme).toBe('Ocean');
+    expect(reactory.emit).toHaveBeenCalledTimes(1);
+  });
+
+  it('emits the returned organization after deleting a theme', async () => {
+    const { reactory } = setup();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Acme Theme' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete theme' }));
+
+    await waitFor(() => expect(emitCallsFor(reactory)).toHaveLength(1));
+
+    const [event, payload] = emitCallsFor(reactory)[0];
+    expect(event).toBe(ORGANIZATION_UPDATED_EVENT);
+    expect(payload.id).toBe('org-1');
+    // The server's deterministic fallback pointer is what the shell re-resolves
+    // against, so the emitted record must carry it.
+    expect(payload.theme).toBe('Ocean');
+    expect((payload.themes || []).map((theme: any) => theme.name)).not.toContain('Acme Theme');
+    expect(reactory.emit).toHaveBeenCalledTimes(1);
+  });
+
+  it('emits the returned organization after a logo upload', async () => {
+    const { reactory } = setup();
+
+    fireEvent.change(screen.getByTestId('organization-branding-logo-input'), {
+      target: { files: [fileOf('logo.png', 'image/png')] },
+    });
+
+    await waitFor(() => expect(emitCallsFor(reactory)).toHaveLength(1));
+
+    const [event, payload] = emitCallsFor(reactory)[0];
+    expect(event).toBe(ORGANIZATION_UPDATED_EVENT);
+    expect(payload.id).toBe('org-1');
+    expect(payload.logoURL).toBe('https://cdn.example/uploaded-logo');
+    expect(reactory.emit).toHaveBeenCalledTimes(1);
+  });
+
+  it('emits the returned organization after a logo removal', async () => {
+    const { reactory } = setup({
+      organization: { logo: 'acme-logo', logoURL: 'https://cdn.example/acme-logo.png' },
+    });
+
+    const slot = screen.getByTestId('organization-branding-logo-slot');
+    fireEvent.click(within(slot).getByRole('button', { name: 'Remove' }));
+
+    await waitFor(() => expect(emitCallsFor(reactory)).toHaveLength(1));
+
+    const [event, payload] = emitCallsFor(reactory)[0];
+    expect(event).toBe(ORGANIZATION_UPDATED_EVENT);
+    expect(payload.id).toBe('org-1');
+    expect(payload.logo).toBeNull();
+    expect(reactory.emit).toHaveBeenCalledTimes(1);
+  });
+
+  it('emits when the organization switches back to the client theme', async () => {
+    const { reactory } = setup();
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Inherit client theme' }));
+
+    await waitFor(() => expect(emitCallsFor(reactory)).toHaveLength(1));
+
+    const [, payload] = emitCallsFor(reactory)[0];
+    expect(payload.id).toBe('org-1');
+    expect(payload.theme).toBeNull();
+    expect(payload.themeMode).toBeNull();
+  });
+
+  it('emits nothing when the save fails', async () => {
+    const reactory = makeReactory({
+      organizations: [
+        makeOrganization({ themes: acmeThemes(), theme: 'Acme Theme', themeMode: 'dark' }),
+      ],
+      mutationImpl: (operation) =>
+        operation === 'OrganizationSaveTheme'
+          ? { data: null, errors: [{ message: 'Theme name already exists' }] }
+          : undefined,
+    });
+
+    const { props } = setup({ reactory });
+
+    fireEvent.click(screen.getByRole('button', { name: 'New theme' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save theme' }));
+
+    await waitFor(() =>
+      expect(props.notify).toHaveBeenCalledWith('Theme name already exists', 'error'),
+    );
+
+    // A failed mutation must not make the shell re-resolve: emitting here (for
+    // example from a `finally`) would report branding that was never stored.
+    expect(emitCallsFor(reactory)).toHaveLength(0);
+    expect(reactory.emit).not.toHaveBeenCalled();
   });
 });
 

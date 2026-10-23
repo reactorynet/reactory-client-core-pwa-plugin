@@ -35,9 +35,11 @@ import {
   Palette as PaletteIcon,
 } from '@mui/icons-material';
 
+import { ORGANIZATION_UPDATED_EVENT } from './events';
 import useOrganizationBranding from './hooks/useOrganizationBranding';
 import { resolveError, type OrganizationMessageKey } from './i18n';
 import type {
+  Organization,
   OrganizationImageType,
   OrganizationTabProps,
   OrganizationThemeMode,
@@ -334,6 +336,27 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
     }
   }, [refresh]);
 
+  /**
+   * Publish `core.OrganizationUpdatedEvent` for a write the server accepted.
+   *
+   * The shell subscribes to this event and re-resolves the active
+   * organization's theme, so a theme (or logo/avatar) changed here applies to
+   * the admin's own view without a reload — ORG-014's "apply on theme change".
+   * The payload is the organization the mutation returned; a consumer that only
+   * needs to know *which* organization changed reads its `id`.
+   *
+   * Every caller invokes this **after** the success check, never in a `finally`:
+   * a failed mutation must not make the shell re-resolve against stale branding.
+   */
+  const emitOrganizationUpdated = useCallback(
+    (updated: Organization | null) => {
+      if (!updated) return;
+      if (!reactory || typeof reactory.emit !== 'function') return;
+      reactory.emit(ORGANIZATION_UPDATED_EVENT, updated);
+    },
+    [reactory],
+  );
+
   const themeNames = useMemo(
     () => (branding.themes || []).map((theme) => `${theme?.name || ''}`).filter(Boolean),
     [branding.themes],
@@ -375,6 +398,8 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
         return;
       }
 
+      emitOrganizationUpdated(result.organization);
+
       notify(
         t('reactory.organizations.branding.image.uploaded', {
           type: t(IMAGE_LABEL_KEYS[imageType]),
@@ -383,7 +408,7 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
       );
       await safeRefresh();
     },
-    [branding, notify, safeRefresh, t],
+    [branding, emitOrganizationUpdated, notify, safeRefresh, t],
   );
 
   const handleRemoveImage = useCallback(
@@ -398,6 +423,8 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
         return;
       }
 
+      emitOrganizationUpdated(result.organization);
+
       notify(
         t('reactory.organizations.branding.image.removed', {
           type: t(IMAGE_LABEL_KEYS[imageType]),
@@ -406,7 +433,7 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
       );
       await safeRefresh();
     },
-    [branding, notify, safeRefresh, t],
+    [branding, emitOrganizationUpdated, notify, safeRefresh, t],
   );
 
   /**
@@ -427,6 +454,8 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
           );
           return;
         }
+
+        emitOrganizationUpdated(result.organization);
 
         notify(t('reactory.organizations.branding.themes.inherited'), 'success');
         await safeRefresh();
@@ -450,13 +479,15 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
         return;
       }
 
+      emitOrganizationUpdated(result.organization);
+
       notify(
         t('reactory.organizations.branding.themes.activated', { name: `${first.name}` }),
         'success',
       );
       await safeRefresh();
     },
-    [branding, notify, safeRefresh, t],
+    [branding, emitOrganizationUpdated, notify, safeRefresh, t],
   );
 
   const handleModeChange = useCallback(
@@ -473,13 +504,15 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
         return;
       }
 
+      emitOrganizationUpdated(result.organization);
+
       notify(
         t('reactory.organizations.branding.themes.activated', { name: branding.theme }),
         'success',
       );
       await safeRefresh();
     },
-    [branding, notify, safeRefresh, t],
+    [branding, emitOrganizationUpdated, notify, safeRefresh, t],
   );
 
   const handleActivateTheme = useCallback(
@@ -494,13 +527,15 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
         return;
       }
 
+      emitOrganizationUpdated(result.organization);
+
       notify(
         t('reactory.organizations.branding.themes.activated', { name: themeName }),
         'success',
       );
       await safeRefresh();
     },
-    [branding, notify, safeRefresh, t],
+    [branding, emitOrganizationUpdated, notify, safeRefresh, t],
   );
 
   const openCreateTheme = useCallback(() => {
@@ -560,13 +595,15 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
       setEditingTheme(null);
       setThemeDirty(false);
 
+      emitOrganizationUpdated(result.organization);
+
       notify(
         t('reactory.organizations.branding.themes.saved', { name: `${themePayload.name}` }),
         'success',
       );
       await safeRefresh();
     },
-    [branding, notify, safeRefresh, t],
+    [branding, emitOrganizationUpdated, notify, safeRefresh, t],
   );
 
   const handleConfirmDelete = useCallback(async () => {
@@ -585,9 +622,11 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
       return;
     }
 
+    emitOrganizationUpdated(result.organization);
+
     notify(t('reactory.organizations.branding.themes.deleted', { name: themeName }), 'success');
     await safeRefresh();
-  }, [branding, deleteTarget, notify, safeRefresh, t]);
+  }, [branding, deleteTarget, emitOrganizationUpdated, notify, safeRefresh, t]);
 
   const openCssStudio = useCallback(
     async (theme: IThemeRecord) => {
