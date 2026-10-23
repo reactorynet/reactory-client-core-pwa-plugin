@@ -1550,8 +1550,20 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
     members: memberRows,
     createNotification: jest.fn(),
     navigation: jest.fn(),
-    /** Event bus surface used by the detail shell and the Overview tab. */
+    /**
+     * The two event buses the shell actually carries (ORG-043 review RC-1).
+     *
+     * `emit` above is eventemitter3; `amq.$pub.def` is postal.js. They are
+     * independent — nothing in the client bridges them — and App.tsx listens on
+     * postal while MaterialTableWidget's refreshEvents listen on the emitter.
+     * Both are recorded so a test can assert an update reaches *both* consumers
+     * instead of silently satisfying only one of them.
+     */
     emit: jest.fn(),
+    amq: {
+      $pub: { def: jest.fn() },
+      $sub: { def: jest.fn() },
+    },
     location: { pathname: '/' } as any,
     getUser: jest.fn(() => ({
       loggedIn: {

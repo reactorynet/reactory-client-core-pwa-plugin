@@ -80,7 +80,7 @@ const fileOf = (name: string, type: string, size?: number): any => {
 };
 
 /**
- * The emit calls the tab made for `core.OrganizationUpdatedEvent`.
+ * The `emit` calls (eventemitter3 bus) the tab made for `core.OrganizationUpdatedEvent`.
  *
  * Filtering by event name (rather than counting every emit) keeps these
  * assertions honest if the tab ever raises another event: only the update
@@ -89,6 +89,14 @@ const fileOf = (name: string, type: string, size?: number): any => {
 const emitCallsFor = (reactory: any, event = ORGANIZATION_UPDATED_EVENT) =>
   reactory.emit.mock.calls.filter((call: any[]) => call[0] === event);
 
+/**
+ * The `amq.$pub.def` calls (postal.js bus) for `core.OrganizationUpdatedEvent`.
+ *
+ * This is the bus App.tsx actually subscribes on, so an assertion on `emit`
+ * alone would pass while the shell never hears the event (ORG-043 review RC-1).
+ */
+const publishCallsFor = (reactory: any, event = ORGANIZATION_UPDATED_EVENT) =>
+  reactory.amq.$pub.def.mock.calls.filter((call: any[]) => call[0] === event);
 describe('branding tab wiring', () => {
   it('replaces only the branding registry entry', () => {
     const branding = ORGANIZATION_TABS.find((tab) => tab.id === 'branding');
@@ -405,11 +413,16 @@ describe('theme lifecycle', () => {
 describe('organization updated event (ORG-043)', () => {
   /**
    * ORG-014's acceptance criterion is "apply on theme change": saving branding
-   * must make the admin's own shell re-resolve the theme without a reload. The
-   * Overview tab already emits `core.OrganizationUpdatedEvent`; the Branding tab
-   * must do the same for every write it commits.
+   * must make the admin's own shell re-resolve the theme without a reload.
    *
-   * One emit per mutation - never one per field change, and never on failure.
+   * The shell carries **two independent buses** (review RC-1): `reactory.emit`
+   * is eventemitter3 (what `MaterialTableWidget`'s refreshEvents listen on) and
+   * `amq.$pub.def` is postal.js (what `App.tsx` subscribes on). Every test here
+   * asserts both, because satisfying only the emitter is exactly the defect
+   * this ticket was raised for.
+   *
+   * One notification per mutation — never one per field change, and never on
+   * failure.
    */
   it('emits the saved organization once after a successful theme save', async () => {
     const { props, reactory } = setup();
@@ -430,9 +443,54 @@ describe('organization updated event (ORG-043)', () => {
     expect(payload.id).toBe('org-1');
     expect((payload.themes || []).map((theme: any) => theme.name)).toContain('theme-1');
 
-    // Creating a theme touches many editor fields and the save builds the whole
-    // payload at once; the event must still be raised once.
+    // The postal publish App.tsx listens on: (event, organization, channel).
+    const published = publishCallsFor(reactory);
+    expect(published).toHaveLength(1);
+    expect(published[0]).toHaveLength(3);
+    expect(published[0][0]).toBe(ORGANIZATION_UPDATED_EVENT);
+    expect(published[0][1]).toBe(payload);
+    expect(published[0][2]).toBe(ORGANIZATION_UPDATED_EVENT);
+
     expect(reactory.emit).toHaveBeenCalledTimes(1);
+    expect(reactory.amq.$pub.def).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not notify once per field change, only once per save', async () => {
+    // A save writes the whole theme payload at once, but the editor emits a
+    // change for every keystroke and every option. A per-field implementation
+    // would still pass a "New theme -> Save" test that never types anything, so
+    // this one edits several fields and holds the count at zero until Save.
+    const { props, reactory } = setup();
+
+    fireEvent.click(screen.getByRole('button', { name: 'New theme' }));
+    expect(emitCallsFor(reactory)).toHaveLength(0);
+    expect(publishCallsFor(reactory)).toHaveLength(0);
+
+    const title = screen.getByLabelText('Application Title');
+    fireEvent.change(title, { target: { value: 'A' } });
+    fireEvent.change(title, { target: { value: 'Acme Portal' } });
+    fireEvent.change(screen.getByLabelText('Description'), {
+      target: { value: 'Edited while the editor is open' },
+    });
+
+    // Editing is not a mutation: nothing is announced yet.
+    expect(emitCallsFor(reactory)).toHaveLength(0);
+    expect(publishCallsFor(reactory)).toHaveLength(0);
+    expect(props.refresh).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save theme' }));
+
+    await waitFor(() => expect(emitCallsFor(reactory)).toHaveLength(1));
+    expect(publishCallsFor(reactory)).toHaveLength(1);
+    expect(emitCallsFor(reactory)).toHaveLength(1);
+    expect(reactory.emit).toHaveBeenCalledTimes(1);
+    expect(reactory.amq.$pub.def).toHaveBeenCalledTimes(1);
+    // The edited fields travelled with the saved payload, so the notification
+    // describes the record the server acknowledged rather than the draft.
+    const savedTheme = (emitCallsFor(reactory)[0][1].themes || [])
+      .find((theme: any) => theme.name === 'theme-1');
+    expect(savedTheme.content.appTitle).toBe('Acme Portal');
+    expect(savedTheme.description).toBe('Edited while the editor is open');
   });
 
   it('emits the returned organization after activating a theme', async () => {
@@ -441,12 +499,16 @@ describe('organization updated event (ORG-043)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Activate Ocean' }));
 
     await waitFor(() => expect(emitCallsFor(reactory)).toHaveLength(1));
+    await waitFor(() => expect(publishCallsFor(reactory)).toHaveLength(1));
 
     const [event, payload] = emitCallsFor(reactory)[0];
     expect(event).toBe(ORGANIZATION_UPDATED_EVENT);
     expect(payload.id).toBe('org-1');
     expect(payload.theme).toBe('Ocean');
+
+    expect(publishCallsFor(reactory)[0][1]).toBe(payload);
     expect(reactory.emit).toHaveBeenCalledTimes(1);
+    expect(reactory.amq.$pub.def).toHaveBeenCalledTimes(1);
   });
 
   it('emits the returned organization after deleting a theme', async () => {
@@ -456,6 +518,7 @@ describe('organization updated event (ORG-043)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Delete theme' }));
 
     await waitFor(() => expect(emitCallsFor(reactory)).toHaveLength(1));
+    await waitFor(() => expect(publishCallsFor(reactory)).toHaveLength(1));
 
     const [event, payload] = emitCallsFor(reactory)[0];
     expect(event).toBe(ORGANIZATION_UPDATED_EVENT);
@@ -464,7 +527,9 @@ describe('organization updated event (ORG-043)', () => {
     // against, so the emitted record must carry it.
     expect(payload.theme).toBe('Ocean');
     expect((payload.themes || []).map((theme: any) => theme.name)).not.toContain('Acme Theme');
+    expect(publishCallsFor(reactory)[0][1]).toBe(payload);
     expect(reactory.emit).toHaveBeenCalledTimes(1);
+    expect(reactory.amq.$pub.def).toHaveBeenCalledTimes(1);
   });
 
   it('emits the returned organization after a logo upload', async () => {
@@ -475,12 +540,15 @@ describe('organization updated event (ORG-043)', () => {
     });
 
     await waitFor(() => expect(emitCallsFor(reactory)).toHaveLength(1));
+    await waitFor(() => expect(publishCallsFor(reactory)).toHaveLength(1));
 
     const [event, payload] = emitCallsFor(reactory)[0];
     expect(event).toBe(ORGANIZATION_UPDATED_EVENT);
     expect(payload.id).toBe('org-1');
     expect(payload.logoURL).toBe('https://cdn.example/uploaded-logo');
+    expect(publishCallsFor(reactory)[0][1]).toBe(payload);
     expect(reactory.emit).toHaveBeenCalledTimes(1);
+    expect(reactory.amq.$pub.def).toHaveBeenCalledTimes(1);
   });
 
   it('emits the returned organization after a logo removal', async () => {
@@ -492,12 +560,15 @@ describe('organization updated event (ORG-043)', () => {
     fireEvent.click(within(slot).getByRole('button', { name: 'Remove' }));
 
     await waitFor(() => expect(emitCallsFor(reactory)).toHaveLength(1));
+    await waitFor(() => expect(publishCallsFor(reactory)).toHaveLength(1));
 
     const [event, payload] = emitCallsFor(reactory)[0];
     expect(event).toBe(ORGANIZATION_UPDATED_EVENT);
     expect(payload.id).toBe('org-1');
     expect(payload.logo).toBeNull();
+    expect(publishCallsFor(reactory)[0][1]).toBe(payload);
     expect(reactory.emit).toHaveBeenCalledTimes(1);
+    expect(reactory.amq.$pub.def).toHaveBeenCalledTimes(1);
   });
 
   it('emits when the organization switches back to the client theme', async () => {
@@ -506,11 +577,13 @@ describe('organization updated event (ORG-043)', () => {
     fireEvent.click(screen.getByRole('checkbox', { name: 'Inherit client theme' }));
 
     await waitFor(() => expect(emitCallsFor(reactory)).toHaveLength(1));
+    await waitFor(() => expect(publishCallsFor(reactory)).toHaveLength(1));
 
     const [, payload] = emitCallsFor(reactory)[0];
     expect(payload.id).toBe('org-1');
     expect(payload.theme).toBeNull();
     expect(payload.themeMode).toBeNull();
+    expect(publishCallsFor(reactory)[0][1]).toBe(payload);
   });
 
   it('emits nothing when the save fails', async () => {
@@ -533,10 +606,109 @@ describe('organization updated event (ORG-043)', () => {
       expect(props.notify).toHaveBeenCalledWith('Theme name already exists', 'error'),
     );
 
-    // A failed mutation must not make the shell re-resolve: emitting here (for
+    // A failed mutation must not make the shell re-resolve: notifying here (for
     // example from a `finally`) would report branding that was never stored.
     expect(emitCallsFor(reactory)).toHaveLength(0);
+    expect(publishCallsFor(reactory)).toHaveLength(0);
     expect(reactory.emit).not.toHaveBeenCalled();
+    expect(reactory.amq.$pub.def).not.toHaveBeenCalled();
+  });
+
+  it('emits nothing when activating a theme fails', async () => {
+    const reactory = makeReactory({
+      organizations: [
+        makeOrganization({ themes: acmeThemes(), theme: 'Acme Theme', themeMode: 'dark' }),
+      ],
+      mutationImpl: (operation) =>
+        operation === 'OrganizationSetActiveTheme'
+          ? { data: null, errors: [{ message: 'Theme is not available' }] }
+          : undefined,
+    });
+
+    const { props } = setup({ reactory });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Activate Ocean' }));
+
+    await waitFor(() =>
+      expect(props.notify).toHaveBeenCalledWith('Theme is not available', 'error'),
+    );
+    expect(emitCallsFor(reactory)).toHaveLength(0);
+    expect(publishCallsFor(reactory)).toHaveLength(0);
+  });
+
+  it('emits nothing when deleting a theme fails', async () => {
+    const reactory = makeReactory({
+      organizations: [
+        makeOrganization({ themes: acmeThemes(), theme: 'Acme Theme', themeMode: 'dark' }),
+      ],
+      mutationImpl: (operation) =>
+        operation === 'OrganizationDeleteTheme'
+          ? { data: null, errors: [{ message: 'Theme is in use' }] }
+          : undefined,
+    });
+
+    const { props } = setup({ reactory });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Acme Theme' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete theme' }));
+
+    await waitFor(() => expect(props.notify).toHaveBeenCalledWith('Theme is in use', 'error'));
+    expect(emitCallsFor(reactory)).toHaveLength(0);
+    expect(publishCallsFor(reactory)).toHaveLength(0);
+  });
+
+  it('emits nothing when an image upload fails', async () => {
+    const reactory = makeReactory({
+      organizations: [makeOrganization({ themes: acmeThemes() })],
+      mutationImpl: (operation) =>
+        operation === 'OrganizationUploadImage'
+          ? { data: null, errors: [{ message: 'Image could not be stored' }] }
+          : undefined,
+    });
+
+    const { props } = setup({ reactory });
+
+    fireEvent.change(screen.getByTestId('organization-branding-logo-input'), {
+      target: { files: [fileOf('logo.png', 'image/png')] },
+    });
+
+    await waitFor(() =>
+      expect(props.notify).toHaveBeenCalledWith('Image could not be stored', 'error'),
+    );
+    expect(emitCallsFor(reactory)).toHaveLength(0);
+    expect(publishCallsFor(reactory)).toHaveLength(0);
+  });
+
+  it('emits nothing when an image removal fails', async () => {
+    const reactory = makeReactory({
+      organizations: [
+        makeOrganization({
+          themes: acmeThemes(),
+          logo: 'acme-logo',
+          logoURL: 'https://cdn.example/acme-logo.png',
+        }),
+      ],
+      mutationImpl: (operation) =>
+        operation === 'updateOrganization'
+          ? { data: null, errors: [{ message: 'Organization is locked' }] }
+          : undefined,
+    });
+
+    const { props } = setup({
+      reactory,
+      // The Remove button renders from the organization the shell passes down;
+      // the stub's state alone is only visible after the branding read lands.
+      organization: { logo: 'acme-logo', logoURL: 'https://cdn.example/acme-logo.png' },
+    });
+
+    const slot = screen.getByTestId('organization-branding-logo-slot');
+    fireEvent.click(within(slot).getByRole('button', { name: 'Remove' }));
+
+    await waitFor(() =>
+      expect(props.notify).toHaveBeenCalledWith('Organization is locked', 'error'),
+    );
+    expect(emitCallsFor(reactory)).toHaveLength(0);
+    expect(publishCallsFor(reactory)).toHaveLength(0);
   });
 });
 

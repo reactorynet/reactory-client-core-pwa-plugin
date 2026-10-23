@@ -304,6 +304,13 @@ describe('OrganizationOverviewTab — read and edit', () => {
       'core.OrganizationUpdatedEvent',
       expect.objectContaining({ id: 'org-1', name: 'Acme Holdings Ltd' }),
     );
+    // The shell listens on the postal bus, not the emitter (ORG-043 RC-1), so
+    // the save must reach that bus too.
+    expect(reactory.amq.$pub.def).toHaveBeenCalledWith(
+      'core.OrganizationUpdatedEvent',
+      expect.objectContaining({ id: 'org-1', name: 'Acme Holdings Ltd' }),
+      'core.OrganizationUpdatedEvent',
+    );
     expect(props.onUnsavedChanges).toHaveBeenLastCalledWith(false);
     expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
   });

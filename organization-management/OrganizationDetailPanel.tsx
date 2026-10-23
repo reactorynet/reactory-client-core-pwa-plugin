@@ -34,7 +34,7 @@ import {
 import { useReactory } from '@reactory/client-core/api';
 
 import OrganizationStatusChip from './components/OrganizationStatusChip';
-import { ORGANIZATION_UPDATED_EVENT } from './events';
+import { ORGANIZATION_UPDATED_EVENT, emitOrganizationUpdated } from './events';
 import { makeTranslator, resolveError } from './i18n';
 import { ORGANIZATION_TABS, organizationTabById, OVERVIEW_TAB_ID } from './organizationTabs';
 import useOrganizationDetail, { resolveOrganizationId } from './hooks/useOrganizationDetail';
@@ -283,9 +283,7 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
         }),
         'success',
       );
-      if (reactory && typeof reactory.emit === 'function') {
-        reactory.emit(ORGANIZATION_UPDATED_EVENT, { id: organization.id, status: 'archived' });
-      }
+      emitOrganizationUpdated(reactory, { id: organization.id, status: 'archived' });
       await refresh();
       return;
     }
@@ -306,9 +304,7 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
         t('reactory.organizations.restore.success', { name: result.organization.name || organization.name }),
         'success',
       );
-      if (reactory && typeof reactory.emit === 'function') {
-        reactory.emit(ORGANIZATION_UPDATED_EVENT, result.organization);
-      }
+      emitOrganizationUpdated(reactory, result.organization);
       await refresh();
       return;
     }
