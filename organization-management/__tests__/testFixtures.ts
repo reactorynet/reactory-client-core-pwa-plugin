@@ -2,6 +2,8 @@ import type { DemographicDefinition } from '../../demographic-form';
 import type {
   Organization,
   OrganizationBusinessUnit,
+  OrganizationDemographicAggregateReport,
+  OrganizationDemographicValue,
   OrganizationMember,
   OrganizationStatistics,
   OrganizationTeam,
@@ -392,6 +394,117 @@ export const baseDemographicDefinitions = (): DemographicDefinition[] => [
   }),
 ];
 
+/**
+ * One stored demographic value (ORG-033).
+ *
+ * Defaults to an administratively-written `gender` value for `user-1`. The
+ * values pane resolves the display name from `options.members`, so a fixture
+ * without a matching member still renders — as the id.
+ */
+export const makeDemographicValue = (
+  overrides: Partial<OrganizationDemographicValue> = {},
+): OrganizationDemographicValue => ({
+  id: 'value-1',
+  organization: 'org-1',
+  user: 'user-1',
+  membership: null,
+  definition: 'def-1',
+  key: 'gender',
+  value: 'female',
+  valueType: 'enum',
+  source: 'user',
+  verified: false,
+  effectiveFrom: null,
+  effectiveTo: null,
+  updatedBy: 'user-1',
+  createdAt: '2026-09-01T08:00:00.000Z',
+  updatedAt: '2026-09-02T08:00:00.000Z',
+  ...overrides,
+});
+
+/**
+ * The value shapes the table must distinguish: two single-valued rows for the
+ * same member, a multi-valued row, and a row whose source is an import.
+ */
+export const demographicValueFixtures = (): OrganizationDemographicValue[] => [
+  makeDemographicValue({ id: 'value-1', user: 'user-1', key: 'gender', value: 'female' }),
+  makeDemographicValue({
+    id: 'value-2',
+    user: 'user-2',
+    key: 'dateofbirth',
+    definition: 'def-2',
+    value: '1990-04-12',
+    valueType: 'date',
+    source: 'admin',
+    verified: true,
+  }),
+  makeDemographicValue({
+    id: 'value-3',
+    user: 'user-1',
+    key: 'language',
+    definition: 'def-5',
+    value: ['English', 'French'],
+    valueType: 'multi-enum',
+    source: 'import',
+  }),
+];
+
+/**
+ * A `DemographicAggregateReport` with one reported and one withheld definition,
+ * which is the shape the completeness summary has to explain.
+ */
+export const makeDemographicAggregateReport = (
+  overrides: Partial<OrganizationDemographicAggregateReport> = {},
+): OrganizationDemographicAggregateReport => ({
+  organization: 'org-1',
+  minimumAggregationGroupSize: 5,
+  filter: {
+    businessUnit: null,
+    team: null,
+    region: null,
+    effectiveFrom: null,
+    effectiveTo: null,
+    definitionKeys: ['gender', 'dateofbirth'],
+    cohortRestricted: false,
+  },
+  definitions: [
+    {
+      definitionKey: 'gender',
+      title: 'Gender',
+      category: 'personal',
+      valueType: 'enum',
+      multiValued: false,
+      sensitive: false,
+      suppressed: false,
+      suppressedCohorts: 1,
+      cohortTotal: 12,
+      percentageDenominator: 12,
+      denominatorKind: 'respondents',
+      buckets: [
+        { key: 'female', label: 'Female', count: 7, percentage: 58.33 },
+        { key: 'male', label: 'Male', count: 5, percentage: 41.67 },
+      ],
+    },
+    {
+      definitionKey: 'dateofbirth',
+      title: 'Date of birth',
+      category: 'personal',
+      valueType: 'date',
+      multiValued: false,
+      sensitive: true,
+      suppressed: true,
+      suppressedCohorts: null,
+      cohortTotal: 0,
+      percentageDenominator: 0,
+      denominatorKind: 'respondents',
+      buckets: [],
+    },
+  ],
+  reportedDefinitions: 1,
+  suppressedDefinitions: 1,
+  ...overrides,
+});
+
 export interface ReactoryStubOptions {
   /** Mutable array: create/archive mutations update it so a refresh reflects them. */
   organizations?: Organization[];
@@ -418,6 +531,16 @@ export interface ReactoryStubOptions {
    * non-zero count makes the delete mutation refuse, exactly as the server does.
    */
   demographicValueCounts?: Record<string, number>;
+  /**
+   * Stored values the values pane (ORG-033) reads and mutates.
+   *
+   * Omitted preserves the ORG-031 behaviour: `OrganizationDemographicValues`
+   * answers with an empty page whose `paging.total` comes from
+   * `demographicValueCounts`, which is all the configuration pane needs.
+   */
+  demographicValues?: OrganizationDemographicValue[];
+  /** Aggregate report the completeness summary reads; a neutral one otherwise. */
+  demographicAggregates?: OrganizationDemographicAggregateReport;
   i18n?: any;
   /**
    * Platform roles the caller holds (`loggedIn.roles`). Matched against what
@@ -556,16 +679,72 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
     }
 
     if (operation === 'OrganizationDemographicValues') {
-      const key = variables?.filter?.key;
-      const total = Number((options.demographicValueCounts || {})[key] || 0);
+      const filter = variables?.filter || {};
+      const page = Number(variables?.paging?.page) > 0 ? Number(variables.paging.page) : 1;
+      const pageSize =
+        Number(variables?.paging?.pageSize) > 0 ? Number(variables.paging.pageSize) : 25;
+
+      // The configuration pane only asks for `paging.total` (one single-row page
+      // per definition); the values pane reads the rows themselves. Both are
+      // served here, so the same document behaves the same way in both places.
+      const source = options.demographicValues || [];
+
+      const rows = source.filter((value) => {
+        if (filter.user && `${value.user || ''}` !== `${filter.user}`) return false;
+        if (filter.key && `${value.key || ''}` !== `${filter.key}`) return false;
+        if (filter.definition && `${value.definition || ''}` !== `${filter.definition}`) return false;
+        if (filter.source && `${value.source || ''}` !== `${filter.source}`) return false;
+        if (
+          filter.verified !== undefined &&
+          filter.verified !== null &&
+          (value.verified === true) !== (filter.verified === true)
+        ) {
+          return false;
+        }
+        return true;
+      });
+
+      const total = options.demographicValues
+        ? rows.length
+        : Number((options.demographicValueCounts || {})[filter.key] || 0);
+
+      const start = (page - 1) * pageSize;
 
       return Promise.resolve({
         data: {
           OrganizationDemographicValues: {
-            values: [],
-            paging: { page: 1, pageSize: 1, total, hasNext: total > 1 },
+            values: options.demographicValues
+              ? rows.slice(start, start + pageSize).map((value) => ({ ...value }))
+              : [],
+            paging: { page, pageSize, total, hasNext: page * pageSize < total },
           },
         },
+        errors: [],
+      });
+    }
+
+    if (operation === 'OrganizationDemographicAggregates') {
+      const report = (options.demographicAggregates || {
+        organization: variables?.organizationId || 'org-1',
+        minimumAggregationGroupSize: 5,
+        filter: {
+          businessUnit: null,
+          team: null,
+          region: null,
+          effectiveFrom: null,
+          effectiveTo: null,
+          definitionKeys: Array.isArray(variables?.definitionKeys)
+            ? [...variables.definitionKeys]
+            : [],
+          cohortRestricted: false,
+        },
+        definitions: [],
+        reportedDefinitions: 0,
+        suppressedDefinitions: 0,
+      }) as OrganizationDemographicAggregateReport;
+
+      return Promise.resolve({
+        data: { OrganizationDemographicAggregates: report },
         errors: [],
       });
     }
@@ -962,6 +1141,89 @@ export const makeReactory = (options: ReactoryStubOptions = {}) => {
       list.splice(index, 1);
       return Promise.resolve({
         data: { OrganizationDeleteDemographicDefinition: true },
+        errors: [],
+      });
+    }
+
+    // ---- Demographic values (ORG-033) ----
+    const saveValueRecord = (input: any): OrganizationDemographicValue => {
+      const list = options.demographicValues;
+      const definitions = options.demographicDefinitions || [];
+      const definition = definitions.find((entry) => entry.key === input?.key) || null;
+      const index = list
+        ? list.findIndex(
+            (entry) =>
+              `${entry.user || ''}` === `${input?.user || ''}` && entry.key === input?.key,
+          )
+        : -1;
+      const existing = index >= 0 && list ? list[index] : null;
+
+      const saved: OrganizationDemographicValue = {
+        ...makeDemographicValue({
+          id: `value-${(list || []).length + 1}`,
+          user: `${input?.user || ''}`,
+          key: `${input?.key || ''}`,
+        }),
+        ...(existing || {}),
+        ...(input || {}),
+        organization: existing?.organization || 'org-1',
+        definition: input?.definition || definition?.id || existing?.definition || null,
+        // The server snapshots the definition's type at write time.
+        valueType: definition?.valueType || existing?.valueType || null,
+        updatedAt: '2026-10-23T09:00:00.000Z',
+      };
+
+      if (list) {
+        if (index >= 0) list[index] = saved;
+        else list.push(saved);
+      }
+
+      return saved;
+    };
+
+    if (operation === 'OrganizationSaveDemographicValue') {
+      const input = variables?.value || {};
+      if (!input.user) {
+        return Promise.resolve({
+          data: null,
+          errors: [
+            {
+              message: 'Invalid value for demographic',
+              extensions: { fields: [{ path: 'user', message: 'A user is required' }] },
+            },
+          ],
+        });
+      }
+
+      const saved = saveValueRecord(input);
+      return Promise.resolve({
+        data: { OrganizationSaveDemographicValue: { ...saved } },
+        errors: [],
+      });
+    }
+
+    if (operation === 'OrganizationBulkSaveDemographicValues') {
+      const inputs: any[] = Array.isArray(variables?.values) ? variables.values : [];
+      const saved = inputs.map((input) => saveValueRecord(input));
+      return Promise.resolve({
+        data: { OrganizationBulkSaveDemographicValues: saved.map((entry) => ({ ...entry })) },
+        errors: [],
+      });
+    }
+
+    if (operation === 'OrganizationDeleteDemographicValue') {
+      const list = options.demographicValues;
+      const index = list
+        ? list.findIndex(
+            (entry) =>
+              entry.key === variables?.key && `${entry.user || ''}` === `${variables?.user || ''}`,
+          )
+        : -1;
+
+      if (index >= 0 && list) list.splice(index, 1);
+
+      return Promise.resolve({
+        data: { OrganizationDeleteDemographicValue: true },
         errors: [],
       });
     }

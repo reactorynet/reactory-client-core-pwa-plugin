@@ -223,19 +223,134 @@ export const ORGANIZATION_SET_DEMOGRAPHIC_ENABLED = `
 `;
 
 /**
- * One page of stored values, used only to count them.
+ * Fields selected for one stored demographic value (ORG-033).
  *
- * `DemographicDefinition` carries no usage count and the server has no
- * aggregation query, so the configuration pane asks for a single-row page per
- * definition and reads `paging.total`. `pageSize: 1` keeps the payload to one
- * document per key; the count is best-effort and never blocks the list.
+ * Mirrors `type DemographicValue` in
+ * `reactory-express-server/src/modules/reactory-core/graph/types/Demographics`.
+ * `user` is a `User` **id**, not a populated object: the server type has no
+ * nested resolver for it, so the values pane resolves names/emails from the
+ * organization's member list and falls back to the id.
+ *
+ * `key` and `valueType` are snapshots taken at write time, which is why the
+ * table can render a value even after its definition was renamed or retyped.
+ */
+export const DEMOGRAPHIC_VALUE_FIELDS = `
+  id
+  organization
+  user
+  membership
+  definition
+  key
+  value
+  valueType
+  source
+  verified
+  effectiveFrom
+  effectiveTo
+  updatedBy
+  createdAt
+  updatedAt
+`;
+
+/**
+ * One page of stored values.
+ *
+ * The same document serves both consumers: the configuration pane reads a
+ * single-row page per definition (`pageSize: 1`) to show its count, while the
+ * values pane reads the table page. `PagedDemographicValues.paging` describes
+ * the **result set**, so paging is the server's, never a client-side slice.
+ *
+ * `DemographicValueFilter` only supports the seven fields below — there is no
+ * `search` and no sort, so the pane filters on `key` / `user` and leaves the
+ * server's `{ key: 1, createdAt: 1 }` order in place.
  */
 export const ORGANIZATION_DEMOGRAPHIC_VALUES = `
   query OrganizationDemographicValues($organizationId: String!, $filter: DemographicValueFilter, $paging: PagingRequest) {
     OrganizationDemographicValues(organizationId: $organizationId, filter: $filter, paging: $paging) {
-      values { key }
+      values {
+        ${DEMOGRAPHIC_VALUE_FIELDS}
+      }
       paging { page pageSize total hasNext }
     }
+  }
+`;
+
+/**
+ * Privacy-filtered aggregates per definition (ORG-035).
+ *
+ * This is the only completeness signal the API offers. `minimumAggregationGroupSize`
+ * is echoed from the organization's policy and every bucket count is at least
+ * that size; a definition whose cohorts all fell below it comes back with
+ * `suppressed: true` and `suppressedCohorts: null`. There is no pre-suppression
+ * total anywhere, which is why the pane never presents `cohortTotal` as an
+ * organization headcount.
+ */
+export const ORGANIZATION_DEMOGRAPHIC_AGGREGATES = `
+  query OrganizationDemographicAggregates($organizationId: String!, $definitionKeys: [String!], $filter: DemographicAggregateFilter) {
+    OrganizationDemographicAggregates(organizationId: $organizationId, definitionKeys: $definitionKeys, filter: $filter) {
+      organization
+      minimumAggregationGroupSize
+      reportedDefinitions
+      suppressedDefinitions
+      filter { businessUnit team region effectiveFrom effectiveTo definitionKeys cohortRestricted }
+      definitions {
+        definitionKey
+        title
+        category
+        valueType
+        multiValued
+        sensitive
+        suppressed
+        suppressedCohorts
+        cohortTotal
+        percentageDenominator
+        denominatorKind
+        buckets { key label count percentage }
+      }
+    }
+  }
+`;
+
+/**
+ * Create or replace one member's value for one definition.
+ *
+ * The (organization, definition, user) triple is the identity: the server
+ * upserts on it, so an edit does not need the document id. Field-level
+ * rejections arrive as `extensions.fields` entries with a dotted `path`.
+ */
+export const ORGANIZATION_SAVE_DEMOGRAPHIC_VALUE = `
+  mutation OrganizationSaveDemographicValue($organizationId: String!, $value: DemographicValueInput!) {
+    OrganizationSaveDemographicValue(organizationId: $organizationId, value: $value) {
+      ${DEMOGRAPHIC_VALUE_FIELDS}
+    }
+  }
+`;
+
+/**
+ * Bulk value write.
+ *
+ * Every row is validated before anything is persisted, so a rejected batch is
+ * rejected as a whole; the pane still reports one outcome per submitted row so
+ * a rejection cannot look like success.
+ */
+export const ORGANIZATION_BULK_SAVE_DEMOGRAPHIC_VALUES = `
+  mutation OrganizationBulkSaveDemographicValues($organizationId: String!, $values: [DemographicValueInput!]!) {
+    OrganizationBulkSaveDemographicValues(organizationId: $organizationId, values: $values) {
+      ${DEMOGRAPHIC_VALUE_FIELDS}
+    }
+  }
+`;
+
+/**
+ * Delete one member's value for one definition.
+ *
+ * `user` is explicit rather than defaulted to the caller: this is the
+ * administrative surface, and an omitted `user` would delete the administrator's
+ * own value.
+ */
+export const ORGANIZATION_DELETE_DEMOGRAPHIC_VALUE = `
+  mutation OrganizationDeleteDemographicValue($organizationId: String!, $key: String!, $user: String) {
+    OrganizationDeleteDemographicValue(organizationId: $organizationId, key: $key, user: $user)
   }
 `;
 
@@ -733,6 +848,10 @@ export const OPERATIONS = {
   restoreOrganization: 'restoreOrganization',
   organizationDemographicDefinitions: 'OrganizationDemographicDefinitions',
   organizationDemographicValues: 'OrganizationDemographicValues',
+  organizationDemographicAggregates: 'OrganizationDemographicAggregates',
+  organizationSaveDemographicValue: 'OrganizationSaveDemographicValue',
+  organizationBulkSaveDemographicValues: 'OrganizationBulkSaveDemographicValues',
+  organizationDeleteDemographicValue: 'OrganizationDeleteDemographicValue',
   organizationSaveDemographicDefinition: 'OrganizationSaveDemographicDefinition',
   organizationDeleteDemographicDefinition: 'OrganizationDeleteDemographicDefinition',
   organizationReorderDemographicDefinitions: 'OrganizationReorderDemographicDefinitions',
