@@ -66,7 +66,7 @@ export const components: Reactory.Client.IReactoryComponentRegistryEntry<any>[] 
     name: 'ApplicationRolesPanel',
     version: '1.0.0',
     component: ApplicationRolesPanel,
-    description: 'Displays the list of roles configured for the application.',
+    description: 'Displays the backend role catalogue grouped by providing module, and shows which roles the application has configured, which are available but unused, and which are invalid.',
     roles: ['USER', 'ADMIN'],
     tags: ['application', 'roles', 'panel'],
   },
