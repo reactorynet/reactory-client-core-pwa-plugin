@@ -268,7 +268,9 @@ export const DemographicImportDialog: React.FC<DemographicImportDialogProps> = (
                   key={`${entry.index}-${entry.column}`}
                   direction={{ xs: 'column', sm: 'row' }}
                   spacing={1}
-                  alignItems={{ xs: 'stretch', sm: 'center' }}
+                  sx={{
+                    alignItems: { xs: 'stretch', sm: 'center' }
+                  }}
                 >
                   <Typography variant="body2" sx={{ flex: 1 }}>
                     {entry.column || `#${entry.index + 1}`}
