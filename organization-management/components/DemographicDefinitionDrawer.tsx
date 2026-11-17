@@ -22,7 +22,7 @@ import {
 import {
   Add as AddIcon,
   Close as CloseIcon,
-  DeleteOutline as DeleteOutlineIcon,
+  DeleteOutlined as DeleteOutlineIcon,
 } from '@mui/icons-material';
 
 import {
@@ -293,7 +293,9 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
         if (reason === 'backdropClick' || reason === 'escapeKeyDown') return;
         onClose();
       }}
-      PaperProps={{ sx: { width: { xs: '100%', sm: 720 }, maxWidth: '100%' } }}
+      slotProps={{
+        paper: { sx: { width: { xs: '100%', sm: 720 }, maxWidth: '100%' } }
+      }}
     >
       <Box
         data-testid="demographic-definition-drawer"
@@ -308,7 +310,9 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
                   title: draft.title || draft.key,
                 })}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             {t('reactory.organizations.demographics.drawer.subtitle')}
           </Typography>
         </Box>
@@ -343,7 +347,9 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
               ? t('reactory.organizations.demographics.field.keyHint')
               : t('reactory.organizations.demographics.field.keyImmutable'))
           }
-          inputProps={{ 'data-testid': 'demographic-definition-field-key' }}
+          slotProps={{
+            htmlInput: { 'data-testid': 'demographic-definition-field-key' }
+          }}
         />
 
         <TextField
@@ -357,7 +363,9 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
           helperText={
             fieldError('title') || t('reactory.organizations.demographics.field.titleHint')
           }
-          inputProps={{ 'data-testid': 'demographic-definition-field-title' }}
+          slotProps={{
+            htmlInput: { 'data-testid': 'demographic-definition-field-title' }
+          }}
         />
 
         <TextField
@@ -368,7 +376,9 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
           multiline
           minRows={2}
           helperText={t('reactory.organizations.demographics.field.descriptionHint')}
-          inputProps={{ 'data-testid': 'demographic-definition-field-description' }}
+          slotProps={{
+            htmlInput: { 'data-testid': 'demographic-definition-field-description' }
+          }}
         />
 
         <TextField
@@ -377,7 +387,9 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
           onChange={(event) => update('icon', event.target.value)}
           fullWidth
           helperText={t('reactory.organizations.demographics.field.iconHint')}
-          inputProps={{ 'data-testid': 'demographic-definition-field-icon' }}
+          slotProps={{
+            htmlInput: { 'data-testid': 'demographic-definition-field-icon' }
+          }}
         />
 
         {/* ---- Typing ---- */}
@@ -436,7 +448,9 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
           helperText={
             fieldError('ordinal') || t('reactory.organizations.demographics.field.ordinalHint')
           }
-          inputProps={{ 'data-testid': 'demographic-definition-field-ordinal', min: 0 }}
+          slotProps={{
+            htmlInput: { 'data-testid': 'demographic-definition-field-ordinal', min: 0 }
+          }}
         />
 
         <TextField
@@ -449,17 +463,24 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
           minRows={4}
           error={Boolean(fieldError('schema'))}
           helperText={schemaHelper}
-          inputProps={{
-            'data-testid': 'demographic-definition-field-schema',
-            spellCheck: false,
-            style: { fontFamily: 'monospace', fontSize: 12 },
+          slotProps={{
+            htmlInput: {
+              'data-testid': 'demographic-definition-field-schema',
+              spellCheck: false,
+              style: { fontFamily: 'monospace', fontSize: 12 },
+            }
           }}
         />
 
         {/* ---- Options (enum / multi-enum only) ---- */}
         {requiresOptions(draft.valueType) && (
           <Box data-testid="demographic-definition-options">
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Stack
+              direction="row"
+              sx={{
+                alignItems: "center",
+                justifyContent: "space-between"
+              }}>
               <Typography variant="subtitle1" component="h4">
                 {t('reactory.organizations.demographics.field.options')}
               </Typography>
@@ -472,12 +493,19 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
                 {t('reactory.organizations.demographics.options.add')}
               </Button>
             </Stack>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               {t('reactory.organizations.demographics.field.optionsHint')}
             </Typography>
 
             {draft.options.length === 0 && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  mt: 1
+                }}>
                 {t('reactory.organizations.demographics.options.empty')}
               </Typography>
             )}
@@ -488,8 +516,10 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
                   key={row.id}
                   direction={{ xs: 'column', sm: 'row' }}
                   spacing={1}
-                  alignItems={{ xs: 'stretch', sm: 'center' }}
                   data-testid={`demographic-definition-option-${index}`}
+                  sx={{
+                    alignItems: { xs: 'stretch', sm: 'center' }
+                  }}
                 >
                   <TextField
                     label={t('reactory.organizations.demographics.field.optionKey')}
@@ -497,8 +527,10 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
                     onChange={(event) => patchOption(index, { key: event.target.value })}
                     size="small"
                     sx={{ flex: 1 }}
-                    inputProps={{
-                      'data-testid': `demographic-definition-option-${index}-key`,
+                    slotProps={{
+                      htmlInput: {
+                        'data-testid': `demographic-definition-option-${index}-key`,
+                      }
                     }}
                   />
                   <TextField
@@ -507,8 +539,10 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
                     onChange={(event) => patchOption(index, { label: event.target.value })}
                     size="small"
                     sx={{ flex: 1 }}
-                    inputProps={{
-                      'data-testid': `demographic-definition-option-${index}-label`,
+                    slotProps={{
+                      htmlInput: {
+                        'data-testid': `demographic-definition-option-${index}-label`,
+                      }
                     }}
                   />
                   <TextField
@@ -518,8 +552,10 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
                     type="number"
                     size="small"
                     sx={{ width: 96 }}
-                    inputProps={{
-                      'data-testid': `demographic-definition-option-${index}-ordinal`,
+                    slotProps={{
+                      htmlInput: {
+                        'data-testid': `demographic-definition-option-${index}-ordinal`,
+                      }
                     }}
                   />
                   <FormControlLabel
@@ -606,7 +642,9 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
           onChange={(event) => update('widgetFqn', event.target.value)}
           fullWidth
           helperText={t('reactory.organizations.demographics.field.widgetFqnHint')}
-          inputProps={{ 'data-testid': 'demographic-definition-field-widget-fqn' }}
+          slotProps={{
+            htmlInput: { 'data-testid': 'demographic-definition-field-widget-fqn' }
+          }}
         />
 
         {widgetStatus === 'resolved' && (
@@ -646,15 +684,22 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
             fieldError('widgetProps') ||
             t('reactory.organizations.demographics.field.widgetPropsHint')
           }
-          inputProps={{
-            'data-testid': 'demographic-definition-field-widget-props',
-            spellCheck: false,
-            style: { fontFamily: 'monospace', fontSize: 12 },
+          slotProps={{
+            htmlInput: {
+              'data-testid': 'demographic-definition-field-widget-props',
+              spellCheck: false,
+              style: { fontFamily: 'monospace', fontSize: 12 },
+            }
           }}
         />
 
         <Box data-testid="demographic-definition-propsmap">
-          <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack
+            direction="row"
+            sx={{
+              alignItems: "center",
+              justifyContent: "space-between"
+            }}>
             <Typography variant="subtitle1" component="h4">
               {t('reactory.organizations.demographics.field.widgetPropsMap')}
             </Typography>
@@ -667,7 +712,9 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
               {t('reactory.organizations.demographics.widget.addMapping')}
             </Button>
           </Stack>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             {t('reactory.organizations.demographics.field.widgetPropsMapHint')}
           </Typography>
 
@@ -677,8 +724,10 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
                 key={row.id}
                 direction="row"
                 spacing={1}
-                alignItems="center"
                 data-testid={`demographic-definition-propsmap-${index}`}
+                sx={{
+                  alignItems: "center"
+                }}
               >
                 <TextField
                   label={t('reactory.organizations.demographics.widget.mapSource')}
@@ -686,8 +735,10 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
                   onChange={(event) => patchMapping(index, { source: event.target.value })}
                   size="small"
                   sx={{ flex: 1 }}
-                  inputProps={{
-                    'data-testid': `demographic-definition-propsmap-${index}-source`,
+                  slotProps={{
+                    htmlInput: {
+                      'data-testid': `demographic-definition-propsmap-${index}-source`,
+                    }
                   }}
                 />
                 <TextField
@@ -696,8 +747,10 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
                   onChange={(event) => patchMapping(index, { prop: event.target.value })}
                   size="small"
                   sx={{ flex: 1 }}
-                  inputProps={{
-                    'data-testid': `demographic-definition-propsmap-${index}-prop`,
+                  slotProps={{
+                    htmlInput: {
+                      'data-testid': `demographic-definition-propsmap-${index}-prop`,
+                    }
                   }}
                 />
                 <Tooltip title={t('reactory.organizations.demographics.widget.removeMapping')}>
@@ -751,7 +804,12 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
                 }
                 label={t(`reactory.organizations.demographics.${labelKey}`)}
               />
-              <Typography variant="caption" color="text.secondary" display="block">
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  display: "block"
+                }}>
                 {t(`reactory.organizations.demographics.${hintKey}`)}
               </Typography>
             </Box>
@@ -765,7 +823,13 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
         </Typography>
         <Card variant="outlined">
           <CardContent>
-            <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                display: "block",
+                mb: 2
+              }}>
               {t('reactory.organizations.demographics.preview.hint')}
             </Typography>
             <Box data-testid="demographic-definition-preview">
@@ -795,7 +859,13 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
       </Box>
 
       <Divider />
-      <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ p: 2 }}>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          justifyContent: "flex-end",
+          p: 2
+        }}>
         <Button onClick={onClose} data-testid="demographic-definition-cancel" disabled={saving}>
           {t('reactory.organizations.demographics.cancel')}
         </Button>

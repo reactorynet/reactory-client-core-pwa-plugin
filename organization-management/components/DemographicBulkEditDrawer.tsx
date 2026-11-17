@@ -170,7 +170,9 @@ export const DemographicBulkEditDrawer: React.FC<DemographicBulkEditDrawerProps>
         if (reason === 'backdropClick' || reason === 'escapeKeyDown') return;
         onClose();
       }}
-      PaperProps={{ sx: { width: { xs: '100%', sm: 640 }, maxWidth: '100%' } }}
+      slotProps={{
+        paper: { sx: { width: { xs: '100%', sm: 640 }, maxWidth: '100%' } }
+      }}
     >
       <Box
         data-testid="demographic-bulk-drawer"
@@ -181,7 +183,9 @@ export const DemographicBulkEditDrawer: React.FC<DemographicBulkEditDrawerProps>
             <Typography variant="h6" component="h2">
               {t('reactory.organizations.demographics.values.bulk.title')}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               {t('reactory.organizations.demographics.values.bulk.subtitle')}
             </Typography>
           </Box>
@@ -198,7 +202,9 @@ export const DemographicBulkEditDrawer: React.FC<DemographicBulkEditDrawerProps>
 
         <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', flex: 1 }}>
           {rows.length === 0 && (
-            <Typography variant="body2" color="text.secondary" data-testid="demographic-bulk-empty">
+            <Typography variant="body2" data-testid="demographic-bulk-empty" sx={{
+              color: "text.secondary"
+            }}>
               {t('reactory.organizations.demographics.values.bulk.empty')}
             </Typography>
           )}
@@ -226,7 +232,9 @@ export const DemographicBulkEditDrawer: React.FC<DemographicBulkEditDrawerProps>
                     reactory={reactory}
                   />
                 ) : (
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     {t('reactory.organizations.demographics.completeness.unavailable')}
                   </Typography>
                 )}
@@ -266,7 +274,13 @@ export const DemographicBulkEditDrawer: React.FC<DemographicBulkEditDrawerProps>
         </Box>
 
         <Divider />
-        <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ p: 2 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            justifyContent: "flex-end",
+            p: 2
+          }}>
           <Button
             onClick={onClose}
             disabled={saving}
@@ -291,7 +305,9 @@ export const DemographicBulkEditDrawer: React.FC<DemographicBulkEditDrawerProps>
 
         {submittedCount > 0 && outcomes && failedCount === 0 && (
           <Box sx={{ px: 2, pb: 2 }}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               {t('reactory.organizations.demographics.values.bulk.result.allSaved', {
                 count: savedCount,
               })}

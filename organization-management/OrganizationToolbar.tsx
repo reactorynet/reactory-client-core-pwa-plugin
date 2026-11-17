@@ -81,10 +81,13 @@ export const OrganizationToolbar: React.FC<OrganizationToolbarProps> = ({
       <Stack
         direction={{ xs: 'column', md: 'row' }}
         spacing={1.5}
-        alignItems={{ xs: 'stretch', md: 'center' }}
-        justifyContent="space-between"
-      >
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="center">
+        sx={{
+          alignItems: { xs: 'stretch', md: 'center' },
+          justifyContent: "space-between"
+        }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{
+          alignItems: "center"
+        }}>
           <TextField
             size="small"
             value={search}
@@ -93,12 +96,14 @@ export const OrganizationToolbar: React.FC<OrganizationToolbarProps> = ({
             placeholder={t('reactory.organizations.list.searchPlaceholder')}
             disabled={disabled}
             sx={{ minWidth: { xs: '100%', sm: 280 } }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }
             }}
           />
 
@@ -132,7 +137,13 @@ export const OrganizationToolbar: React.FC<OrganizationToolbarProps> = ({
           </Tooltip>
         </Stack>
 
-        <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="flex-end">
+        <Stack
+          direction="row"
+          spacing={1.5}
+          sx={{
+            alignItems: "center",
+            justifyContent: "flex-end"
+          }}>
           {canManage && (
             <Button
               variant="outlined"

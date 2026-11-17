@@ -282,7 +282,9 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({
             </Typography>
 
             {phase === 'ready' || phase === 'submitting' ? (
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 {user?.email
                   ? `Resetting the password for ${user.email}.`
                   : 'Choose a new password for your account.'}
@@ -306,9 +308,13 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({
           ) : null}
 
           {phase === 'verifying' ? (
-            <Stack direction="row" spacing={2} alignItems="center" role="status" aria-live="polite">
+            <Stack direction="row" spacing={2} role="status" aria-live="polite" sx={{
+              alignItems: "center"
+            }}>
               <CircularProgress size={20} />
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Checking your reset link…
               </Typography>
             </Stack>
@@ -336,7 +342,9 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({
             <Box component="form" onSubmit={onSubmit} noValidate>
               <Stack spacing={2}>
                 {user && (user.firstName || user.avatar) ? (
-                  <Stack direction="row" spacing={2} alignItems="center">
+                  <Stack direction="row" spacing={2} sx={{
+                    alignItems: "center"
+                  }}>
                     <Avatar src={user.avatar || undefined} alt="">
                       {(user.firstName?.[0] ?? '') + (user.lastName?.[0] ?? '')}
                     </Avatar>
@@ -364,22 +372,24 @@ export const PasswordReset: React.FC<PasswordResetProps> = ({
                   fullWidth
                   required
                   helperText={strengthHelper}
-                  inputProps={{ 'aria-describedby': 'reset-password-helper' }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label={showPassword ? 'Hide password' : 'Show password'}
-                          onClick={() => setShowPassword((value) => !value)}
-                          onMouseDown={(event) => event.preventDefault()}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            onClick={() => setShowPassword((value) => !value)}
+                            onMouseDown={(event) => event.preventDefault()}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+
+                    htmlInput: { 'aria-describedby': 'reset-password-helper' }
+                  }} />
 
                 <TextField
                   label="Confirm new password"

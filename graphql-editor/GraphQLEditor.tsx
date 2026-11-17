@@ -87,7 +87,9 @@ export const GraphQLEditor: React.FC<GraphQLEditorProps> = ({ reactory: propReac
               variant={isMutation ? 'filled' : 'outlined'}
             />
           </Box>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             Execute GraphQL queries and mutations against the Reactory API
           </Typography>
         </Paper>
@@ -96,7 +98,9 @@ export const GraphQLEditor: React.FC<GraphQLEditorProps> = ({ reactory: propReac
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={2}
-            alignItems={{ xs: 'stretch', sm: 'flex-start' }}
+            sx={{
+              alignItems: { xs: 'stretch', sm: 'flex-start' }
+            }}
           >
             <TextField
               size="small"
@@ -188,16 +192,30 @@ export const GraphQLEditor: React.FC<GraphQLEditorProps> = ({ reactory: propReac
             />
           ) : (
             <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Run a query or mutation to see results.
               </Typography>
               {schemaLoading ? (
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                    display: 'block',
+                    mt: 1
+                  }}>
                   Loading the schema for the component view{'\u2026'}
                 </Typography>
               ) : null}
               {schemaError && !schemaLoading ? (
-                <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 1 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "warning.main",
+                    display: 'block',
+                    mt: 1
+                  }}>
                   Schema unavailable ({schemaError}). The grid and raw views still work; the
                   component view will not.
                 </Typography>

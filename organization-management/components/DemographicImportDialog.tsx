@@ -218,7 +218,7 @@ export const DemographicImportDialog: React.FC<DemographicImportDialogProps> = (
           {t('reactory.organizations.demographics.values.csv.subtitle')}
         </Typography>
 
-        <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+        <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap" }}>
           <Button variant="outlined" component="label" data-testid="demographic-import-choose">
             {t('reactory.organizations.demographics.values.csv.chooseFile')}
             <input
@@ -239,7 +239,7 @@ export const DemographicImportDialog: React.FC<DemographicImportDialogProps> = (
           )}
         </Stack>
 
-        <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+        <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mt: 1 }}>
           {t('reactory.organizations.demographics.values.csv.fileHint')}
         </Typography>
 
@@ -280,7 +280,9 @@ export const DemographicImportDialog: React.FC<DemographicImportDialogProps> = (
                     value={entry.target}
                     onChange={(event) => updateTarget(entry.index, event.target.value)}
                     sx={{ minWidth: 240 }}
-                    inputProps={{ 'data-testid': `demographic-import-map-${entry.index}` }}
+                    slotProps={{
+                      htmlInput: { 'data-testid': `demographic-import-map-${entry.index}` }
+                    }}
                   >
                     <MenuItem value={IMPORT_TARGET_IGNORE}>
                       {t('reactory.organizations.demographics.values.csv.mapping.ignore')}

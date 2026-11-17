@@ -136,7 +136,9 @@ export const DemographicValueDrawer: React.FC<DemographicValueDrawerProps> = ({
         if (reason === 'backdropClick' || reason === 'escapeKeyDown') return;
         onClose();
       }}
-      PaperProps={{ sx: { width: { xs: '100%', sm: 560 }, maxWidth: '100%' } }}
+      slotProps={{
+        paper: { sx: { width: { xs: '100%', sm: 560 }, maxWidth: '100%' } }
+      }}
     >
       <Box
         data-testid="demographic-value-drawer"
@@ -149,7 +151,9 @@ export const DemographicValueDrawer: React.FC<DemographicValueDrawerProps> = ({
                 key: definition?.title || definition?.key || value?.key || '',
               })}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               {t('reactory.organizations.demographics.values.drawer.subtitle', {
                 user: user.label,
               })}
@@ -210,7 +214,13 @@ export const DemographicValueDrawer: React.FC<DemographicValueDrawerProps> = ({
         </Box>
 
         <Divider />
-        <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ p: 2 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            justifyContent: "flex-end",
+            p: 2
+          }}>
           <Button
             onClick={onClose}
             disabled={saving}

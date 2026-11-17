@@ -513,7 +513,9 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="subtitle1" fontWeight="bold">
+                        <Typography variant="subtitle1" sx={{
+                          fontWeight: "bold"
+                        }}>
                           {flag.feature}
                         </Typography>
                         <Chip
@@ -538,9 +540,10 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
                           >
                             <Typography
                               variant="caption"
-                              color="text.secondary"
-                              sx={{ mr: 0.5 }}
-                            >
+                              sx={{
+                                color: "text.secondary",
+                                mr: 0.5
+                              }}>
                               Roles:
                             </Typography>
                             {flag.roles.map((role: string) => (
@@ -560,9 +563,10 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
                           >
                             <Typography
                               variant="caption"
-                              color="text.secondary"
-                              sx={{ mr: 0.5 }}
-                            >
+                              sx={{
+                                color: "text.secondary",
+                                mr: 0.5
+                              }}>
                               Regions:
                             </Typography>
                             {flag.regions.map((region: string) => (
@@ -587,9 +591,10 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
                           >
                             <Typography
                               variant="caption"
-                              color="text.secondary"
-                              sx={{ mr: 0.5 }}
-                            >
+                              sx={{
+                                color: "text.secondary",
+                                mr: 0.5
+                              }}>
                               Timezones:
                             </Typography>
                             {flag.timezones.map((tz: string) => (
@@ -605,18 +610,20 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
                         {flag.partner && (
                           <Typography
                             variant="caption"
-                            color="text.secondary"
-                            display="block"
-                          >
+                            sx={{
+                              color: "text.secondary",
+                              display: "block"
+                            }}>
                             Partner: {flag.partner}
                           </Typography>
                         )}
                         {flag.organization && (
                           <Typography
                             variant="caption"
-                            color="text.secondary"
-                            display="block"
-                          >
+                            sx={{
+                              color: "text.secondary",
+                              display: "block"
+                            }}>
                             Organization: {flag.organization}
                           </Typography>
                         )}
@@ -697,10 +704,14 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
                 renderOption={(optionProps: any, option: CatalogueFlag) => (
                   <Box component="li" {...optionProps}>
                     <Box>
-                      <Typography variant="body2" fontWeight="bold">
+                      <Typography variant="body2" sx={{
+                        fontWeight: "bold"
+                      }}>
                         {option.title}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" sx={{
+                        color: "text.secondary"
+                      }}>
                         {flagFqn(option)}
                         {option.description
                           ? ` — ${option.description}`
@@ -731,7 +742,9 @@ export const ApplicationFeatureFlagsPanel: React.FC<ApplicationFeatureFlagsPanel
               label="Enabled"
             />
             <Divider sx={{ my: 1 }} />
-            <Typography variant="subtitle2" color="text.secondary">
+            <Typography variant="subtitle2" sx={{
+              color: "text.secondary"
+            }}>
               Targeting (Optional)
             </Typography>
             <TextField

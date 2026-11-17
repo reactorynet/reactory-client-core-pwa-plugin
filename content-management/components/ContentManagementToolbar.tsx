@@ -187,19 +187,24 @@ export const ContentManagementToolbar: React.FC<ContentManagementToolbarProps> =
       {/* Top Row: Title, Total, View Mode, Actions */}
       <Stack
         direction={{ xs: 'column', md: 'row' }}
-        justifyContent="space-between"
-        alignItems={{ xs: 'flex-start', md: 'center' }}
         spacing={2}
-        sx={{ mb: 2 }}
-      >
-        <Stack direction="row" alignItems="center" spacing={1.5}>
+        sx={{
+          justifyContent: "space-between",
+          alignItems: { xs: 'flex-start', md: 'center' },
+          mb: 2
+        }}>
+        <Stack direction="row" spacing={1.5} sx={{
+          alignItems: "center"
+        }}>
           <Typography variant="h5" component="h1" sx={{ fontWeight: 700 }}>
             Content Management
           </Typography>
           <Chip label={`${totalCount} items`} size="small" variant="outlined" color="default" />
         </Stack>
 
-        <Stack direction="row" alignItems="center" spacing={1}>
+        <Stack direction="row" spacing={1} sx={{
+          alignItems: "center"
+        }}>
           {onViewModeChange && (
             <ButtonGroup size="small" sx={{ mr: 1 }}>
               <Button
@@ -240,10 +245,11 @@ export const ContentManagementToolbar: React.FC<ContentManagementToolbarProps> =
       {/* Bottom Row: Search & Filters */}
       <Stack
         direction={{ xs: 'column', lg: 'row' }}
-        justifyContent="space-between"
-        alignItems={{ xs: 'stretch', lg: 'center' }}
         spacing={2}
-      >
+        sx={{
+          justifyContent: "space-between",
+          alignItems: { xs: 'stretch', lg: 'center' }
+        }}>
         {/* Search Field */}
         <TextField
           size="small"
@@ -251,24 +257,33 @@ export const ContentManagementToolbar: React.FC<ContentManagementToolbarProps> =
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           sx={{ minWidth: { xs: '100%', sm: 320 } }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" color="action" />
-              </InputAdornment>
-            ),
-            endAdornment: search ? (
-              <InputAdornment position="end">
-                <IconButton size="small" onClick={handleClearSearch} edge="end">
-                  <ClearIcon fontSize="small" />
-                </IconButton>
-              </InputAdornment>
-            ) : null,
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" color="action" />
+                </InputAdornment>
+              ),
+              endAdornment: search ? (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={handleClearSearch} edge="end">
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ) : null,
+            }
           }}
         />
 
         {/* Filter Pills */}
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap alignItems="center">
+        <Stack
+          direction="row"
+          spacing={1}
+          useFlexGap
+          sx={{
+            flexWrap: "wrap",
+            alignItems: "center"
+          }}>
           <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', mr: 0.5 }}>
             STATUS:
           </Typography>

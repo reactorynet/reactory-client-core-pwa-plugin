@@ -56,7 +56,9 @@ export const ResultsViewer: React.FC<ResultsViewerProps> = ({
           <Typography variant="subtitle1" component="h3">
             Result
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             {result.executionTime !== undefined ? `${result.executionTime} ms` : ''}
             {result.success === false ? ' \u00b7 failed' : ''}
           </Typography>

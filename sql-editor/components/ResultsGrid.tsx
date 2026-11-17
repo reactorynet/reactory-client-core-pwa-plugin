@@ -136,12 +136,16 @@ export const ResultsGrid: React.FC<ResultsGridProps> = ({
           flexWrap: 'wrap',
         }}
       >
-        <Stack direction="row" spacing={1} alignItems="baseline">
+        <Stack direction="row" spacing={1} sx={{
+          alignItems: "baseline"
+        }}>
           <Typography variant="subtitle1" component="h3">
             Query Results
           </Typography>
           {result ? (
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               {total} {total === 1 ? 'row' : 'rows'}
               {provider ? ` \u00b7 ${provider}` : ''}
               {trimmedTerm ? ` \u00b7 ${visibleRows.length} on this page match` : ''}
@@ -149,25 +153,29 @@ export const ResultsGrid: React.FC<ResultsGridProps> = ({
           ) : null}
         </Stack>
 
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} sx={{
+          alignItems: "center"
+        }}>
           <TextField
             size="small"
             value={searchTerm}
             onChange={(event) => onSearchTermChange(event.target.value)}
             placeholder="Search"
             disabled={!result || pageRows.length === 0}
-            inputProps={{ 'aria-label': 'Search the current page' }}
             helperText="Filters the current page"
             sx={{ minWidth: 200 }}
-            FormHelperTextProps={{ sx: { mt: 0.25, mx: 0, whiteSpace: 'nowrap' } }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-            }}
-          />
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              },
+
+              htmlInput: { 'aria-label': 'Search the current page' },
+              formHelperText: { sx: { mt: 0.25, mx: 0, whiteSpace: 'nowrap' } }
+            }} />
           <Tooltip title="Download the current page as CSV">
             <span>
               <Button
@@ -193,7 +201,9 @@ export const ResultsGrid: React.FC<ResultsGridProps> = ({
       >
         {idle && !result ? (
           <Box sx={{ px: 2, py: 4, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               Run a query to see results.
             </Typography>
           </Box>
@@ -210,7 +220,9 @@ export const ResultsGrid: React.FC<ResultsGridProps> = ({
 
         {result && total > 0 && visibleRows.length === 0 ? (
           <Box sx={{ px: 2, py: 4, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               No rows on this page match &ldquo;{searchTerm}&rdquo;.
             </Typography>
           </Box>

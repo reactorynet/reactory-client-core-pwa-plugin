@@ -174,7 +174,9 @@ export const DemographicFieldRenderer: React.FC<DemographicFieldRendererProps> =
       </Box>
 
       {definition.description && (
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           {definition.description}
         </Typography>
       )}

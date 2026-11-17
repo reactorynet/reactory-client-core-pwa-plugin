@@ -253,7 +253,9 @@ export const OrganizationCreateWizard: React.FC<OrganizationCreateWizardProps> =
   const demographicsContent = useMemo(() => {
     if (demographics.status === 'loading') {
       return (
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} sx={{
+          alignItems: "center"
+        }}>
           <CircularProgress size={18} />
           <Typography variant="body2">
             {t('reactory.organizations.wizard.demographics.loading')}
@@ -276,7 +278,9 @@ export const OrganizationCreateWizard: React.FC<OrganizationCreateWizardProps> =
         <Typography variant="subtitle2">
           {t('reactory.organizations.wizard.demographics.placeholderTitle')}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           {body}
         </Typography>
       </Stack>
@@ -312,7 +316,9 @@ export const OrganizationCreateWizard: React.FC<OrganizationCreateWizardProps> =
 
         {activeStep === 0 && (
           <Stack spacing={2}>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               {t('reactory.organizations.wizard.identityHint')}
             </Typography>
 
@@ -360,7 +366,9 @@ export const OrganizationCreateWizard: React.FC<OrganizationCreateWizardProps> =
 
         {activeStep === 1 && (
           <Stack spacing={1.5}>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               {t('reactory.organizations.wizard.branding.hint')}
             </Typography>
 
@@ -375,7 +383,13 @@ export const OrganizationCreateWizard: React.FC<OrganizationCreateWizardProps> =
                   control={<Radio />}
                   label={t('reactory.organizations.wizard.branding.inherit')}
                 />
-                <Typography variant="caption" color="text.secondary" sx={{ ml: 4, mb: 1 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                    ml: 4,
+                    mb: 1
+                  }}>
                   {t('reactory.organizations.wizard.branding.inheritHint')}
                 </Typography>
 
@@ -384,7 +398,12 @@ export const OrganizationCreateWizard: React.FC<OrganizationCreateWizardProps> =
                   control={<Radio />}
                   label={t('reactory.organizations.wizard.branding.blank')}
                 />
-                <Typography variant="caption" color="text.secondary" sx={{ ml: 4 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                    ml: 4
+                  }}>
                   {t('reactory.organizations.wizard.branding.blankHint')}
                 </Typography>
               </RadioGroup>
@@ -403,20 +422,26 @@ export const OrganizationCreateWizard: React.FC<OrganizationCreateWizardProps> =
               <Typography variant="subtitle1" component="h2">
                 {t('reactory.organizations.wizard.review.title')}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 {t('reactory.organizations.wizard.review.hint')}
               </Typography>
             </Box>
 
             <Box>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {t('reactory.organizations.wizard.field.name')}
               </Typography>
               <Typography variant="body1">{draft.name.trim()}</Typography>
             </Box>
 
             <Box>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {t('reactory.organizations.wizard.field.code')}
               </Typography>
               <Typography variant="body1">
@@ -425,7 +450,9 @@ export const OrganizationCreateWizard: React.FC<OrganizationCreateWizardProps> =
             </Box>
 
             <Box>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {t('reactory.organizations.wizard.field.tradingName')}
               </Typography>
               <Typography variant="body1">
@@ -434,7 +461,9 @@ export const OrganizationCreateWizard: React.FC<OrganizationCreateWizardProps> =
             </Box>
 
             <Box>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {t('reactory.organizations.wizard.field.description')}
               </Typography>
               <Typography variant="body1">
@@ -445,7 +474,9 @@ export const OrganizationCreateWizard: React.FC<OrganizationCreateWizardProps> =
             <Divider />
 
             <Box>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {t('reactory.organizations.wizard.review.branding')}
               </Typography>
               <Typography variant="body1">{brandingLabel(draft.branding)}</Typography>

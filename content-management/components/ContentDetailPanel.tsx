@@ -82,7 +82,16 @@ export const ContentDetailPanel: React.FC<ContentDetailPanelProps> = ({
   if (isEditing && item?.slug) {
     return (
       <Box sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 1, border: 1, borderColor: 'divider' }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2, pb: 1, borderBottom: 1, borderColor: 'divider' }}>
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+            pb: 1,
+            borderBottom: 1,
+            borderColor: 'divider'
+          }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Editing: {item?.title || item?.slug}
           </Typography>
@@ -116,7 +125,9 @@ export const ContentDetailPanel: React.FC<ContentDetailPanelProps> = ({
   if (!item) {
     return (
       <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography color="text.secondary">No content record available.</Typography>
+        <Typography sx={{
+          color: "text.secondary"
+        }}>No content record available.</Typography>
       </Box>
     );
   }
@@ -126,20 +137,29 @@ export const ContentDetailPanel: React.FC<ContentDetailPanelProps> = ({
       {/* Detail Header */}
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
-        justifyContent="space-between"
-        alignItems={{ xs: 'flex-start', sm: 'center' }}
         spacing={2}
-        sx={{ mb: 2 }}
-      >
+        sx={{
+          justifyContent: "space-between",
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          mb: 2
+        }}>
         <Box>
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+              mb: 0.5
+            }}>
             <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
               {item.title || item.slug}
             </Typography>
             <ContentStatusBadge value={item.published} />
             <ContentFormatBadge value={item.format} />
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={1}>
+          <Stack direction="row" spacing={1} sx={{
+            alignItems: "center"
+          }}>
             <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
               slug: {item.slug}
             </Typography>
@@ -200,7 +220,11 @@ export const ContentDetailPanel: React.FC<ContentDetailPanelProps> = ({
             {item.content ? (
               <Box className="content-render-preview">{previewHtml}</Box>
             ) : (
-              <Typography color="text.secondary" fontStyle="italic">
+              <Typography
+                sx={{
+                  color: "text.secondary",
+                  fontStyle: "italic"
+                }}>
                 No content body entered yet.
               </Typography>
             )}
@@ -244,7 +268,9 @@ export const ContentDetailPanel: React.FC<ContentDetailPanelProps> = ({
                   <TableCell sx={{ fontWeight: 600 }}>Topics</TableCell>
                   <TableCell>
                     {item.topics && item.topics.length > 0 ? (
-                      <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                      <Stack direction="row" spacing={0.5} sx={{
+                        flexWrap: "wrap"
+                      }}>
                         {item.topics.map((t) => (
                           <Chip key={t} label={t} size="small" variant="outlined" />
                         ))}
@@ -258,7 +284,9 @@ export const ContentDetailPanel: React.FC<ContentDetailPanelProps> = ({
                   <TableCell sx={{ fontWeight: 600 }}>Roles</TableCell>
                   <TableCell>
                     {item.roles && item.roles.length > 0 ? (
-                      <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                      <Stack direction="row" spacing={0.5} sx={{
+                        flexWrap: "wrap"
+                      }}>
                         {item.roles.map((r) => (
                           <Chip key={r} label={r} size="small" color="secondary" variant="outlined" />
                         ))}
@@ -292,8 +320,16 @@ export const ContentDetailPanel: React.FC<ContentDetailPanelProps> = ({
                     variant="outlined"
                     sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 1 }}
                   >
-                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                      <Stack direction="row" spacing={1} alignItems="center">
+                    <Stack
+                      direction="row"
+                      sx={{
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 1
+                      }}>
+                      <Stack direction="row" spacing={1} sx={{
+                        alignItems: "center"
+                      }}>
                         <Chip label={tr.lang.toUpperCase()} size="small" color="primary" />
                         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                           {tr.title || 'Untitled Translation'}
@@ -307,7 +343,12 @@ export const ContentDetailPanel: React.FC<ContentDetailPanelProps> = ({
                       </Stack>
                     </Stack>
                     {tr.description && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "text.secondary",
+                          mb: 1
+                        }}>
                         {tr.description}
                       </Typography>
                     )}
@@ -331,7 +372,9 @@ export const ContentDetailPanel: React.FC<ContentDetailPanelProps> = ({
               </Stack>
             ) : (
               <Paper variant="outlined" sx={{ p: 3, textAlign: 'center', bgcolor: 'background.paper' }}>
-                <Typography color="text.secondary">
+                <Typography sx={{
+                  color: "text.secondary"
+                }}>
                   No translations recorded for this content item.
                 </Typography>
               </Paper>

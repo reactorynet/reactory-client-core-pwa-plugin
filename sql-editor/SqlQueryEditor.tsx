@@ -127,7 +127,9 @@ export const SqlQueryEditor: React.FC<SqlQueryEditorProps> = ({ reactory: propRe
           <Typography variant="h5" component="h1">
             SQL Query Editor
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             Execute read-only SQL against connected relational databases
           </Typography>
         </Paper>
@@ -136,7 +138,9 @@ export const SqlQueryEditor: React.FC<SqlQueryEditorProps> = ({ reactory: propRe
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={2}
-            alignItems={{ xs: 'stretch', sm: 'flex-start' }}
+            sx={{
+              alignItems: { xs: 'stretch', sm: 'flex-start' }
+            }}
           >
             <Box sx={{ flexGrow: 1, minWidth: 0 }}>
               <ConnectionSelect

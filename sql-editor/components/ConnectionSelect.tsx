@@ -74,9 +74,10 @@ export const ConnectionSelect: React.FC<ConnectionSelectProps> = ({
           );
           if (found) return <span>{connectionLabel(found)}</span>;
           return (
-            <Typography component="span" variant="body2" color="text.secondary">
-              Select a connection
-            </Typography>
+            <Typography component="span" variant="body2" sx={{
+              color: "text.secondary"
+            }}>Select a connection
+                          </Typography>
           );
         }}
       >
@@ -87,7 +88,9 @@ export const ConnectionSelect: React.FC<ConnectionSelectProps> = ({
               <Stack spacing={0}>
                 <Typography variant="body2">{connectionLabel(connection)}</Typography>
                 {detail ? (
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     {detail}
                   </Typography>
                 ) : null}

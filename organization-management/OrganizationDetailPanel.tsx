@@ -341,7 +341,12 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
 
   const metric = (key: string, label: string, value?: number | null) => (
     <Box key={key} sx={{ minWidth: 72 }} data-testid={`organization-metric-${key}`}>
-      <Typography variant="caption" color="text.secondary" display="block">
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          display: "block"
+        }}>
         {label}
       </Typography>
       <Typography variant="h6">
@@ -360,9 +365,13 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
       </Button>
 
       {isLoading && (
-        <Stack direction="row" spacing={1.5} alignItems="center" role="status">
+        <Stack direction="row" spacing={1.5} role="status" sx={{
+          alignItems: "center"
+        }}>
           <CircularProgress size={20} />
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {t('reactory.organizations.detail.loading')}
           </Typography>
         </Stack>
@@ -396,7 +405,9 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
                 spacing={2}
-                alignItems={{ xs: 'flex-start', sm: 'center' }}
+                sx={{
+                  alignItems: { xs: 'flex-start', sm: 'center' }
+                }}
               >
                 <Avatar
                   src={organization.avatarURL || organization.logoURL || undefined}
@@ -410,7 +421,15 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
                   <Typography variant="h5" component="h1">
                     {organization.name}
                   </Typography>
-                  <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 0.5 }}>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    useFlexGap
+                    sx={{
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                      mt: 0.5
+                    }}>
                     <Box component="span" data-testid="organization-detail-status">
                       <OrganizationStatusChip status={organization.status} t={t} />
                     </Box>
@@ -423,7 +442,9 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
                   </Stack>
                 </Box>
 
-                <Stack direction="row" spacing={2} alignItems="center">
+                <Stack direction="row" spacing={2} sx={{
+                  alignItems: "center"
+                }}>
                   {metric('members', t('reactory.organizations.detail.members'), statistics?.members)}
                   {metric(
                     'businessUnits',
@@ -443,7 +464,12 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
               </Stack>
 
               {organization.description && (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                    mt: 2
+                  }}>
                   {organization.description}
                 </Typography>
               )}
@@ -548,7 +574,9 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
           {t('reactory.organizations.archive.title', { name: organization?.name || '' })}
         </DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {t('reactory.organizations.archive.reversibleHint')}
           </Typography>
         </DialogContent>
@@ -586,7 +614,9 @@ export const OrganizationDetailPanel: React.FC<OrganizationDetailPanelProps> = (
         </DialogTitle>
         <Divider />
         <DialogContent>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {pendingAction && pendingAction.reloads
               ? t('reactory.organizations.detail.unsaved.reloadBody')
               : t('reactory.organizations.detail.unsaved.body')}

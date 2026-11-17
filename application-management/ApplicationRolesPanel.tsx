@@ -27,7 +27,7 @@ import {
   Search as SearchIcon,
   Close as CloseIcon,
   CheckCircle as CheckCircleIcon,
-  ErrorOutline as ErrorOutlineIcon,
+  ErrorOutlined as ErrorOutlineIcon,
   ExpandMore as ExpandMoreIcon,
   VerifiedUser as PlatformIcon,
   LockOutlined as InternalIcon,
@@ -369,7 +369,9 @@ export const ApplicationRolesPanel: React.FC<ApplicationRolesPanelProps> = ({
       nodes.push(
         <Accordion key="__invalid" defaultExpanded data-testid="role-group-invalid">
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} sx={{
+              alignItems: "center"
+            }}>
               <ErrorOutlineIcon color="error" />
               <Typography variant="subtitle2" color="error">
                 Unrecognised roles
@@ -378,7 +380,12 @@ export const ApplicationRolesPanel: React.FC<ApplicationRolesPanelProps> = ({
             </Stack>
           </AccordionSummary>
           <AccordionDetails>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mb: 1
+              }}>
               These roles are configured on the application, but no activated module provides
               them. Remove them (or declare them on the providing module) before adding roles.
             </Typography>
@@ -406,13 +413,21 @@ export const ApplicationRolesPanel: React.FC<ApplicationRolesPanelProps> = ({
       return (
         <Accordion key={key} defaultExpanded={defaultExpanded} data-testid={`role-group-${key}`}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%' }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                alignItems: "center",
+                width: '100%'
+              }}>
               {icon}
               <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                 <Typography variant="subtitle2" noWrap>
                   {title}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" noWrap>
+                <Typography variant="caption" noWrap sx={{
+                  color: "text.secondary"
+                }}>
                   {subtitle}
                 </Typography>
               </Box>
@@ -516,7 +531,9 @@ export const ApplicationRolesPanel: React.FC<ApplicationRolesPanelProps> = ({
           {loading ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 3 }}>
               <CircularProgress size={22} />
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Loading the role catalogue…
               </Typography>
             </Box>
@@ -558,24 +575,27 @@ export const ApplicationRolesPanel: React.FC<ApplicationRolesPanelProps> = ({
                 <Stack
                   direction={{ xs: 'column', sm: 'row' }}
                   spacing={2}
-                  alignItems={{ xs: 'stretch', sm: 'center' }}
-                  sx={{ mb: 2 }}
-                >
+                  sx={{
+                    alignItems: { xs: 'stretch', sm: 'center' },
+                    mb: 2
+                  }}>
                   <TextField
                     size="small"
                     placeholder="Filter roles…"
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
-                    inputProps={{ 'data-testid': 'role-search' }}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
-                    }}
                     sx={{ maxWidth: 320 }}
-                  />
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon fontSize="small" />
+                          </InputAdornment>
+                        ),
+                      },
+
+                      htmlInput: { 'data-testid': 'role-search' }
+                    }} />
                   <FormControlLabel
                     control={
                       <Switch
@@ -592,7 +612,9 @@ export const ApplicationRolesPanel: React.FC<ApplicationRolesPanelProps> = ({
                     label={<Typography variant="body2">Configured only</Typography>}
                   />
                   {catalogue && configuredRoles.length > 0 && (
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       {catalogueUnconfigured} available role
                       {catalogueUnconfigured === 1 ? '' : 's'} not configured
                     </Typography>
