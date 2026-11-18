@@ -621,10 +621,10 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
                           onChange={(event) =>
                             void handleToggleRequired(definition, event.target.checked)
                           }
-                          inputProps={switchInputProps(
+                          slotProps={{ input: switchInputProps(
                             `demographic-definition-required-${key}`,
                             t('reactory.organizations.demographics.required', { title }),
-                          )}
+                          ) }}
                         />
                       ) : (
                         <Typography variant="body2">
@@ -644,10 +644,10 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
                           onChange={(event) =>
                             void handleToggleEnabled(definition, event.target.checked)
                           }
-                          inputProps={switchInputProps(
+                          slotProps={{ input: switchInputProps(
                             `demographic-definition-enabled-${key}`,
                             t('reactory.organizations.demographics.enable', { title }),
-                          )}
+                          ) }}
                         />
                       ) : (
                         <Typography variant="body2">

@@ -602,11 +602,11 @@ export const ApplicationRolesPanel: React.FC<ApplicationRolesPanelProps> = ({
                         size="small"
                         checked={configuredOnly}
                         onChange={(event) => setConfiguredOnly(event.target.checked)}
-                        inputProps={
+                        slotProps={{ input: 
                           { 'data-testid': 'role-configured-only' } as React.InputHTMLAttributes<
                             HTMLInputElement
                           >
-                        }
+                         }}
                       />
                     }
                     label={<Typography variant="body2">Configured only</Typography>}

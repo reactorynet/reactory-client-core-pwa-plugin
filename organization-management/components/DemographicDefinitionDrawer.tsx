@@ -566,10 +566,10 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
                           patchOption(index, { deprecated: event.target.checked })
                         }
                         size="small"
-                        inputProps={switchInputProps(
+                        slotProps={{ input: switchInputProps(
                           `demographic-definition-option-${index}-deprecated`,
                           t('reactory.organizations.demographics.field.optionDeprecated'),
-                        )}
+                        ) }}
                       />
                     }
                     label={t('reactory.organizations.demographics.field.optionDeprecated')}
@@ -619,10 +619,10 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
                 <Switch
                   checked={draft.referenceMultiple}
                   onChange={(event) => update('referenceMultiple', event.target.checked)}
-                  inputProps={switchInputProps(
+                  slotProps={{ input: switchInputProps(
                     'demographic-definition-field-reference-multiple',
                     t('reactory.organizations.demographics.field.referenceMultiple'),
-                  )}
+                  ) }}
                 />
               }
               label={t('reactory.organizations.demographics.field.referenceMultiple')}
@@ -796,10 +796,10 @@ export const DemographicDefinitionDrawer: React.FC<DemographicDefinitionDrawerPr
                   <Switch
                     checked={draft[field] === true}
                     onChange={(event) => update(field, event.target.checked)}
-                    inputProps={switchInputProps(
+                    slotProps={{ input: switchInputProps(
                       `demographic-definition-flag-${field}`,
                       t(`reactory.organizations.demographics.${labelKey}`),
-                    )}
+                    ) }}
                   />
                 }
                 label={t(`reactory.organizations.demographics.${labelKey}`)}

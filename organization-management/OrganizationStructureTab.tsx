@@ -824,9 +824,9 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                   <Switch
                     checked={structure.includeDeleted}
                     onChange={(event) => structure.setIncludeDeleted(event.target.checked)}
-                    inputProps={{
+                    slotProps={{ input: {
                       'aria-label': t('reactory.organizations.structure.showDeleted'),
-                    }}
+                    } }}
                   />
                 }
                 label={t('reactory.organizations.structure.showDeleted')}

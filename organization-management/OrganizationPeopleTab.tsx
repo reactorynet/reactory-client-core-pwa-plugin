@@ -1200,7 +1200,7 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                             // The accessible name is the team label, which is how
                             // the suite selects it (MUI renders a checkbox, not
                             // a switch, whatever the control looks like).
-                            inputProps={{ 'aria-label': teamLabel(team) }}
+                            slotProps={{ input: { 'aria-label': teamLabel(team) } }}
                           />
                         }
                         label={teamLabel(team)}
