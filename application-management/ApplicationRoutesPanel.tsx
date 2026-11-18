@@ -194,7 +194,9 @@ const RouteSlotEditor: React.FC<RouteSlotEditorProps> = ({
           label={<Typography variant="caption">Show</Typography>}
         />
       </Box>
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{
+        color: "text.secondary"
+      }}>
         Optional component mounted above (header) or below (footer) the route body.
       </Typography>
       <TextField
@@ -645,14 +647,16 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
                 placeholder="Search routes..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                }}
                 sx={{ width: 220 }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }
+                }}
               />
               {isAdmin && (
                 <Button
@@ -754,7 +758,12 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
                                   )}
                                   <TableCell>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                      <Typography variant="body2" fontFamily="monospace" sx={{ fontWeight: 600 }}>
+                                      <Typography
+                                        variant="body2"
+                                        sx={{
+                                          fontFamily: "monospace",
+                                          fontWeight: 600
+                                        }}>
                                         {route.path}
                                       </Typography>
                                       {route.exact && <Chip label="exact" size="small" variant="outlined" />}
@@ -765,11 +774,18 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
                                   </TableCell>
                                   <TableCell>{route.title || '-'}</TableCell>
                                   <TableCell>
-                                    <Typography variant="caption" fontFamily="monospace">
+                                    <Typography variant="caption" sx={{
+                                      fontFamily: "monospace"
+                                    }}>
                                       {route.componentFqn || '-'}
                                     </Typography>
                                     {(route.header?.componentFqn || route.footer?.componentFqn) && (
-                                      <Typography variant="caption" color="text.secondary" display="block">
+                                      <Typography
+                                        variant="caption"
+                                        sx={{
+                                          color: "text.secondary",
+                                          display: "block"
+                                        }}>
                                         Slots: {[route.header?.componentFqn ? 'header' : null, route.footer?.componentFqn ? 'footer' : null].filter(Boolean).join(', ')}
                                       </Typography>
                                     )}
@@ -802,7 +818,9 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
                                           <Chip key={role} label={role} size="small" />
                                         ))
                                       ) : (
-                                        <Typography variant="caption" color="text.secondary">
+                                        <Typography variant="caption" sx={{
+                                          color: "text.secondary"
+                                        }}>
                                           All roles
                                         </Typography>
                                       )}
@@ -844,7 +862,9 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
               </TableContainer>
             </DragDropContext>
           ) : (
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               {searchTerm ? 'No routes matched your search query.' : 'No routes configured. Click Add Route to configure routes for this application.'}
             </Typography>
           )}
@@ -898,9 +918,13 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
                 return (
                   <Box component="li" {...optionProps} key={option}>
                     <Box>
-                      <Typography variant="body2" fontFamily="monospace">{option}</Typography>
+                      <Typography variant="body2" sx={{
+                        fontFamily: "monospace"
+                      }}>{option}</Typography>
                       {meta && (
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" sx={{
+                          color: "text.secondary"
+                        }}>
                           {meta.title} · {meta.componentType}
                         </Typography>
                       )}
@@ -974,7 +998,9 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
                   label={<Typography variant="caption">Raw JSON</Typography>}
                 />
               </Box>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {selectedRoute?.componentFqn
                   ? 'Props passed to the bound component. The shape is resolved from the component when an input form exists, otherwise inferred.'
                   : 'No component FQN set — property shape is inferred from the values below (same as the workflow QuickLauncher).'}
@@ -994,7 +1020,9 @@ export const ApplicationRoutesPanel: React.FC<ApplicationRoutesPanelProps> = ({
                   minRows={4}
                   error={Boolean(propsError)}
                   helperText={propsError || 'JSON object of props passed to the component'}
-                  InputProps={{ sx: { fontFamily: 'monospace', fontSize: '0.85rem' } }}
+                  slotProps={{
+                    input: { sx: { fontFamily: 'monospace', fontSize: '0.85rem' } }
+                  }}
                 />
               ) : (
                 <Box sx={{ '& .MuiPaper-root': { bgcolor: 'transparent' } }}>

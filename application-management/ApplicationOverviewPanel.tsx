@@ -3,7 +3,7 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Grid,
+  Grid2 as Grid,
   Typography,
   Avatar,
   Chip,
@@ -46,7 +46,9 @@ export const ApplicationOverviewPanel: React.FC<ApplicationOverviewPanelProps> =
     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
       <Box sx={{ mr: 2, color: 'action.active' }}>{icon}</Box>
       <Box>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           {label}
         </Typography>
         <Typography variant="body2">{value || 'Not set'}</Typography>
@@ -58,7 +60,10 @@ export const ApplicationOverviewPanel: React.FC<ApplicationOverviewPanelProps> =
     <Box sx={{ p: 2 }}>
       <Grid container spacing={3}>
         {/* Header Card */}
-        <Grid item xs={12}>
+        <Grid
+          size={{
+            xs: 12
+          }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -67,7 +72,9 @@ export const ApplicationOverviewPanel: React.FC<ApplicationOverviewPanelProps> =
                   <Typography variant="h4" gutterBottom>
                     {i18n ? i18n.t(overview.name, { defaultValue: overview.name || 'Not set' }) : (overview.name || 'Not set')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary">
+                  <Typography variant="body1" sx={{
+                    color: "text.secondary"
+                  }}>
                     {overview.description || 'No description provided'}
                   </Typography>
                   <Box sx={{ mt: 1 }}>
@@ -81,7 +88,11 @@ export const ApplicationOverviewPanel: React.FC<ApplicationOverviewPanelProps> =
         </Grid>
 
         {/* Application Details */}
-        <Grid item xs={12} md={6}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 6
+          }}>
           <Card>
             <CardHeader title="Application Details" />
             <Divider />
@@ -111,7 +122,11 @@ export const ApplicationOverviewPanel: React.FC<ApplicationOverviewPanelProps> =
         </Grid>
 
         {/* Email & Authentication */}
-        <Grid item xs={12} md={6}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 6
+          }}>
           <Card>
             <CardHeader title="Email & Authentication" />
             <Divider />
@@ -119,7 +134,9 @@ export const ApplicationOverviewPanel: React.FC<ApplicationOverviewPanelProps> =
               <InfoItem icon={<EmailIcon />} label="Username" value={overview.username} />
               <InfoItem icon={<EmailIcon />} label="Email" value={overview.email} />
               <Box sx={{ mt: 2 }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   Active Theme
                 </Typography>
                 <Typography variant="body2">{overview.theme || 'Default'}</Typography>

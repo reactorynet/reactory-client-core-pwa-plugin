@@ -84,7 +84,13 @@ export const DynamicResultView: React.FC<DynamicResultViewProps> = ({
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          display: 'block',
+          mb: 1
+        }}>
         Generated from {typeName}
         {schemaView?.typeCount ? ` \u00b7 schema of ${schemaView.typeCount} types` : ''}
         {schemaView?.compiledAt ? ` \u00b7 compiled ${schemaView.compiledAt}` : ''}

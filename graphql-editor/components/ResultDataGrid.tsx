@@ -83,30 +83,36 @@ export const ResultDataGrid: React.FC<ResultDataGridProps> = ({ rows, rootField 
           flexWrap: 'wrap',
         }}
       >
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           {rows.length} {rows.length === 1 ? 'row' : 'rows'}
           {rootField ? ` \u00b7 ${rootField}` : ''}
           {trimmed ? ` \u00b7 ${visibleRows.length} match` : ''}
         </Typography>
 
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} sx={{
+          alignItems: "center"
+        }}>
           <TextField
             size="small"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Search"
-            inputProps={{ 'aria-label': 'Search results' }}
             helperText="Filters the result"
             sx={{ minWidth: 200 }}
-            FormHelperTextProps={{ sx: { mt: 0.25, mx: 0, whiteSpace: 'nowrap' } }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-            }}
-          />
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              },
+
+              htmlInput: { 'aria-label': 'Search results' },
+              formHelperText: { sx: { mt: 0.25, mx: 0, whiteSpace: 'nowrap' } }
+            }} />
           <Tooltip title="Download the result as CSV">
             <span>
               <Button
@@ -125,7 +131,9 @@ export const ResultDataGrid: React.FC<ResultDataGridProps> = ({ rows, rootField 
 
       {visibleRows.length === 0 ? (
         <Box sx={{ px: 2, py: 4, textAlign: 'center' }}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             No rows match &ldquo;{searchTerm}&rdquo;.
           </Typography>
         </Box>

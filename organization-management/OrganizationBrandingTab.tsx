@@ -204,7 +204,13 @@ const ImageSlot: React.FC<ImageSlotProps> = ({
         <Typography variant="subtitle1" component="h3" gutterBottom>
           {title}
         </Typography>
-        <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+        <Typography
+          variant="caption"
+          gutterBottom
+          sx={{
+            color: "text.secondary",
+            display: "block"
+          }}>
           {hint}
         </Typography>
 
@@ -232,7 +238,9 @@ const ImageSlot: React.FC<ImageSlotProps> = ({
               sx={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
             />
           ) : (
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               {emptyLabel}
             </Typography>
           )}
@@ -690,13 +698,21 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
 
       <Card variant="outlined">
         <CardContent>
-          <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+              justifyContent: "space-between"
+            }}>
             <Typography variant="subtitle1" component="h2">
               {t('reactory.organizations.branding.images.title')}
             </Typography>
             {branding.loading && <CircularProgress size={18} data-testid="organization-branding-loading" />}
           </Stack>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             {t('reactory.organizations.branding.images.hint')}
           </Typography>
         </CardContent>
@@ -770,7 +786,13 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
             />
           )}
 
-          <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+          <Typography
+            variant="caption"
+            gutterBottom
+            sx={{
+              color: "text.secondary",
+              display: "block"
+            }}>
             {inherited
               ? t('reactory.organizations.branding.theme.inheritHint')
               : t('reactory.organizations.branding.theme.ownHint')}
@@ -779,9 +801,10 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={2}
-            alignItems={{ xs: 'stretch', sm: 'center' }}
-            sx={{ mt: 1 }}
-          >
+            sx={{
+              alignItems: { xs: 'stretch', sm: 'center' },
+              mt: 1
+            }}>
             <Typography variant="body2" data-testid="organization-branding-effective-theme">
               {`${t('reactory.organizations.branding.theme.effective')}: ${effectiveThemeLabel}`}
             </Typography>
@@ -795,7 +818,9 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
                 value={activeMode}
                 disabled={readOnly || branding.saving}
                 onChange={(event) => void handleModeChange(normalizeMode(event.target.value))}
-                inputProps={{ 'data-testid': 'organization-branding-mode' }}
+                slotProps={{
+                  htmlInput: { 'data-testid': 'organization-branding-mode' }
+                }}
               >
                 {MODE_VALUES.map((mode) => (
                   <MenuItem key={mode} value={mode}>
@@ -810,8 +835,16 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
 
       <Card variant="outlined">
         <CardContent>
-          <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
-            <Stack direction="row" spacing={1} alignItems="center">
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+              justifyContent: "space-between"
+            }}>
+            <Stack direction="row" spacing={1} sx={{
+              alignItems: "center"
+            }}>
               <PaletteIcon color="primary" fontSize="small" />
               <Typography variant="subtitle1" component="h2">
                 {t('reactory.organizations.branding.themes.title')}
@@ -841,7 +874,9 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
           <Divider sx={{ my: 2 }} />
 
           {themeNames.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               {t('reactory.organizations.branding.themes.empty')}
             </Typography>
           ) : (
@@ -857,12 +892,15 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
                     key={themeName}
                     direction={{ xs: 'column', sm: 'row' }}
                     spacing={1}
-                    alignItems={{ xs: 'stretch', sm: 'center' }}
-                    justifyContent="space-between"
                     data-testid={`organization-branding-theme-${themeName}`}
-                  >
+                    sx={{
+                      alignItems: { xs: 'stretch', sm: 'center' },
+                      justifyContent: "space-between"
+                    }}>
                     <Box sx={{ minWidth: 0 }}>
-                      <Stack direction="row" spacing={1} alignItems="center">
+                      <Stack direction="row" spacing={1} sx={{
+                        alignItems: "center"
+                      }}>
                         <Typography variant="body1" noWrap>
                           {themeName}
                         </Typography>
@@ -885,7 +923,9 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
                         )}
                       </Stack>
                       {theme.description && (
-                        <Typography variant="caption" color="text.secondary" noWrap>
+                        <Typography variant="caption" noWrap sx={{
+                          color: "text.secondary"
+                        }}>
                           {theme.description}
                         </Typography>
                       )}

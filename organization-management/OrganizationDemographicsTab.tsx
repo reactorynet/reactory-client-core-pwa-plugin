@@ -419,11 +419,14 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={1}
-            alignItems={{ xs: 'flex-start', sm: 'center' }}
-            justifyContent="space-between"
-          >
+            sx={{
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              justifyContent: "space-between"
+            }}>
             <Box>
-              <Stack direction="row" spacing={1} alignItems="center">
+              <Stack direction="row" spacing={1} sx={{
+                alignItems: "center"
+              }}>
                 <Typography variant="subtitle1" component="h2">
                   {t('reactory.organizations.demographics.title')}
                 </Typography>
@@ -434,7 +437,9 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
                   />
                 )}
               </Stack>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {t('reactory.organizations.demographics.subtitle')}
               </Typography>
             </Box>
@@ -465,7 +470,9 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
             <Typography variant="subtitle1" component="h3">
               {t('reactory.organizations.demographics.empty.title')}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               {t('reactory.organizations.demographics.empty.body')}
             </Typography>
           </CardContent>
@@ -525,7 +532,9 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
                   >
                     {canWrite && (
                       <TableCell padding="checkbox">
-                        <Stack direction="row" alignItems="center" spacing={0}>
+                        <Stack direction="row" spacing={0} sx={{
+                          alignItems: "center"
+                        }}>
                           <Tooltip
                             title={t('reactory.organizations.demographics.dragHandle', { title })}
                           >
@@ -559,9 +568,17 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
                     )}
 
                     <TableCell>
-                      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        sx={{
+                          alignItems: "center",
+                          flexWrap: "wrap"
+                        }}>
                         <Typography variant="body2">{title}</Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" sx={{
+                          color: "text.secondary"
+                        }}>
                           {key}
                         </Typography>
                         {definition.system === true && (
@@ -643,7 +660,9 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
 
                     {canWrite && (
                       <TableCell align="right">
-                        <Stack direction="row" spacing={0} justifyContent="flex-end">
+                        <Stack direction="row" spacing={0} sx={{
+                          justifyContent: "flex-end"
+                        }}>
                           <Tooltip
                             title={t('reactory.organizations.demographics.edit', { title })}
                           >
@@ -685,7 +704,9 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
       )}
 
       {canWrite && definitions.length > 0 && (
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           {t('reactory.organizations.demographics.reorderHint')}
         </Typography>
       )}
@@ -715,7 +736,13 @@ export const OrganizationDemographicsTab: React.FC<OrganizationTabProps> = ({
               {resolveError(t, deleteError)}
             </Alert>
           ) : (
-            <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 2 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                display: "block",
+                mt: 2
+              }}>
               {t('reactory.organizations.demographics.delete.blockedHint')}
             </Typography>
           )}

@@ -53,7 +53,9 @@ const ThemeCssStudio: React.FC<ThemeCssStudioProps> = ({
     <Divider />
     <DialogContent>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           Published directly to: <code>themes/{themeName}/styles.css</code> (Served via CDN)
         </Typography>
         <Button
@@ -72,12 +74,14 @@ const ThemeCssStudio: React.FC<ThemeCssStudioProps> = ({
         value={content}
         disabled={readOnly}
         onChange={(e) => onChange(e.target.value)}
-        InputProps={{
-          sx: {
-            fontFamily: 'monospace',
-            fontSize: '0.875rem',
-            bgcolor: 'background.default',
-          },
+        slotProps={{
+          input: {
+            sx: {
+              fontFamily: 'monospace',
+              fontSize: '0.875rem',
+              bgcolor: 'background.default',
+            },
+          }
         }}
       />
     </DialogContent>

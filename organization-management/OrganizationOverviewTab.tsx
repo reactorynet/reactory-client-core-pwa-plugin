@@ -4,7 +4,7 @@ import {
   Button,
   Card,
   CardContent,
-  Grid,
+  Grid2 as Grid,
   MenuItem,
   Stack,
   TextField,
@@ -248,8 +248,18 @@ interface ReadOnlyRowProps {
 }
 
 const ReadOnlyRow: React.FC<ReadOnlyRowProps> = ({ label, value, notSet }) => (
-  <Grid item xs={12} sm={6} md={3}>
-    <Typography variant="caption" color="text.secondary" display="block">
+  <Grid
+    size={{
+      xs: 12,
+      sm: 6,
+      md: 3
+    }}>
+    <Typography
+      variant="caption"
+      sx={{
+        color: "text.secondary",
+        display: "block"
+      }}>
       {label}
     </Typography>
     <Typography variant="body2">{value && `${value}`.length > 0 ? value : notSet}</Typography>
@@ -430,7 +440,11 @@ export const OrganizationOverviewTab: React.FC<OrganizationTabProps> = ({
           </Typography>
 
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6
+              }}>
               <TextField
                 {...fieldProps}
                 required
@@ -443,7 +457,11 @@ export const OrganizationOverviewTab: React.FC<OrganizationTabProps> = ({
               />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6
+              }}>
               <TextField
                 {...fieldProps}
                 fullWidth
@@ -455,7 +473,11 @@ export const OrganizationOverviewTab: React.FC<OrganizationTabProps> = ({
               />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6
+              }}>
               <TextField
                 {...fieldProps}
                 fullWidth
@@ -467,7 +489,11 @@ export const OrganizationOverviewTab: React.FC<OrganizationTabProps> = ({
               />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6
+              }}>
               <TextField
                 {...fieldProps}
                 fullWidth
@@ -479,7 +505,10 @@ export const OrganizationOverviewTab: React.FC<OrganizationTabProps> = ({
               />
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid
+              size={{
+                xs: 12
+              }}>
               <TextField
                 {...fieldProps}
                 fullWidth
@@ -503,7 +532,11 @@ export const OrganizationOverviewTab: React.FC<OrganizationTabProps> = ({
           </Typography>
 
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6
+              }}>
               <TextField
                 {...fieldProps}
                 fullWidth
@@ -516,7 +549,11 @@ export const OrganizationOverviewTab: React.FC<OrganizationTabProps> = ({
               />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6
+              }}>
               <TextField
                 {...fieldProps}
                 fullWidth
@@ -529,7 +566,11 @@ export const OrganizationOverviewTab: React.FC<OrganizationTabProps> = ({
               />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6
+              }}>
               <TextField
                 {...fieldProps}
                 fullWidth
@@ -541,7 +582,11 @@ export const OrganizationOverviewTab: React.FC<OrganizationTabProps> = ({
               />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6
+              }}>
               <TextField
                 {...fieldProps}
                 select
@@ -599,7 +644,9 @@ export const OrganizationOverviewTab: React.FC<OrganizationTabProps> = ({
       </Card>
 
       {!readOnly && (
-        <Stack direction="row" spacing={1} justifyContent="flex-end">
+        <Stack direction="row" spacing={1} sx={{
+          justifyContent: "flex-end"
+        }}>
           <Button onClick={handleCancel} disabled={!dirty || admin.saving}>
             {t('reactory.organizations.overview.cancel')}
           </Button>

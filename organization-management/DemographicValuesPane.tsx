@@ -419,11 +419,14 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={1}
-            alignItems={{ xs: 'flex-start', sm: 'center' }}
-            justifyContent="space-between"
-          >
+            sx={{
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              justifyContent: "space-between"
+            }}>
             <Box>
-              <Stack direction="row" spacing={1} alignItems="center">
+              <Stack direction="row" spacing={1} sx={{
+                alignItems: "center"
+              }}>
                 <Typography variant="subtitle1" component="h2">
                   {t('reactory.organizations.demographics.values.title')}
                 </Typography>
@@ -434,12 +437,16 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
                   />
                 )}
               </Stack>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {t('reactory.organizations.demographics.values.subtitle')}
               </Typography>
             </Box>
 
-            <Stack direction="row" spacing={1} flexWrap="wrap">
+            <Stack direction="row" spacing={1} sx={{
+              flexWrap: "wrap"
+            }}>
               <Button
                 variant="outlined"
                 startIcon={<UploadFileIcon />}
@@ -482,8 +489,10 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         spacing={2}
-        alignItems={{ xs: 'stretch', sm: 'flex-start' }}
         data-testid="demographic-values-filters"
+        sx={{
+          alignItems: { xs: 'stretch', sm: 'flex-start' }
+        }}
       >
         <TextField
           select
@@ -492,7 +501,9 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
           value={demographics.filter.key || ''}
           onChange={(event) => handleDefinitionFilter(event.target.value)}
           sx={{ minWidth: 220 }}
-          inputProps={{ 'data-testid': 'demographic-values-filter-definition' }}
+          slotProps={{
+            htmlInput: { 'data-testid': 'demographic-values-filter-definition' }
+          }}
         >
           <MenuItem value="">
             {t('reactory.organizations.demographics.values.filter.definitionAll')}
@@ -519,7 +530,9 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
             userFilterError || t('reactory.organizations.demographics.values.filter.userHint')
           }
           sx={{ minWidth: 260 }}
-          inputProps={{ 'data-testid': 'demographic-values-filter-user' }}
+          slotProps={{
+            htmlInput: { 'data-testid': 'demographic-values-filter-user' }
+          }}
         />
 
         <Button
@@ -556,7 +569,9 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
             <Typography variant="subtitle1" component="h3">
               {t('reactory.organizations.demographics.values.empty.title')}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               {t('reactory.organizations.demographics.values.empty.body')}
             </Typography>
           </CardContent>
@@ -610,7 +625,12 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
                     <TableCell>
                       <Typography variant="body2">{user.label}</Typography>
                       {user.email && user.email !== user.label && (
-                        <Typography variant="caption" color="text.secondary" display="block">
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "text.secondary",
+                            display: "block"
+                          }}>
                           {user.email}
                         </Typography>
                       )}
@@ -620,7 +640,12 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
                       <Typography variant="body2">
                         {definition?.title || value.key}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary" display="block">
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "text.secondary",
+                          display: "block"
+                        }}>
                         {value.key}
                       </Typography>
                     </TableCell>
@@ -656,7 +681,9 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
                     </TableCell>
 
                     <TableCell align="right">
-                      <Stack direction="row" spacing={0} justifyContent="flex-end">
+                      <Stack direction="row" spacing={0} sx={{
+                        justifyContent: "flex-end"
+                      }}>
                         <Tooltip
                           title={t('reactory.organizations.demographics.values.edit')}
                         >
@@ -712,7 +739,9 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
       {/* ---- Per-definition completeness ---- */}
       <Card variant="outlined">
         <CardContent data-testid="demographic-completeness">
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} sx={{
+            alignItems: "center"
+          }}>
             <Typography variant="subtitle1" component="h3">
               {t('reactory.organizations.demographics.completeness.title')}
             </Typography>
@@ -720,7 +749,12 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
               <CircularProgress size={16} data-testid="demographic-completeness-loading" />
             )}
           </Stack>
-          <Typography variant="caption" color="text.secondary" display="block">
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              display: "block"
+            }}>
             {t('reactory.organizations.demographics.completeness.subtitle')}
           </Typography>
 
@@ -773,10 +807,11 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
               {demographics.aggregates.definitions.length === 0 ? (
                 <Typography
                   variant="body2"
-                  color="text.secondary"
-                  sx={{ mt: 1 }}
                   data-testid="demographic-completeness-empty"
-                >
+                  sx={{
+                    color: "text.secondary",
+                    mt: 1
+                  }}>
                   {t('reactory.organizations.demographics.completeness.empty')}
                 </Typography>
               ) : (
@@ -800,7 +835,12 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
                         >
                           <TableCell>
                             <Typography variant="body2">{entry.title}</Typography>
-                            <Typography variant="caption" color="text.secondary" display="block">
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: "text.secondary",
+                                display: "block"
+                              }}>
                               {entry.definitionKey}
                             </Typography>
                           </TableCell>
@@ -824,7 +864,12 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
                             )}
                             {!entry.suppressed &&
                               Number(entry.suppressedCohorts) > 0 && (
-                                <Typography variant="caption" color="text.secondary" display="block">
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    color: "text.secondary",
+                                    display: "block"
+                                  }}>
                                   {t(
                                     'reactory.organizations.demographics.completeness.definition.suppressedCohorts',
                                     { count: Number(entry.suppressedCohorts) },
@@ -841,11 +886,12 @@ export const DemographicValuesPane: React.FC<DemographicValuesPaneProps> = ({
 
               <Typography
                 variant="caption"
-                color="text.secondary"
-                display="block"
-                sx={{ mt: 1 }}
                 data-testid="demographic-completeness-caveat"
-              >
+                sx={{
+                  color: "text.secondary",
+                  display: "block",
+                  mt: 1
+                }}>
                 {t('reactory.organizations.demographics.completeness.caveat')}
               </Typography>
             </>

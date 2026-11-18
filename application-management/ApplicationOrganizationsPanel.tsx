@@ -96,7 +96,9 @@ export const ApplicationOrganizationsPanel: React.FC<ApplicationOrganizationsPan
         <Card>
           <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <WarningIcon color="warning" />
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               No Reactory instance available. Please provide a reactory prop to view organizations.
             </Typography>
           </CardContent>

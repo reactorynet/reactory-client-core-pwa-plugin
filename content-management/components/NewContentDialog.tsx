@@ -111,8 +111,10 @@ export const NewContentDialog: React.FC<NewContentDialogProps> = ({
             value={slug}
             onChange={(e) => handleSlugChange(e.target.value)}
             helperText="Unique identifier used in routes and static content lookups"
-            InputProps={{
-              sx: { fontFamily: 'monospace' },
+            slotProps={{
+              input: {
+                sx: { fontFamily: 'monospace' },
+              }
             }}
           />
 
