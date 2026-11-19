@@ -210,7 +210,7 @@ export const DemographicBooleanWidget: React.FC<DemographicBuiltInWidgetProps> =
           checked={Boolean(value)}
           onChange={(event) => onChange(event.target.checked)}
           disabled={disabled}
-          inputProps={{ 'aria-label': controlLabelOf(props) }}
+          slotProps={{ input: { 'aria-label': controlLabelOf(props) } }}
         />
         <Typography variant="body2" sx={{
           color: "text.secondary"

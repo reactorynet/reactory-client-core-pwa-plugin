@@ -390,7 +390,7 @@ export const OrganizationListPanel: React.FC<OrganizationListPanelProps> = ({
                     checked={list.isPageSelected}
                     indeterminate={list.isPageIndeterminate}
                     onChange={(event) => list.togglePageSelection(event.target.checked)}
-                    inputProps={{ 'aria-label': t('reactory.organizations.list.selectAll') }}
+                    slotProps={{ input: { 'aria-label': t('reactory.organizations.list.selectAll') } }}
                   />
                 </TableCell>
                 <TableCell>{t('reactory.organizations.list.column.logo')}</TableCell>
@@ -511,11 +511,11 @@ export const OrganizationListPanel: React.FC<OrganizationListPanelProps> = ({
                         onChange={(event) =>
                           list.toggleSelection(row.id, event.target.checked)
                         }
-                        inputProps={{
+                        slotProps={{ input: {
                           'aria-label': t('reactory.organizations.list.selectRow', {
                             name: row.name,
                           }),
-                        }}
+                        } }}
                       />
                     </TableCell>
 

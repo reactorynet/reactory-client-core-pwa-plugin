@@ -24,7 +24,7 @@ import {
   Divider,
   FormControl,
   FormControlLabel,
-  Grid2 as Grid,
+  Grid,
   IconButton,
   InputAdornment,
   InputLabel,

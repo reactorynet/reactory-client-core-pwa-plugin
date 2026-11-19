@@ -778,7 +778,7 @@ export const OrganizationBrandingTab: React.FC<OrganizationTabProps> = ({
                 <Switch
                   checked={inherited}
                   onChange={(event, checked) => void handleInheritanceChange(event, checked)}
-                  inputProps={{ 'aria-label': t('reactory.organizations.branding.theme.inherit') }}
+                  slotProps={{ input: { 'aria-label': t('reactory.organizations.branding.theme.inherit') } }}
                   disabled={branding.saving}
                 />
               }

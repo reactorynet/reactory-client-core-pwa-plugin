@@ -24,7 +24,7 @@ import {
   DialogActions,
   TextField,
   Paper,
-  Grid2 as Grid,
+  Grid,
   CircularProgress,
   Tooltip,
   InputAdornment,

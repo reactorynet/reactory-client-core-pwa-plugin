@@ -922,14 +922,14 @@ export const ApplicationMenusPanel: React.FC<ApplicationMenusPanelProps> = (prop
               value={selectedMenu?.featureFlags || []}
               onChange={(_: any, newValue: string[]) => handleFieldChange('featureFlags', newValue)}
               freeSolo
-              renderTags={(value: string[], getTagProps: any) =>
+              renderValue={(value: string[], getItemProps: any) =>
                 value.map((option: string, index: number) => (
                   <Chip
                     variant="outlined"
                     label={option}
                     size="small"
                     color="primary"
-                    {...getTagProps({ index })}
+                    {...getItemProps({ index })}
                   />
                 ))
               }
@@ -1146,14 +1146,14 @@ export const ApplicationMenusPanel: React.FC<ApplicationMenusPanelProps> = (prop
                 }))
               }
               freeSolo
-              renderTags={(value: string[], getTagProps: any) =>
+              renderValue={(value: string[], getItemProps: any) =>
                 value.map((option: string, index: number) => (
                   <Chip
                     variant="outlined"
                     label={option}
                     size="small"
                     color="primary"
-                    {...getTagProps({ index })}
+                    {...getItemProps({ index })}
                   />
                 ))
               }
