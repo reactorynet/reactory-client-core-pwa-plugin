@@ -360,7 +360,8 @@ export const DemographicMultiEnumWidget: React.FC<DemographicBuiltInWidgetProps>
             error={Boolean(error)}
             required={Boolean(definition.required)}
             slotProps={{
-              htmlInput: { ...params.inputProps, 'aria-label': controlLabelOf(props) }
+              ...params.slotProps,
+              htmlInput: { ...params.slotProps.htmlInput, 'aria-label': controlLabelOf(props) }
             }}
           />
         )}
@@ -542,7 +543,8 @@ export const DemographicReferenceWidget: React.FC<DemographicBuiltInWidgetProps>
               })}
               error={Boolean(error)}
               slotProps={{
-                htmlInput: { ...params.inputProps, 'aria-label': controlLabelOf(props) }
+                ...params.slotProps,
+                htmlInput: { ...params.slotProps.htmlInput, 'aria-label': controlLabelOf(props) }
               }}
             />
           )}
