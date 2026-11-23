@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useGraphQLExecution, INITIAL_GRAPHQL_DOCUMENT } from '../useGraphQLExecution';
 import { deferred, makeGraphQLReactory } from '../../testFixtures';
 
