@@ -41,7 +41,7 @@ import {
   DragIndicator as DragIcon,
   Search as SearchIcon,
 } from '@mui/icons-material';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useReactory } from '@reactory/client-core/api';
 import { ReactoryForm } from '@reactory/client-core/components/reactory/ReactoryForm/ReactoryForm';
 import { TagsField } from '@reactory/client-core/components/shared/TagsField';
