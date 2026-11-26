@@ -296,7 +296,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
       {/* TAB 0: GENERAL & BRANDING */}
       {editorTab === 0 && (
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6
+            }}>
             <TextField
               {...fieldProps}
               fullWidth
@@ -309,7 +313,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
               helperText="Unique lowercase identifier e.g. 'reactory', 'dark-ocean'"
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6
+            }}>
             <TextField
               {...fieldProps}
               fullWidth
@@ -318,7 +326,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
               onChange={(e) => emit({ ...theme, nameSpace: e.target.value })}
             />
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 4
+            }}>
             <TextField
               {...fieldProps}
               fullWidth
@@ -327,7 +339,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
               onChange={(e) => emit({ ...theme, version: e.target.value })}
             />
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 4
+            }}>
             <FormControl fullWidth>
               <InputLabel>Default Mode</InputLabel>
               <Select
@@ -342,7 +358,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 4
+            }}>
             <FormControl fullWidth>
               <InputLabel>Theme Engine Type</InputLabel>
               <Select
@@ -356,7 +376,10 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12}>
+          <Grid
+            size={{
+              xs: 12
+            }}>
             <TextField
               {...fieldProps}
               fullWidth
@@ -368,13 +391,20 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
             />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid
+            size={{
+              xs: 12
+            }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 600, mt: 1 }}>
               Branding & Content
             </Typography>
             <Divider sx={{ mb: 2 }} />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6
+            }}>
             <TextField
               {...fieldProps}
               fullWidth
@@ -388,7 +418,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
               }
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6
+            }}>
             <TextField
               {...fieldProps}
               fullWidth
@@ -436,13 +470,20 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
 
           <Grid container spacing={3}>
             {/* Primary Palette */}
-            <Grid item xs={12} md={6}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 6
+              }}>
               <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, color: 'primary.main' }}>
                   Primary Color
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
+                  <Grid
+                    size={{
+                      xs: 6
+                    }}>
                     <TextField
                       {...fieldProps}
                       fullWidth
@@ -450,21 +491,26 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
                       label="Main"
                       value={currentEditingPalette?.primary?.main || ''}
                       onChange={(e) => handlePaletteChange('primary', 'main', e.target.value)}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <input
-                              type="color"
-                              value={currentEditingPalette?.primary?.main || '#f95e20'}
-                              onChange={(e) => handlePaletteChange('primary', 'main', e.target.value)}
-                              style={{ border: 'none', width: 24, height: 24, cursor: 'pointer', borderRadius: 4 }}
-                            />
-                          </InputAdornment>
-                        ),
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <input
+                                type="color"
+                                value={currentEditingPalette?.primary?.main || '#f95e20'}
+                                onChange={(e) => handlePaletteChange('primary', 'main', e.target.value)}
+                                style={{ border: 'none', width: 24, height: 24, cursor: 'pointer', borderRadius: 4 }}
+                              />
+                            </InputAdornment>
+                          ),
+                        }
                       }}
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid
+                    size={{
+                      xs: 6
+                    }}>
                     <TextField
                       {...fieldProps}
                       fullWidth
@@ -474,7 +520,10 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
                       onChange={(e) => handlePaletteChange('primary', 'light', e.target.value)}
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid
+                    size={{
+                      xs: 6
+                    }}>
                     <TextField
                       {...fieldProps}
                       fullWidth
@@ -484,7 +533,10 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
                       onChange={(e) => handlePaletteChange('primary', 'dark', e.target.value)}
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid
+                    size={{
+                      xs: 6
+                    }}>
                     <TextField
                       {...fieldProps}
                       fullWidth
@@ -499,13 +551,20 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
             </Grid>
 
             {/* Secondary Palette */}
-            <Grid item xs={12} md={6}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 6
+              }}>
               <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, color: 'secondary.main' }}>
                   Secondary Color
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
+                  <Grid
+                    size={{
+                      xs: 6
+                    }}>
                     <TextField
                       {...fieldProps}
                       fullWidth
@@ -513,21 +572,26 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
                       label="Main"
                       value={currentEditingPalette?.secondary?.main || ''}
                       onChange={(e) => handlePaletteChange('secondary', 'main', e.target.value)}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <input
-                              type="color"
-                              value={currentEditingPalette?.secondary?.main || '#700000'}
-                              onChange={(e) => handlePaletteChange('secondary', 'main', e.target.value)}
-                              style={{ border: 'none', width: 24, height: 24, cursor: 'pointer', borderRadius: 4 }}
-                            />
-                          </InputAdornment>
-                        ),
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <input
+                                type="color"
+                                value={currentEditingPalette?.secondary?.main || '#700000'}
+                                onChange={(e) => handlePaletteChange('secondary', 'main', e.target.value)}
+                                style={{ border: 'none', width: 24, height: 24, cursor: 'pointer', borderRadius: 4 }}
+                              />
+                            </InputAdornment>
+                          ),
+                        }
                       }}
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid
+                    size={{
+                      xs: 6
+                    }}>
                     <TextField
                       {...fieldProps}
                       fullWidth
@@ -537,7 +601,10 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
                       onChange={(e) => handlePaletteChange('secondary', 'light', e.target.value)}
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid
+                    size={{
+                      xs: 6
+                    }}>
                     <TextField
                       {...fieldProps}
                       fullWidth
@@ -547,7 +614,10 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
                       onChange={(e) => handlePaletteChange('secondary', 'dark', e.target.value)}
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid
+                    size={{
+                      xs: 6
+                    }}>
                     <TextField
                       {...fieldProps}
                       fullWidth
@@ -562,13 +632,20 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
             </Grid>
 
             {/* Background Palette */}
-            <Grid item xs={12} md={6}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 6
+              }}>
               <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
                   Surfaces & Background
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
+                  <Grid
+                    size={{
+                      xs: 6
+                    }}>
                     <TextField
                       {...fieldProps}
                       fullWidth
@@ -576,26 +653,31 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
                       label="Default Background"
                       value={currentEditingPalette?.background?.default || ''}
                       onChange={(e) => handlePaletteChange('background', 'default', e.target.value)}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <input
-                              type="color"
-                              value={
-                                currentEditingPalette?.background?.default ||
-                                (activeModeTab === 'dark' ? '#121212' : '#f5f5f5')
-                              }
-                              onChange={(e) =>
-                                handlePaletteChange('background', 'default', e.target.value)
-                              }
-                              style={{ border: 'none', width: 24, height: 24, cursor: 'pointer', borderRadius: 4 }}
-                            />
-                          </InputAdornment>
-                        ),
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <input
+                                type="color"
+                                value={
+                                  currentEditingPalette?.background?.default ||
+                                  (activeModeTab === 'dark' ? '#121212' : '#f5f5f5')
+                                }
+                                onChange={(e) =>
+                                  handlePaletteChange('background', 'default', e.target.value)
+                                }
+                                style={{ border: 'none', width: 24, height: 24, cursor: 'pointer', borderRadius: 4 }}
+                              />
+                            </InputAdornment>
+                          ),
+                        }
                       }}
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid
+                    size={{
+                      xs: 6
+                    }}>
                     <TextField
                       {...fieldProps}
                       fullWidth
@@ -603,22 +685,24 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
                       label="Paper Surface"
                       value={currentEditingPalette?.background?.paper || ''}
                       onChange={(e) => handlePaletteChange('background', 'paper', e.target.value)}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <input
-                              type="color"
-                              value={
-                                currentEditingPalette?.background?.paper ||
-                                (activeModeTab === 'dark' ? '#1e1e1e' : '#ffffff')
-                              }
-                              onChange={(e) =>
-                                handlePaletteChange('background', 'paper', e.target.value)
-                              }
-                              style={{ border: 'none', width: 24, height: 24, cursor: 'pointer', borderRadius: 4 }}
-                            />
-                          </InputAdornment>
-                        ),
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <input
+                                type="color"
+                                value={
+                                  currentEditingPalette?.background?.paper ||
+                                  (activeModeTab === 'dark' ? '#1e1e1e' : '#ffffff')
+                                }
+                                onChange={(e) =>
+                                  handlePaletteChange('background', 'paper', e.target.value)
+                                }
+                                style={{ border: 'none', width: 24, height: 24, cursor: 'pointer', borderRadius: 4 }}
+                              />
+                            </InputAdornment>
+                          ),
+                        }
                       }}
                     />
                   </Grid>
@@ -627,13 +711,20 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
             </Grid>
 
             {/* Text Palette */}
-            <Grid item xs={12} md={6}>
+            <Grid
+              size={{
+                xs: 12,
+                md: 6
+              }}>
               <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
                   Text Colors
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={6}>
+                  <Grid
+                    size={{
+                      xs: 6
+                    }}>
                     <TextField
                       {...fieldProps}
                       fullWidth
@@ -641,24 +732,29 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
                       label="Primary Text"
                       value={currentEditingPalette?.text?.primary || ''}
                       onChange={(e) => handlePaletteChange('text', 'primary', e.target.value)}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <input
-                              type="color"
-                              value={
-                                currentEditingPalette?.text?.primary ||
-                                (activeModeTab === 'dark' ? '#ffffff' : '#111111')
-                              }
-                              onChange={(e) => handlePaletteChange('text', 'primary', e.target.value)}
-                              style={{ border: 'none', width: 24, height: 24, cursor: 'pointer', borderRadius: 4 }}
-                            />
-                          </InputAdornment>
-                        ),
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <input
+                                type="color"
+                                value={
+                                  currentEditingPalette?.text?.primary ||
+                                  (activeModeTab === 'dark' ? '#ffffff' : '#111111')
+                                }
+                                onChange={(e) => handlePaletteChange('text', 'primary', e.target.value)}
+                                style={{ border: 'none', width: 24, height: 24, cursor: 'pointer', borderRadius: 4 }}
+                              />
+                            </InputAdornment>
+                          ),
+                        }
                       }}
                     />
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid
+                    size={{
+                      xs: 6
+                    }}>
                     <TextField
                       {...fieldProps}
                       fullWidth
@@ -666,17 +762,19 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
                       label="Secondary Text"
                       value={currentEditingPalette?.text?.secondary || ''}
                       onChange={(e) => handlePaletteChange('text', 'secondary', e.target.value)}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <input
-                              type="color"
-                              value={currentEditingPalette?.text?.secondary || '#888888'}
-                              onChange={(e) => handlePaletteChange('text', 'secondary', e.target.value)}
-                              style={{ border: 'none', width: 24, height: 24, cursor: 'pointer', borderRadius: 4 }}
-                            />
-                          </InputAdornment>
-                        ),
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <input
+                                type="color"
+                                value={currentEditingPalette?.text?.secondary || '#888888'}
+                                onChange={(e) => handlePaletteChange('text', 'secondary', e.target.value)}
+                                style={{ border: 'none', width: 24, height: 24, cursor: 'pointer', borderRadius: 4 }}
+                              />
+                            </InputAdornment>
+                          ),
+                        }
                       }}
                     />
                   </Grid>
@@ -690,7 +788,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
       {/* TAB 2: TYPOGRAPHY, SPACING & SHAPE */}
       {editorTab === 2 && (
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6
+            }}>
             <FormControl fullWidth>
               <InputLabel>Font Family Presets</InputLabel>
               <Select
@@ -708,7 +810,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6
+            }}>
             <TextField
               {...fieldProps}
               fullWidth
@@ -718,7 +824,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
             />
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6
+            }}>
             <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
                 Base Font Size: {theme.options?.typography?.fontSize || 14}px
@@ -735,7 +845,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
             </Paper>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6
+            }}>
             <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
                 Border Radius: {theme.options?.shape?.borderRadius ?? 4}px
@@ -767,7 +881,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
             </Paper>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6
+            }}>
             <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
                 Spacing Unit Factor: {theme.options?.spacing || 8}px
@@ -789,7 +907,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
       {/* TAB 3: COMPONENT OVERRIDES */}
       {editorTab === 3 && (
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6
+            }}>
             <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
                 MuiButton Defaults
@@ -823,7 +945,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
             </Paper>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 6
+            }}>
             <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
                 MuiTextField & Select Inputs
@@ -927,7 +1053,12 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
       {/* TAB 5: RAW JSON THEMEOPTIONS */}
       {editorTab === 5 && (
         <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 1
+            }}>
             Edit the raw MUI <code>ThemeOptions</code> object directly. Supports custom variables, transitions, zIndex, and breakpoints.
           </Typography>
           {jsonError && (
@@ -942,12 +1073,14 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
             value={rawJsonOptions}
             disabled={isReadOnly}
             onChange={(e) => handleRawJsonChange(e.target.value)}
-            InputProps={{
-              sx: {
-                fontFamily: 'monospace',
-                fontSize: '0.875rem',
-                bgcolor: 'background.default',
-              },
+            slotProps={{
+              input: {
+                sx: {
+                  fontFamily: 'monospace',
+                  fontSize: '0.875rem',
+                  bgcolor: 'background.default',
+                },
+              }
             }}
           />
         </Box>
@@ -1031,10 +1164,18 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
               Form Controls & Inputs:
             </Typography>
             <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid item xs={12} sm={6}>
+              <Grid
+                size={{
+                  xs: 12,
+                  sm: 6
+                }}>
                 <TextField fullWidth size="small" label="Text Input Preview" defaultValue="Sample text value" />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid
+                size={{
+                  xs: 12,
+                  sm: 6
+                }}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Select Option</InputLabel>
                   <Select defaultValue="1" label="Select Option">
@@ -1089,7 +1230,9 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({
       onClose={onCancel}
       maxWidth={maxWidth}
       fullWidth
-      PaperProps={{ sx: { minHeight: 650 } }}
+      slotProps={{
+        paper: { sx: { minHeight: 650 } }
+      }}
     >
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         {header}

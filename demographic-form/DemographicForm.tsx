@@ -52,7 +52,9 @@ export const DemographicForm: React.FC<DemographicFormProps> = (props) => {
     return (
       <Box data-testid="demographic-form-empty" className={className}>
         {emptyState || (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {t('reactory.demographics.form.empty')}
           </Typography>
         )}

@@ -562,14 +562,16 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
                 placeholder="Search themes..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                }}
                 sx={{ width: 220 }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }
+                }}
               />
               <Tooltip title="Refresh Themes">
                 <IconButton onClick={handleRefresh} disabled={loading}>
@@ -602,7 +604,13 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
                 const textColor = darkOpt?.text?.primary || DEFAULT_DARK_PALETTE.text.primary;
 
                 return (
-                  <Grid item xs={12} sm={6} md={4} key={theme.id || theme.name}>
+                  <Grid
+                    key={theme.id || theme.name}
+                    size={{
+                      xs: 12,
+                      sm: 6,
+                      md: 4
+                    }}>
                     <Paper
                       variant="outlined"
                       sx={{
@@ -627,7 +635,9 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
                             <Typography variant="h6" sx={{ fontWeight: 600 }}>
                               {theme.name}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography variant="caption" sx={{
+                              color: "text.secondary"
+                            }}>
                               v{theme.version || '1.0.0'} • {theme.nameSpace || 'reactory'}
                             </Typography>
                           </Box>
@@ -668,7 +678,13 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
 
                         {/* Palette Color Swatches */}
                         <Box sx={{ mb: 1.5 }}>
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: "text.secondary",
+                              display: 'block',
+                              mb: 0.5
+                            }}>
                             Palette Swatches:
                           </Typography>
                           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
@@ -688,7 +704,13 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
                         </Box>
 
                         {theme.description && (
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 2, minHeight: 36 }}>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: "text.secondary",
+                              mb: 2,
+                              minHeight: 36
+                            }}>
                             {theme.description}
                           </Typography>
                         )}
@@ -738,10 +760,17 @@ export const ApplicationThemesPanel: React.FC<ApplicationThemesPanelProps> = ({
           ) : (
             <Box sx={{ textAlign: 'center', py: 6 }}>
               <PaletteIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
-              <Typography variant="h6" color="text.secondary">
+              <Typography variant="h6" sx={{
+                color: "text.secondary"
+              }}>
                 No themes found
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  mb: 2
+                }}>
                 Create a new theme to customize colors, typography, component styling, and CSS.
               </Typography>
               <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenAdd}>

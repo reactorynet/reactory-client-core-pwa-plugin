@@ -122,7 +122,13 @@ const SettingEditor = ({
   return (
     <Box sx={{ py: 1 }}>
       <Paper variant="outlined" sx={{ p: 2, bgcolor: 'background.default' }}>
-        <Typography variant="caption" color="text.secondary" gutterBottom display="block">
+        <Typography
+          variant="caption"
+          gutterBottom
+          sx={{
+            color: "text.secondary",
+            display: "block"
+          }}>
           {setting.componentFqn
             ? `Component "${setting.componentFqn}" could not be resolved`
             : 'No form schema or component defined for this setting'}
@@ -171,7 +177,9 @@ export const ApplicationSettingsPanel: React.FC<ApplicationSettingsPanelProps> =
         <Divider />
         <CardContent>
           {settings.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               No settings configured for this application.
             </Typography>
           ) : (
@@ -190,7 +198,9 @@ export const ApplicationSettingsPanel: React.FC<ApplicationSettingsPanelProps> =
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="subtitle2">{setting.title || setting.name}</Typography>
                         {setting.description && (
-                          <Typography variant="caption" color="text.secondary">{setting.description}</Typography>
+                          <Typography variant="caption" sx={{
+                            color: "text.secondary"
+                          }}>{setting.description}</Typography>
                         )}
                       </Box>
                       <Box sx={{ display: 'flex', gap: 0.5 }}>

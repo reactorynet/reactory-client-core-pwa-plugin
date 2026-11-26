@@ -43,7 +43,7 @@ import {
   ArrowUpward as ArrowUpwardIcon,
   ArrowDownward as ArrowDownwardIcon,
 } from '@mui/icons-material';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useReactory } from '@reactory/client-core/api';
 
 export interface ApplicationMenusPanelProps {
@@ -260,7 +260,9 @@ const MenuItemsList: React.FC<MenuItemsListProps> = ({
           }
         >
           <ListItemIcon sx={{ minWidth: 36 }}>
-            <LinkIcon fontSize="small" />
+            <LinkIcon sx={{
+              fontSize: "small"
+            }} />
           </ListItemIcon>
           <ListItemText
             primary={
@@ -287,7 +289,9 @@ const MenuItemsList: React.FC<MenuItemsListProps> = ({
             }
             secondary={
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 0.5 }}>
-                <Typography variant="caption" fontFamily="monospace">
+                <Typography variant="caption" sx={{
+                  fontFamily: "monospace"
+                }}>
                   {item.route || item.link || '-'}
                 </Typography>
                 {item.featureFlags?.length > 0 && (
@@ -727,7 +731,9 @@ export const ApplicationMenusPanel: React.FC<ApplicationMenusPanelProps> = (prop
                                         />
                                       )}
                                     </Box>
-                                    <Typography variant="caption" color="text.secondary">
+                                    <Typography variant="caption" sx={{
+                                      color: "text.secondary"
+                                    }}>
                                       Target: <strong>{menu.target || 'Not set'}</strong> &bull;{' '}
                                       {menu.items?.length || 0} item{(menu.items?.length || 0) !== 1 ? 's' : ''}
                                     </Typography>
@@ -810,7 +816,9 @@ export const ApplicationMenusPanel: React.FC<ApplicationMenusPanelProps> = (prop
                               <AccordionDetails>
                                 <Box>
                                   <Box sx={{ mb: 2 }}>
-                                    <Typography variant="caption" color="text.secondary">
+                                    <Typography variant="caption" sx={{
+                                      color: "text.secondary"
+                                    }}>
                                       Roles:
                                     </Typography>
                                     <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
@@ -819,7 +827,9 @@ export const ApplicationMenusPanel: React.FC<ApplicationMenusPanelProps> = (prop
                                           <Chip key={role} label={role} size="small" />
                                         ))
                                       ) : (
-                                        <Typography variant="caption" color="text.secondary">
+                                        <Typography variant="caption" sx={{
+                                          color: "text.secondary"
+                                        }}>
                                           No roles specified (available to all permitted users)
                                         </Typography>
                                       )}
@@ -839,7 +849,9 @@ export const ApplicationMenusPanel: React.FC<ApplicationMenusPanelProps> = (prop
                                       onMoveItem={handleMoveMenuItem}
                                     />
                                   ) : (
-                                    <Typography variant="caption" color="text.secondary">
+                                    <Typography variant="caption" sx={{
+                                      color: "text.secondary"
+                                    }}>
                                       No menu items configured in this menu
                                     </Typography>
                                   )}
@@ -910,14 +922,14 @@ export const ApplicationMenusPanel: React.FC<ApplicationMenusPanelProps> = (prop
               value={selectedMenu?.featureFlags || []}
               onChange={(_: any, newValue: string[]) => handleFieldChange('featureFlags', newValue)}
               freeSolo
-              renderTags={(value: string[], getTagProps: any) =>
+              renderValue={(value: string[], getItemProps: any) =>
                 value.map((option: string, index: number) => (
                   <Chip
                     variant="outlined"
                     label={option}
                     size="small"
                     color="primary"
-                    {...getTagProps({ index })}
+                    {...getItemProps({ index })}
                   />
                 ))
               }
@@ -1030,7 +1042,9 @@ export const ApplicationMenusPanel: React.FC<ApplicationMenusPanelProps> = (prop
                                     </Box>
                                   }
                                   secondary={
-                                    <Typography variant="caption" fontFamily="monospace">
+                                    <Typography variant="caption" sx={{
+                                      fontFamily: "monospace"
+                                    }}>
                                       {item.route || item.link || '-'}
                                     </Typography>
                                   }
@@ -1046,7 +1060,9 @@ export const ApplicationMenusPanel: React.FC<ApplicationMenusPanelProps> = (prop
                 </Droppable>
               </DragDropContext>
             ) : (
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 No items added yet. Click &quot;Add Item&quot; to define entries for this menu.
               </Typography>
             )}
@@ -1130,14 +1146,14 @@ export const ApplicationMenusPanel: React.FC<ApplicationMenusPanelProps> = (prop
                 }))
               }
               freeSolo
-              renderTags={(value: string[], getTagProps: any) =>
+              renderValue={(value: string[], getItemProps: any) =>
                 value.map((option: string, index: number) => (
                   <Chip
                     variant="outlined"
                     label={option}
                     size="small"
                     color="primary"
-                    {...getTagProps({ index })}
+                    {...getItemProps({ index })}
                   />
                 ))
               }

@@ -67,12 +67,16 @@ export const ApplicationStatisticsPanel: React.FC<ApplicationStatisticsPanelProp
             {icon}
           </Box>
           <Box sx={{ flex: 1 }}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               {title}
             </Typography>
             <Typography variant="h4">{value || '0'}</Typography>
             {subtitle && (
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {subtitle}
               </Typography>
             )}
@@ -109,16 +113,26 @@ export const ApplicationStatisticsPanel: React.FC<ApplicationStatisticsPanelProp
   return (
     <Box sx={{ p: 2 }}>
       <Grid container spacing={3}>
-        <Grid item xs={12}>
+        <Grid
+          size={{
+            xs: 12
+          }}>
           <Typography variant="h5" gutterBottom>
             Application Statistics
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             Overview of application usage and activity metrics
           </Typography>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <StatCard
             icon={<PeopleIcon />}
             title="Active Users"
@@ -128,7 +142,12 @@ export const ApplicationStatisticsPanel: React.FC<ApplicationStatisticsPanelProp
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <StatCard
             icon={<TimelineIcon />}
             title="Total Sessions"
@@ -138,7 +157,12 @@ export const ApplicationStatisticsPanel: React.FC<ApplicationStatisticsPanelProp
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <StatCard
             icon={<ScheduleIcon />}
             title="Avg Session Duration"
@@ -148,12 +172,20 @@ export const ApplicationStatisticsPanel: React.FC<ApplicationStatisticsPanelProp
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <StatCard icon={<TrendingUpIcon />} title="Last Activity" value={formatDate(statistics.lastActivity)} subtitle="" color="info" />
         </Grid>
 
         {/* Additional Statistics Card */}
-        <Grid item xs={12}>
+        <Grid
+          size={{
+            xs: 12
+          }}>
           <Card>
             <CardHeader title="Usage Trends" />
             <Divider />
@@ -164,7 +196,9 @@ export const ApplicationStatisticsPanel: React.FC<ApplicationStatisticsPanelProp
                 <Chip label={`${formatDuration(statistics.averageSessionDuration)} Avg Duration`} color="success" variant="outlined" />
               </Box>
               <Box sx={{ mt: 3 }}>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   Last activity: {formatDate(statistics.lastActivity)}
                 </Typography>
               </Box>

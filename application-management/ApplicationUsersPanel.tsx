@@ -31,7 +31,9 @@ export const ApplicationUsersPanel: React.FC<ApplicationUsersPanelProps> = ({
         <Card>
           <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <WarningIcon color="warning" />
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               No application ID provided. Please provide an applicationId to view users.
             </Typography>
           </CardContent>
@@ -45,7 +47,9 @@ export const ApplicationUsersPanel: React.FC<ApplicationUsersPanelProps> = ({
   if (!ApplicationUsers) {
     return (
       <Box sx={{ p: 2 }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           ApplicationUsers component (core.ApplicationUsers@1.0.0) is not loaded.
         </Typography>
       </Box>

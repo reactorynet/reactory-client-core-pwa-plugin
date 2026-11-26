@@ -232,10 +232,11 @@ const ChipList: React.FC<ChipListProps> = ({
         direction="row"
         spacing={0.5}
         useFlexGap
-        flexWrap="wrap"
         data-testid={testId}
-        sx={{ maxWidth: 220 }}
-      >
+        sx={{
+          flexWrap: "wrap",
+          maxWidth: 220
+        }}>
         {visible.map((value) => (
           <Chip key={value} size="small" variant="outlined" label={value} />
         ))}
@@ -655,11 +656,14 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={1}
-            alignItems={{ xs: 'stretch', sm: 'center' }}
-            justifyContent="space-between"
-          >
+            sx={{
+              alignItems: { xs: 'stretch', sm: 'center' },
+              justifyContent: "space-between"
+            }}>
             <Box>
-              <Stack direction="row" spacing={1} alignItems="center">
+              <Stack direction="row" spacing={1} sx={{
+                alignItems: "center"
+              }}>
                 <Typography variant="subtitle1" component="h2">
                   {t('reactory.organizations.people.title')}
                 </Typography>
@@ -673,7 +677,9 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                   data-testid="organization-people-total"
                 />
               </Stack>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {t('reactory.organizations.people.hint')}
               </Typography>
             </Box>
@@ -695,9 +701,10 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
           <Stack
             direction={{ xs: 'column', md: 'row' }}
             spacing={1}
-            sx={{ mt: 2 }}
-            alignItems={{ xs: 'stretch', md: 'center' }}
-          >
+            sx={{
+              alignItems: { xs: 'stretch', md: 'center' },
+              mt: 2
+            }}>
             <TextField
               size="small"
               fullWidth
@@ -705,7 +712,9 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
               placeholder={t('reactory.organizations.people.searchPlaceholder')}
               value={people.searchInput}
               onChange={(event) => people.setSearch(event.target.value)}
-              inputProps={{ 'data-testid': 'people-search' }}
+              slotProps={{
+                htmlInput: { 'data-testid': 'people-search' }
+              }}
             />
 
             <TextField
@@ -714,9 +723,11 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
               label={t('reactory.organizations.people.roleFilter')}
               value={people.filter.role || ''}
               onChange={(event) => updateFilter({ role: event.target.value || null })}
-              inputProps={{ 'data-testid': 'people-role-filter' }}
               sx={{ minWidth: 160 }}
               helperText={t('reactory.organizations.people.roleObservedHint')}
+              slotProps={{
+                htmlInput: { 'data-testid': 'people-role-filter' }
+              }}
             >
               <MenuItem value="">{t('reactory.organizations.people.roleAll')}</MenuItem>
               {roleOptions.map((role) => (
@@ -739,8 +750,10 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                 }
                 updateFilter({ status: value, includeDeactivated: false });
               }}
-              inputProps={{ 'data-testid': 'people-status-filter' }}
               sx={{ minWidth: 160 }}
+              slotProps={{
+                htmlInput: { 'data-testid': 'people-status-filter' }
+              }}
             >
               <MenuItem value="active">{t('reactory.organizations.people.status.active')}</MenuItem>
               <MenuItem value="deactivated">
@@ -760,8 +773,10 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                 // unit changes would silently return nothing.
                 updateFilter({ businessUnitId: event.target.value || null, teamId: null })
               }
-              inputProps={{ 'data-testid': 'people-business-unit-filter' }}
               sx={{ minWidth: 170 }}
+              slotProps={{
+                htmlInput: { 'data-testid': 'people-business-unit-filter' }
+              }}
             >
               <MenuItem value="">{t('reactory.organizations.people.businessUnitAll')}</MenuItem>
               {people.businessUnits.map((unit) => (
@@ -777,8 +792,10 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
               label={t('reactory.organizations.people.teamFilter')}
               value={selectedTeamId}
               onChange={(event) => updateFilter({ teamId: event.target.value || null })}
-              inputProps={{ 'data-testid': 'people-team-filter' }}
               sx={{ minWidth: 170 }}
+              slotProps={{
+                htmlInput: { 'data-testid': 'people-team-filter' }
+              }}
             >
               <MenuItem value="">{t('reactory.organizations.people.teamAll')}</MenuItem>
               {visibleTeams.map((team) => (
@@ -850,7 +867,9 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                     hover
                   >
                     <TableCell>
-                      <Stack direction="row" spacing={1} alignItems="center">
+                      <Stack direction="row" spacing={1} sx={{
+                        alignItems: "center"
+                      }}>
                         <Avatar src={avatar || undefined} sx={{ height: 28, width: 28 }}>
                           {name.slice(0, 1).toUpperCase()}
                         </Avatar>
@@ -877,7 +896,9 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                           }
                         />
                       ) : (
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" sx={{
+                          color: "text.secondary"
+                        }}>
                           {t('reactory.organizations.people.rolesNone')}
                         </Typography>
                       )}
@@ -905,14 +926,18 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                           }
                         />
                       ) : (
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" sx={{
+                          color: "text.secondary"
+                        }}>
                           {t('reactory.organizations.people.notSet')}
                         </Typography>
                       )}
                     </TableCell>
 
                     <TableCell>
-                      <Stack direction="row" spacing={0.5} alignItems="center">
+                      <Stack direction="row" spacing={0.5} sx={{
+                        alignItems: "center"
+                      }}>
                         <Chip
                           size="small"
                           color={
@@ -933,7 +958,9 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                           )}
                         />
                         {invited && (
-                          <Typography variant="caption" color="text.secondary">
+                          <Typography variant="caption" sx={{
+                            color: "text.secondary"
+                          }}>
                             {t('reactory.organizations.people.invited')}
                           </Typography>
                         )}
@@ -949,7 +976,9 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                     {!readOnly && (
                       <TableCell align="right">
                         {actionable && (
-                          <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                          <Stack direction="row" spacing={0.5} sx={{
+                            justifyContent: "flex-end"
+                          }}>
                             <Tooltip
                               title={t('reactory.organizations.people.action.roles', { name })}
                             >
@@ -1070,7 +1099,9 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                 current ? { ...current, roles: event.target.value } : current,
               )
             }
-            inputProps={{ 'data-testid': 'people-roles-input' }}
+            slotProps={{
+              htmlInput: { 'data-testid': 'people-roles-input' }
+            }}
           />
         </DialogContent>
         <DialogActions>
@@ -1117,7 +1148,9 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                   current ? { ...current, businessUnitId: event.target.value } : current,
                 )
               }
-              inputProps={{ 'data-testid': 'people-assign-business-unit' }}
+              slotProps={{
+                htmlInput: { 'data-testid': 'people-assign-business-unit' }
+              }}
             >
               <MenuItem value="">{t('reactory.organizations.people.unassigned')}</MenuItem>
               {people.businessUnits.map((unit) => (
@@ -1131,7 +1164,12 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
               <Typography variant="subtitle2" component="h3">
                 {t('reactory.organizations.people.assign.teams')}
               </Typography>
-              <Typography variant="caption" color="text.secondary" display="block">
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  display: "block"
+                }}>
                 {t('reactory.organizations.people.assign.teamsHint')}
               </Typography>
 
@@ -1162,7 +1200,7 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                             // The accessible name is the team label, which is how
                             // the suite selects it (MUI renders a checkbox, not
                             // a switch, whatever the control looks like).
-                            inputProps={{ 'aria-label': teamLabel(team) }}
+                            slotProps={{ input: { 'aria-label': teamLabel(team) } }}
                           />
                         }
                         label={teamLabel(team)}
@@ -1275,7 +1313,9 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                   current ? { ...current, emails: event.target.value } : current,
                 )
               }
-              inputProps={{ 'data-testid': 'people-invite-emails' }}
+              slotProps={{
+                htmlInput: { 'data-testid': 'people-invite-emails' }
+              }}
             />
 
             <TextField
@@ -1287,7 +1327,9 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                   current ? { ...current, roles: event.target.value } : current,
                 )
               }
-              inputProps={{ 'data-testid': 'people-invite-roles' }}
+              slotProps={{
+                htmlInput: { 'data-testid': 'people-invite-roles' }
+              }}
             />
 
             <TextField
@@ -1300,7 +1342,9 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                   current ? { ...current, businessUnitId: event.target.value } : current,
                 )
               }
-              inputProps={{ 'data-testid': 'people-invite-business-unit' }}
+              slotProps={{
+                htmlInput: { 'data-testid': 'people-invite-business-unit' }
+              }}
             >
               <MenuItem value="">{t('reactory.organizations.people.unassigned')}</MenuItem>
               {people.businessUnits.map((unit) => (
@@ -1337,7 +1381,12 @@ export const OrganizationPeopleTab: React.FC<OrganizationTabProps> = ({
                           {outcome.email}
                         </Typography>
                         {outcome.message && (
-                          <Typography variant="caption" color="text.secondary" display="block">
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: "text.secondary",
+                              display: "block"
+                            }}>
                             {outcome.message}
                           </Typography>
                         )}

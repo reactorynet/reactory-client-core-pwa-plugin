@@ -1,6 +1,6 @@
 import React from 'react';
 import { Chip, Tooltip } from '@mui/material';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 
 export interface ContentStatusBadgeProps {

@@ -171,7 +171,9 @@ const TeamRow: React.FC<TeamRowProps> = ({
       }}
     >
       <Box sx={{ minWidth: 0 }}>
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} sx={{
+          alignItems: "center"
+        }}>
           <Typography variant="body1" noWrap sx={{ fontWeight: 500 }}>
             {name}
           </Typography>
@@ -191,12 +193,22 @@ const TeamRow: React.FC<TeamRowProps> = ({
         </Stack>
 
         {team.description ? (
-          <Typography variant="caption" color="text.secondary" display="block">
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              display: "block"
+            }}>
             {team.description}
           </Typography>
         ) : null}
 
-        <Typography variant="caption" color="text.secondary" display="block">
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            display: "block"
+          }}>
           {owner.length > 0
             ? t('reactory.organizations.structure.unit.owner', { name: owner })
             : t('reactory.organizations.structure.unit.ownerNone')}
@@ -775,11 +787,14 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={1}
-            alignItems={{ xs: 'stretch', sm: 'center' }}
-            justifyContent="space-between"
-          >
+            sx={{
+              alignItems: { xs: 'stretch', sm: 'center' },
+              justifyContent: "space-between"
+            }}>
             <Box>
-              <Stack direction="row" spacing={1} alignItems="center">
+              <Stack direction="row" spacing={1} sx={{
+                alignItems: "center"
+              }}>
                 <Typography variant="subtitle1" component="h2">
                   {t('reactory.organizations.structure.title')}
                 </Typography>
@@ -794,20 +809,24 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                   })}
                 />
               </Stack>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {t('reactory.organizations.structure.hint')}
               </Typography>
             </Box>
 
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} sx={{
+              alignItems: "center"
+            }}>
               <FormControlLabel
                 control={
                   <Switch
                     checked={structure.includeDeleted}
                     onChange={(event) => structure.setIncludeDeleted(event.target.checked)}
-                    inputProps={{
+                    slotProps={{ input: {
                       'aria-label': t('reactory.organizations.structure.showDeleted'),
-                    }}
+                    } }}
                   />
                 }
                 label={t('reactory.organizations.structure.showDeleted')}
@@ -828,7 +847,13 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
             </Stack>
           </Stack>
 
-          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              display: "block",
+              mt: 0.5
+            }}>
             {t('reactory.organizations.structure.showDeletedHint')}
           </Typography>
         </CardContent>
@@ -866,11 +891,18 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                     <Stack
                       direction={{ xs: 'column', sm: 'row' }}
                       spacing={1}
-                      alignItems={{ xs: 'stretch', sm: 'flex-start' }}
-                      justifyContent="space-between"
-                    >
+                      sx={{
+                        alignItems: { xs: 'stretch', sm: 'flex-start' },
+                        justifyContent: "space-between"
+                      }}>
                       <Box sx={{ minWidth: 0 }}>
-                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          sx={{
+                            alignItems: "center",
+                            flexWrap: "wrap"
+                          }}>
                           <Typography variant="subtitle1" component="h3">
                             {unitName}
                           </Typography>
@@ -891,12 +923,19 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                         </Stack>
 
                         {unit.description && (
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography variant="body2" sx={{
+                            color: "text.secondary"
+                          }}>
                             {unit.description}
                           </Typography>
                         )}
 
-                        <Typography variant="caption" color="text.secondary" display="block">
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "text.secondary",
+                            display: "block"
+                          }}>
                           {t('reactory.organizations.structure.unit.owner', {
                             name: ownerLabel(
                               unit,
@@ -907,7 +946,9 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                       </Box>
 
                       {!readOnly && (
-                        <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                        <Stack direction="row" spacing={0.5} sx={{
+                          flexWrap: "wrap"
+                        }}>
                           {deleted ? (
                             <Button
                               size="small"
@@ -1011,8 +1052,10 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                     {node.teams.length === 0 ? (
                       <Typography
                         variant="body2"
-                        color="text.secondary"
                         data-testid={`structure-unit-${unitId}-empty`}
+                        sx={{
+                          color: "text.secondary"
+                        }}
                       >
                         {t('reactory.organizations.structure.unit.noTeams')}
                       </Typography>
@@ -1055,7 +1098,9 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
             <Box component="li" data-testid="structure-unassigned-teams">
               <Card variant="outlined">
                 <CardContent>
-                  <Stack direction="row" spacing={1} alignItems="center">
+                  <Stack direction="row" spacing={1} sx={{
+                    alignItems: "center"
+                  }}>
                     <Typography variant="subtitle1" component="h3">
                       {t('reactory.organizations.structure.unassigned.title')}
                     </Typography>
@@ -1067,7 +1112,13 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                       })}
                     />
                   </Stack>
-                  <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                  <Typography
+                    variant="caption"
+                    gutterBottom
+                    sx={{
+                      color: "text.secondary",
+                      display: "block"
+                    }}>
                     {t('reactory.organizations.structure.unassigned.hint')}
                   </Typography>
 
@@ -1121,7 +1172,9 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                 placeholder={t('reactory.organizations.structure.namePlaceholder')}
                 value={unitForm.name}
                 onChange={(event) => updateUnitForm({ name: event.target.value })}
-                inputProps={{ 'data-testid': 'structure-unit-name' }}
+                slotProps={{
+                  htmlInput: { 'data-testid': 'structure-unit-name' }
+                }}
               />
               <TextField
                 fullWidth
@@ -1131,7 +1184,9 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                 placeholder={t('reactory.organizations.structure.descriptionPlaceholder')}
                 value={unitForm.description}
                 onChange={(event) => updateUnitForm({ description: event.target.value })}
-                inputProps={{ 'data-testid': 'structure-unit-description' }}
+                slotProps={{
+                  htmlInput: { 'data-testid': 'structure-unit-description' }
+                }}
               />
               <TextField
                 fullWidth
@@ -1140,7 +1195,9 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                 helperText={t('reactory.organizations.structure.ownerHint')}
                 value={unitForm.owner}
                 onChange={(event) => updateUnitForm({ owner: event.target.value })}
-                inputProps={{ 'data-testid': 'structure-unit-owner' }}
+                slotProps={{
+                  htmlInput: { 'data-testid': 'structure-unit-owner' }
+                }}
               />
             </Stack>
           )}
@@ -1182,7 +1239,9 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                 placeholder={t('reactory.organizations.structure.namePlaceholder')}
                 value={teamForm.name}
                 onChange={(event) => updateTeamForm({ name: event.target.value })}
-                inputProps={{ 'data-testid': 'structure-team-name' }}
+                slotProps={{
+                  htmlInput: { 'data-testid': 'structure-team-name' }
+                }}
               />
 
               {teamForm.mode === 'create' ? (
@@ -1205,7 +1264,9 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                         </MenuItem>
                       ))}
                   </TextField>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     {t('reactory.organizations.structure.team.createHint')}
                   </Typography>
                 </>
@@ -1219,7 +1280,9 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                     placeholder={t('reactory.organizations.structure.descriptionPlaceholder')}
                     value={teamForm.description}
                     onChange={(event) => updateTeamForm({ description: event.target.value })}
-                    inputProps={{ 'data-testid': 'structure-team-description' }}
+                    slotProps={{
+                      htmlInput: { 'data-testid': 'structure-team-description' }
+                    }}
                   />
                   <TextField
                     fullWidth
@@ -1227,9 +1290,13 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
                     helperText={t('reactory.organizations.structure.ownerHint')}
                     value={teamForm.owner}
                     onChange={(event) => updateTeamForm({ owner: event.target.value })}
-                    inputProps={{ 'data-testid': 'structure-team-owner' }}
+                    slotProps={{
+                      htmlInput: { 'data-testid': 'structure-team-owner' }
+                    }}
                   />
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     {t('reactory.organizations.structure.team.currentUnit', {
                       name:
                         (unitById.get(teamForm.businessUnitId)?.name as string) ||
@@ -1325,7 +1392,9 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
         <DialogContent>
           <Stack spacing={2} sx={{ pt: 1 }}>
             {members.length === 0 ? (
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 {t('reactory.organizations.structure.members.empty')}
               </Typography>
             ) : (
@@ -1376,14 +1445,18 @@ export const OrganizationStructureTab: React.FC<OrganizationTabProps> = ({
             )}
 
             {!readOnly && (
-              <Stack direction="row" spacing={1} alignItems="flex-start">
+              <Stack direction="row" spacing={1} sx={{
+                alignItems: "flex-start"
+              }}>
                 <TextField
                   fullWidth
                   size="small"
                   label={t('reactory.organizations.structure.members.memberId')}
                   value={membersForm ? membersForm.memberId : ''}
                   onChange={(event) => updateMemberId(event.target.value)}
-                  inputProps={{ 'data-testid': 'structure-member-input' }}
+                  slotProps={{
+                    htmlInput: { 'data-testid': 'structure-member-input' }
+                  }}
                 />
                 <Button
                   variant="contained"

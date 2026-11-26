@@ -340,7 +340,9 @@ export const OrganizationListPanel: React.FC<OrganizationListPanelProps> = ({
         <Typography variant="h5" component="h1" gutterBottom>
           {t('reactory.organizations.list.title')}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           {t('reactory.organizations.list.subtitle')}
         </Typography>
       </Box>
@@ -388,7 +390,7 @@ export const OrganizationListPanel: React.FC<OrganizationListPanelProps> = ({
                     checked={list.isPageSelected}
                     indeterminate={list.isPageIndeterminate}
                     onChange={(event) => list.togglePageSelection(event.target.checked)}
-                    inputProps={{ 'aria-label': t('reactory.organizations.list.selectAll') }}
+                    slotProps={{ input: { 'aria-label': t('reactory.organizations.list.selectAll') } }}
                   />
                 </TableCell>
                 <TableCell>{t('reactory.organizations.list.column.logo')}</TableCell>
@@ -458,13 +460,16 @@ export const OrganizationListPanel: React.FC<OrganizationListPanelProps> = ({
                     <Stack
                       direction="row"
                       spacing={1.5}
-                      alignItems="center"
-                      justifyContent="center"
                       role="status"
-                      sx={{ py: 4 }}
-                    >
+                      sx={{
+                        alignItems: "center",
+                        justifyContent: "center",
+                        py: 4
+                      }}>
                       <CircularProgress size={20} />
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" sx={{
+                        color: "text.secondary"
+                      }}>
                         {t('reactory.organizations.list.loading')}
                       </Typography>
                     </Stack>
@@ -481,7 +486,9 @@ export const OrganizationListPanel: React.FC<OrganizationListPanelProps> = ({
                           ? t('reactory.organizations.list.emptyNoMatches')
                           : t('reactory.organizations.list.emptyNoOrganizations')}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" sx={{
+                        color: "text.secondary"
+                      }}>
                         {list.hasNoMatches
                           ? t('reactory.organizations.list.emptyNoMatchesHint')
                           : t('reactory.organizations.list.emptyNoOrganizationsHint')}
@@ -504,11 +511,11 @@ export const OrganizationListPanel: React.FC<OrganizationListPanelProps> = ({
                         onChange={(event) =>
                           list.toggleSelection(row.id, event.target.checked)
                         }
-                        inputProps={{
+                        slotProps={{ input: {
                           'aria-label': t('reactory.organizations.list.selectRow', {
                             name: row.name,
                           }),
-                        }}
+                        } }}
                       />
                     </TableCell>
 
@@ -621,7 +628,9 @@ export const OrganizationListPanel: React.FC<OrganizationListPanelProps> = ({
       >
         <DialogTitle id="organization-archive-dialog-title">{archiveTitle}</DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {t('reactory.organizations.archive.reversibleHint')}
           </Typography>
 

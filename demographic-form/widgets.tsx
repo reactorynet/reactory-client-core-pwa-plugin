@@ -162,7 +162,9 @@ export const DemographicTextWidget: React.FC<DemographicBuiltInWidgetProps> = (p
         disabled={disabled}
         error={Boolean(error)}
         required={Boolean(definition.required)}
-        inputProps={{ 'aria-label': controlLabelOf(props) }}
+        slotProps={{
+          htmlInput: { 'aria-label': controlLabelOf(props) }
+        }}
       />
     </ControlWrapper>
   );
@@ -185,7 +187,9 @@ export const DemographicNumberWidget: React.FC<DemographicBuiltInWidgetProps> = 
         disabled={disabled}
         error={Boolean(error)}
         required={Boolean(definition.required)}
-        inputProps={{ 'aria-label': controlLabelOf(props) }}
+        slotProps={{
+          htmlInput: { 'aria-label': controlLabelOf(props) }
+        }}
       />
     </ControlWrapper>
   );
@@ -198,15 +202,19 @@ export const DemographicBooleanWidget: React.FC<DemographicBuiltInWidgetProps> =
 
   return (
     <ControlWrapper definition={definition} instanceKey={props.instanceKey} widget="Switch">
-      <Stack direction="row" spacing={1} alignItems="center">
+      <Stack direction="row" spacing={1} sx={{
+        alignItems: "center"
+      }}>
         <Switch
           id={controlIdOf(props)}
           checked={Boolean(value)}
           onChange={(event) => onChange(event.target.checked)}
           disabled={disabled}
-          inputProps={{ 'aria-label': controlLabelOf(props) }}
+          slotProps={{ input: { 'aria-label': controlLabelOf(props) } }}
         />
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           {Boolean(value)
             ? t('reactory.demographics.boolean.yes')
             : t('reactory.demographics.boolean.no')}
@@ -241,7 +249,9 @@ export const DemographicDateWidget: React.FC<DemographicBuiltInWidgetProps> = (p
           size="small"
           value={formatDemographicDate(value) || t('reactory.demographics.field.notSet')}
           disabled
-          inputProps={{ 'aria-label': controlLabelOf(props) }}
+          slotProps={{
+            htmlInput: { 'aria-label': controlLabelOf(props) }
+          }}
         />
       </ControlWrapper>
     );
@@ -349,9 +359,10 @@ export const DemographicMultiEnumWidget: React.FC<DemographicBuiltInWidgetProps>
             placeholder={t('reactory.demographics.multiEnum.placeholder')}
             error={Boolean(error)}
             required={Boolean(definition.required)}
-            // `params.id` is the Autocomplete's own id, so the field label's
-            // `for` resolves to a real input.
-            inputProps={{ ...params.inputProps, 'aria-label': controlLabelOf(props) }}
+            slotProps={{
+              ...params.slotProps,
+              htmlInput: { ...params.slotProps.htmlInput, 'aria-label': controlLabelOf(props) }
+            }}
           />
         )}
       />
@@ -531,7 +542,10 @@ export const DemographicReferenceWidget: React.FC<DemographicBuiltInWidgetProps>
                 title: definition.title,
               })}
               error={Boolean(error)}
-              inputProps={{ ...params.inputProps, 'aria-label': controlLabelOf(props) }}
+              slotProps={{
+                ...params.slotProps,
+                htmlInput: { ...params.slotProps.htmlInput, 'aria-label': controlLabelOf(props) }
+              }}
             />
           )}
         />
@@ -610,7 +624,9 @@ export const DemographicMultiValueField: React.FC<
     <ControlWrapper definition={definition} instanceKey={props.instanceKey} widget="MultiValueField">
       <Stack spacing={1}>
         {items.length === 0 && (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             {t('reactory.demographics.array.empty')}
           </Typography>
         )}
@@ -619,8 +635,10 @@ export const DemographicMultiValueField: React.FC<
             key={`${definition.key}-multi-${index}`}
             direction="row"
             spacing={1}
-            alignItems="center"
             data-testid={`demographic-multi-item-${definition.key}-${index}`}
+            sx={{
+              alignItems: "center"
+            }}
           >
             <Box sx={{ flex: 1 }}>
               {renderItem({

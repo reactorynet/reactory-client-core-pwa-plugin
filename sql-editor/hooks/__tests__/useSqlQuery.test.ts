@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useSqlQuery, INITIAL_COMMAND_TEXT } from '../useSqlQuery';
 import {
   deferred,
